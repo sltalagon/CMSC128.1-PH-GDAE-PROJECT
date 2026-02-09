@@ -1,0 +1,29 @@
+# --- GLOBAL ---
+.DS_Store
+.vscode/
+.idea/
+*.log
+
+# --- BACKEND (Spring Boot / Java) ---
+backend/target/
+backend/mvnw
+backend/mvnw.cmd
+backend/.mvn
+backend/*.class
+backend/*.jar
+backend/*.war
+backend/HELP.md
+
+# --- FRONTEND (React / Node) ---
+frontend/node_modules/
+frontend/dist/
+frontend/build/
+frontend/.env
+frontend/.env.local
+frontend/npm-debug.log*
+frontend/yarn-debug.log*
+frontend/yarn-error.log*
+
+# --- SENSITIVE DATA ---
+application.properties
+.env
