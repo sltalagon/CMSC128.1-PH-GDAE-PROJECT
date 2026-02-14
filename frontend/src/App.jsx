@@ -1,16 +1,17 @@
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import Navbar from './pages/Navbar';
-import GeneSearch from './pages/GeneSearch';
-import DiseaseSearch from './pages/DiseaseSearch';
-import AdminPanel from './pages/AdminPanel';
-import About from './pages/About';
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import Navbar from "./pages/Navbar";
+import GeneSearch from "./pages/GeneSearch";
+import DiseaseSearch from "./pages/DiseaseSearch";
+import AdminPanel from "./pages/AdminPanel";
+import About from "./pages/About";
+import SuggestionTab from "./pages/SuggestionTab";
 
 function App() {
   return (
     <Router>
       <div className="min-h-screen bg-slate-50">
         <Navbar />
-        
+
         {/* Main Content Area */}
         <main>
           <Routes>
@@ -18,6 +19,7 @@ function App() {
             <Route path="/diseases" element={<DiseaseSearch />} />
             <Route path="/admin" element={<AdminPanel />} />
             <Route path="/about" element={<About />} />
+            <Route path="/suggestion" element={<SuggestionTab />} />
           </Routes>
         </main>
       </div>
@@ -25,4 +27,4 @@ function App() {
   );
 }
 
-export default App; 
+export default App;

@@ -1,9 +1,8 @@
-import { Database, Activity, Link, BookOpen, Plus } from 'lucide-react';
+import { Database, Activity, Link, BookOpen, Plus } from "lucide-react";
 
 const AdminPanel = () => {
   return (
     <div className="max-w-6xl mx-auto py-8 px-4">
-      
       {/* Header */}
       <div className="mb-8">
         <h2 className="text-2xl font-bold text-slate-900 mb-2">Admin Panel</h2>
@@ -14,7 +13,6 @@ const AdminPanel = () => {
 
       {/* Action Cards Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-        
         {/* Add Gene Card */}
         <div className="bg-blue-50 p-6 rounded-xl border border-blue-100 hover:shadow-md transition-shadow cursor-pointer flex items-start gap-4 group">
           <div className="bg-white p-3 rounded-lg shadow-sm text-blue-600 group-hover:scale-110 transition-transform">
@@ -24,7 +22,9 @@ const AdminPanel = () => {
             <h3 className="text-lg font-bold text-slate-900 flex items-center gap-2">
               Add Gene <Plus size={16} className="text-slate-400" />
             </h3>
-            <p className="text-slate-600 text-sm mt-1">Register a new gene with its information</p>
+            <p className="text-slate-600 text-sm mt-1">
+              Register a new gene with its information
+            </p>
           </div>
         </div>
 
@@ -37,7 +37,9 @@ const AdminPanel = () => {
             <h3 className="text-lg font-bold text-slate-900 flex items-center gap-2">
               Add Disease <Plus size={16} className="text-slate-400" />
             </h3>
-            <p className="text-slate-600 text-sm mt-1">Register a new disease with Philippine prevalence data</p>
+            <p className="text-slate-600 text-sm mt-1">
+              Register a new disease with Philippine prevalence data
+            </p>
           </div>
         </div>
 
@@ -48,9 +50,12 @@ const AdminPanel = () => {
           </div>
           <div>
             <h3 className="text-lg font-bold text-slate-900 flex items-center gap-2">
-              Add Gene-Disease Association <Plus size={16} className="text-slate-400" />
+              Add Gene-Disease Association{" "}
+              <Plus size={16} className="text-slate-400" />
             </h3>
-            <p className="text-slate-600 text-sm mt-1">Link genes to diseases with association type</p>
+            <p className="text-slate-600 text-sm mt-1">
+              Link genes to diseases with association type
+            </p>
           </div>
         </div>
 
@@ -63,16 +68,19 @@ const AdminPanel = () => {
             <h3 className="text-lg font-bold text-slate-900 flex items-center gap-2">
               Add Reference <Plus size={16} className="text-slate-400" />
             </h3>
-            <p className="text-slate-600 text-sm mt-1">Add supporting research references</p>
+            <p className="text-slate-600 text-sm mt-1">
+              Add supporting research references
+            </p>
           </div>
         </div>
       </div>
 
       {/* Warning/Note Box */}
       <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 text-sm text-yellow-800">
-        <strong>Note:</strong> This is a demonstration with mock data. In production, these forms would save data to a database. Currently, submissions will be displayed but not persisted.
+        <strong>Note:</strong> This is a demonstration with mock data. In
+        production, these forms would save data to a database. Currently,
+        submissions will be displayed but not persisted.
       </div>
-
     </div>
   );
 };
