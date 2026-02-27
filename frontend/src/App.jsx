@@ -1,28 +1,55 @@
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import Navbar from "./pages/Navbar";
-import GeneSearch from "./pages/GeneSearch";
-import DiseaseSearch from "./pages/DiseaseSearch";
-import AdminPanel from "./pages/AdminPanel";
-import About from "./pages/About";
-import SuggestionTab from "./pages/SuggestionTab";
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+import Navbar from "./components/Navbar";
+import GeneSearch from "./pages/public/GeneSearch";
+import DiseaseSearch from "./pages/public/DiseaseSearch";
+import AdminPanel from "./pages/admin/AdminPanel";
+import AdminLogin from "./pages/admin/AdminLogin"; 
+import About from "./pages/public/About";
+import SuggestionTab from "./pages/public/SuggestionTab";
+import { Outlet } from "react-router-dom";
+
+// Layout for Public Pages (with Navbar)
+const PublicLayout = () => (
+  <div className="min-h-screen bg-slate-50">
+    <Navbar />
+    <main>
+      <Outlet /> 
+    </main>
+  </div>
+);
+
+// simple Protected Route component
+const ProtectedRoute = ({ children }) => {
+  const isAuthenticated = localStorage.getItem("isAdmin") === "true"; 
+  return isAuthenticated ? children : <Navigate replace to="/admin/login" />;
+};
 
 function App() {
   return (
     <Router>
-      <div className="min-h-screen bg-slate-50">
-        <Navbar />
+      <Routes>
+        {/* --- PUBLIC ROUTES (Shows Navbar) --- */}
+        <Route element={<PublicLayout />}>
+          <Route path="/" element={<GeneSearch />} />
+          <Route path="/diseases" element={<DiseaseSearch />} />
+          <Route path="/about" element={<About />} />
+          <Route path="/suggestion" element={<SuggestionTab />} />
+        </Route>
 
-        {/* Main Content Area */}
-        <main>
-          <Routes>
-            <Route path="/" element={<GeneSearch />} />
-            <Route path="/diseases" element={<DiseaseSearch />} />
-            <Route path="/admin" element={<AdminPanel />} />
-            <Route path="/about" element={<About />} />
-            <Route path="/suggestion" element={<SuggestionTab />} />
-          </Routes>
-        </main>
-      </div>
+        {/* --- ADMIN ROUTES (No Public Navbar) --- */}
+        <Route path="/admin/login" element={<AdminLogin />} />
+        <Route 
+          path="/admin" 
+          element={
+            <ProtectedRoute>
+              <AdminPanel />
+            </ProtectedRoute>
+          } 
+        />
+
+        {/* Catch-all redirect */}
+        <Route path="*" element={<Navigate to="/" />} />
+      </Routes>
     </Router>
   );
 }
