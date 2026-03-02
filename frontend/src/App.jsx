@@ -55,8 +55,8 @@ function App() {
         </Route>
 
         {/* --- ADMIN ROUTES (No Public Navbar) --- */}
+        <Route path="/admin/login" element={<AdminLogin />} />
         <Route element={<AdminLayout />}>
-          <Route path="/admin/login" element={<AdminLogin />} />
           <Route
             path="/admin"
             element={

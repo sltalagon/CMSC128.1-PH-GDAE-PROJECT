@@ -1,75 +1,99 @@
-import { Search, Book, Activity, SquarePen, Shield } from "lucide-react";
+import React from "react";
+import logo from "../assets/logot.png";
 import { NavLink } from "react-router-dom";
+import { Search, Database, Shield, Lightbulb, BookOpen } from "lucide-react";
 
-const Navbar = () => {
-  // Main public navigation items
+const Navbar = ({ userEmail = "demo@phgdae.edu.ph" }) => {
   const navItems = [
     { name: "Gene Search", path: "/", icon: <Search size={18} /> },
-    { name: "Disease Search", path: "/diseases", icon: <Activity size={18} /> },
-    { name: "Suggestion Tab", path: "/suggestion", icon: <SquarePen size={18} /> },
-    { name: "About", path: "/about", icon: <Book size={18} /> },
+    { name: "Disease Search", path: "/diseases", icon: <Search size={18} /> },
+    { name: "Suggestions", path: "/suggestion", icon: <Lightbulb size={18} /> },
+    { name: "About", path: "/about", icon: <BookOpen size={18} /> },
   ];
 
+  // Consistent pill styling for all nav links
+  const getLinkClassName = ({ isActive }) =>
+    `flex items-center gap-2 px-6 py-3 rounded-full text-sm font-bold transition-all duration-200 ${
+      isActive
+        ? "bg-blue-600 text-white shadow-lg shadow-blue-200 ring-2 ring-blue-100"
+        : "bg-gray-100 text-slate-600 hover:bg-gray-200"
+    }`;
+
   return (
-    <div className="bg-white border-b border-gray-200 sticky top-0 z-50">
-      {/* Top Header Section */}
-      <div className="container mx-auto px-6 py-4 flex justify-between items-center">
-        <div className="flex items-center gap-3">
-          <div className="bg-blue-600 p-2 rounded-lg">
-            <div className="w-6 h-6 border-2 border-white rounded-full"></div>
-            <div className="w-6 h-1 bg-white mt-1 rounded-full"></div>
+    <div className="w-full font-sans">
+      {/* Top Banner: Purple/Blue Gradient with Pattern */}
+      <div className="relative bg-gradient-to-r from-blue-600 to-purple-600 text-white overflow-hidden">
+        <div
+          className="absolute inset-0 opacity-10 pointer-events-none"
+          style={{
+            backgroundImage: `url("data:image/svg+xml,%3Csvg width='20' height='20' viewBox='0 0 20 20' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M10 0v20M0 10h20' stroke='white' stroke-width='1'/%3E%3C/svg%3E")`,
+          }}
+        ></div>
+
+        <div className="max-w-7xl mx-auto px-6 py-10 relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
+          <div className="flex items-center gap-4">
+            <div className="bg-white rounded-full p-2 flex items-center justify-center shadow">
+              <img
+                src={logo}
+                className="h-28 w-auto object-contain"
+                alt="PH-GDAE Logo"
+              />
+            </div>
+            <div>
+              <h1 className="text-4xl font-extrabold tracking-tight">
+                PH-GDAE
+              </h1>
+              <p className="text-blue-100 font-medium opacity-90">
+                Philippine Gene–Disease Association Explorer
+              </p>
+            </div>
           </div>
-          <div>
-            <h1 className="text-2xl font-bold text-slate-900 leading-tight">PH-GDAE</h1>
-            <p className="text-sm text-slate-500">Philippine Gene–Disease Association Explorer</p>
+
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2 bg-white/20 backdrop-blur-md px-4 py-2 rounded-full border border-white/30 text-sm font-semibold">
+              <span>🇵🇭</span> Philippine Focus
+            </div>
+            <div className="bg-white/10 backdrop-blur-md px-4 py-2 rounded-full border border-white/20 text-sm opacity-80">
+              {userEmail}
+            </div>
           </div>
         </div>
-        <span className="bg-green-100 text-green-700 px-3 py-1 rounded-full text-xs font-semibold">
-          PH Philippine Focus
-        </span>
+
+        {/* The White Bottom Curve */}
+        <div
+          className="absolute bottom-0 left-0 right-0 h-8 bg-white"
+          style={{ borderRadius: "100% 100% 0 0 / 100% 100% 0 0" }}
+        ></div>
       </div>
 
-      {/* Navigation Tabs Section */}
-      <div className="container mx-auto px-6">
-        <div className="flex justify-between items-center">
-          
-          {/* Left Side: Main Public Tabs */}
-          <div className="flex gap-8">
-            {navItems.map((item) => (
-              <NavLink
-                key={item.name}
-                to={item.path}
-                className={({ isActive }) =>
-                  `flex items-center gap-2 pb-3 pt-2 text-sm font-medium border-b-2 transition-colors ${
-                    isActive
-                      ? "border-blue-600 text-blue-600"
-                      : "border-transparent text-slate-500 hover:text-slate-700"
-                  }`
-                }
-              >
-                {item.icon}
-                {item.name}
-              </NavLink>
-            ))}
+      {/* Navigation: Pill Buttons */}
+      <nav className="bg-white pb-6 pt-2">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            {/* Left Side: Main Links */}
+            <div className="flex flex-wrap gap-3">
+              {navItems.map((item) => (
+                <NavLink
+                  key={item.name}
+                  to={item.path}
+                  // "end" prevents the Home link from staying blue when on sub-pages
+                  end={item.path === "/"}
+                  className={getLinkClassName}
+                >
+                  {item.icon}
+                  {item.name}
+                </NavLink>
+              ))}
+            </div>
+
+            {/* Right Side: Admin Access Link integrated into pill design */}
+            <NavLink to="/admin/login" className={getLinkClassName}>
+              <Shield size={18} />
+              Admin Access
+            </NavLink>
           </div>
-
-          {/* Right Side: Admin Access Link */}
-          <NavLink
-            to="/admin/login"
-            className={({ isActive }) =>
-              `flex items-center gap-2 pb-3 pt-2 text-sm font-medium border-b-2 transition-colors ${
-                isActive
-                  ? "border-blue-600 text-blue-600"
-                  : "border-transparent text-slate-400 hover:text-blue-600"
-              }`
-            }
-          >
-            <Shield size={18} />
-            Admin Access
-          </NavLink>
-
         </div>
-      </div>
+      </nav>
     </div>
   );
 };
