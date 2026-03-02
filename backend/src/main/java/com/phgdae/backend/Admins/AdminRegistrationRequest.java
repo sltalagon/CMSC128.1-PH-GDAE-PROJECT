@@ -1,0 +1,11 @@
+package com.phgdae.backend.Admins;
+
+import lombok.Getter;
+import lombok.Setter;
+
+@Getter
+@Setter
+public class AdminRegistrationRequest {
+    private String username;
+    private String password;
+}
