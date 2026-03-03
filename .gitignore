@@ -24,6 +24,3 @@ frontend/npm-debug.log*
 frontend/yarn-debug.log*
 frontend/yarn-error.log*
 
-# --- SENSITIVE DATA ---
-application.properties
-.env
