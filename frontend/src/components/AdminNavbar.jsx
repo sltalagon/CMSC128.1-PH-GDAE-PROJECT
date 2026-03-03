@@ -12,6 +12,12 @@ import {
 } from "lucide-react";
 
 const Navbar = ({ userEmail = "demo@phgdae.edu.ph", onSignOut }) => {
+  const navigate = useNavigate();
+
+  const handleSignOut = () => {
+    localStorage.removeItem("isAdmin");
+    navigate("/admin/login");
+  };
   const navItems = [
     { name: "Gene Search", path: "/admin/genes", icon: <Search size={18} /> },
     {
@@ -99,7 +105,7 @@ const Navbar = ({ userEmail = "demo@phgdae.edu.ph", onSignOut }) => {
             ))}
 
             <button
-              onClick={onSignOut}
+              onClick={handleSignOut}
               className="ml-auto flex items-center gap-2 px-6 py-3 rounded-full text-sm font-bold bg-orange-50 text-orange-600 hover:bg-orange-100 transition-colors"
             >
               <LogOut size={18} />
