@@ -19,7 +19,7 @@ public class FunctionalCategoryService {
         long nextIdNumber = functionalCategoryRepository.count() + 1;
 
         // Format as FXXX (e.g., F001, F002)
-        String formattedId = String.format("D%03d", nextIdNumber);
+        String formattedId = String.format("F%03d", nextIdNumber);
         functionalCategory.setCategoryId(formattedId);
 
         return functionalCategoryRepository.save(functionalCategory);

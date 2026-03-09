@@ -1,47 +1,42 @@
 import React, { useState } from "react";
-import { X, Check, Activity, Plus, Trash2 } from "lucide-react";
+import { apiGet, apiPost } from "../../api/api";
+import { X, Check, Activity } from "lucide-react";
+
 
 export function AddDiseaseForm({ onClose }) {
   const [formData, setFormData] = useState({
-    name: "",
-    category: "",
-    description: "",
-    prevalenceInPH: "Moderate",
+    diseaseName: "",
+    diseaseCategory: "",
+    inheritancePattern: "",
     omimId: "",
+    phPrevalence: "MEDIUM",
+    description: "",
   });
 
-  const [symptoms, setSymptoms] = useState([""]);
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState(null);
 
-  const addSymptom = () => {
-    setSymptoms([...symptoms, ""]);
-  };
-
-  const removeSymptom = (index) => {
-    setSymptoms(symptoms.filter((_, i) => i !== index));
-  };
-
-  const updateSymptom = (index, value) => {
-    const newSymptoms = [...symptoms];
-    newSymptoms[index] = value;
-    setSymptoms(newSymptoms);
-  };
-
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    setSubmitting(true);
+    setError(null);
 
-    const filteredSymptoms = symptoms.filter((s) => s.trim() !== "");
+    try {
+      await apiPost("/diseases", {
+        diseaseName: formData.diseaseName,
+        diseaseCategory: formData.diseaseCategory,
+        inheritancePattern: formData.inheritancePattern,
+        omimId: formData.omimId ? parseFloat(formData.omimId) : null,
+        phPrevalence: formData.phPrevalence,
+        description: formData.description,
+      });
 
-    // In production, this would save to database
-    console.log("Submitting disease:", {
-      ...formData,
-      symptoms: filteredSymptoms,
-    });
-
-    toast.success(`Disease "${formData.name}" added successfully!`, {
-      description: "The disease has been registered in the system.",
-    });
-
-    onClose();
+      onClose();
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -66,6 +61,12 @@ export function AddDiseaseForm({ onClose }) {
         </button>
       </div>
 
+      {error && (
+        <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-700 rounded-lg text-sm">
+          {error}
+        </div>
+      )}
+
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
           <label className="block text-sm font-semibold text-gray-700 mb-2">
@@ -74,8 +75,8 @@ export function AddDiseaseForm({ onClose }) {
           <input
             type="text"
             required
-            value={formData.name}
-            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+            value={formData.diseaseName}
+            onChange={(e) => setFormData({ ...formData, diseaseName: e.target.value })}
             placeholder="e.g., Type 2 Diabetes Mellitus"
             className="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:border-green-500 focus:outline-none"
           />
@@ -88,27 +89,22 @@ export function AddDiseaseForm({ onClose }) {
             </label>
             <select
               required
-              value={formData.category}
-              onChange={(e) =>
-                setFormData({ ...formData, category: e.target.value })
-              }
+              value={formData.diseaseCategory}
+              onChange={(e) => setFormData({ ...formData, diseaseCategory: e.target.value })}
               className="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:border-green-500 focus:outline-none"
             >
               <option value="">Select category</option>
-              <option value="Metabolic Disorder">Metabolic Disorder</option>
-              <option value="Cardiovascular Disease">
-                Cardiovascular Disease
-              </option>
-              <option value="Cancer">Cancer</option>
-              <option value="Genetic Blood Disorder">
-                Genetic Blood Disorder
-              </option>
-              <option value="Infectious Disease">Infectious Disease</option>
-              <option value="Neurological Disorder">
-                Neurological Disorder
-              </option>
-              <option value="Autoimmune Disease">Autoimmune Disease</option>
-              <option value="Other">Other</option>
+              <option value="METABOLIC">Metabolic</option>
+              <option value="NEUROLOGICAL">Neurological</option>
+              <option value="NEUROMUSCULAR">Neuromuscular</option>
+              <option value="CANCER">Cancer</option>
+              <option value="HEMATOLOGIC">Hematologic</option>
+              <option value="SENSORY_DISORDERS">Sensory Disorders</option>
+              <option value="DERMATOLOGICAL">Dermatological</option>
+              <option value="CARDIOVASCULAR">Cardiovascular</option>
+              <option value="RENAL">Renal</option>
+              <option value="SYNDROMIC">Syndromic</option>
+              <option value="ETC">Other</option>
             </select>
           </div>
 
@@ -118,17 +114,44 @@ export function AddDiseaseForm({ onClose }) {
             </label>
             <select
               required
-              value={formData.prevalenceInPH}
-              onChange={(e) =>
-                setFormData({ ...formData, prevalenceInPH: e.target.value })
-              }
+              value={formData.phPrevalence}
+              onChange={(e) => setFormData({ ...formData, phPrevalence: e.target.value })}
               className="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:border-green-500 focus:outline-none"
             >
-              <option value="High">High</option>
-              <option value="Moderate">Moderate</option>
-              <option value="Low">Low</option>
+              <option value="HIGH">High</option>
+              <option value="MEDIUM">Medium</option>
+              <option value="LOW">Low</option>
+              <option value="NONE">None</option>
             </select>
           </div>
+        </div>
+
+        <div>
+          <label className="block text-sm font-semibold text-gray-700 mb-2">
+            Inheritance Pattern <span className="text-red-500">*</span>
+          </label>
+          <input
+            type="text"
+            required
+            value={formData.inheritancePattern}
+            onChange={(e) => setFormData({ ...formData, inheritancePattern: e.target.value })}
+            placeholder="e.g., Autosomal Dominant, Autosomal Recessive, X-Linked"
+            className="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:border-green-500 focus:outline-none"
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm font-semibold text-gray-700 mb-2">
+            OMIM ID <span className="text-red-500">*</span>
+          </label>
+          <input
+            type="number"
+            required
+            value={formData.omimId}
+            onChange={(e) => setFormData({ ...formData, omimId: e.target.value })}
+            placeholder="e.g., 125853"
+            className="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:border-green-500 focus:outline-none"
+          />
         </div>
 
         <div>
@@ -138,75 +161,21 @@ export function AddDiseaseForm({ onClose }) {
           <textarea
             required
             value={formData.description}
-            onChange={(e) =>
-              setFormData({ ...formData, description: e.target.value })
-            }
+            onChange={(e) => setFormData({ ...formData, description: e.target.value })}
             placeholder="Describe the disease, its characteristics, and impact..."
             rows={3}
             className="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:border-green-500 focus:outline-none resize-none"
           />
         </div>
 
-        <div>
-          <div className="flex items-center justify-between mb-2">
-            <label className="block text-sm font-semibold text-gray-700">
-              Common Symptoms
-            </label>
-            <button
-              type="button"
-              onClick={addSymptom}
-              className="text-sm text-green-600 hover:text-green-700 flex items-center gap-1 font-medium"
-            >
-              <Plus className="w-4 h-4" />
-              Add Symptom
-            </button>
-          </div>
-          <div className="space-y-2">
-            {symptoms.map((symptom, index) => (
-              <div key={index} className="flex gap-2">
-                <input
-                  type="text"
-                  value={symptom}
-                  onChange={(e) => updateSymptom(index, e.target.value)}
-                  placeholder="Enter a symptom"
-                  className="flex-1 px-4 py-2 border-2 border-gray-200 rounded-lg focus:border-green-500 focus:outline-none"
-                />
-                {symptoms.length > 1 && (
-                  <button
-                    type="button"
-                    onClick={() => removeSymptom(index)}
-                    className="px-3 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </button>
-                )}
-              </div>
-            ))}
-          </div>
-        </div>
-
-        <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-2">
-            OMIM ID (Optional)
-          </label>
-          <input
-            type="text"
-            value={formData.omimId}
-            onChange={(e) =>
-              setFormData({ ...formData, omimId: e.target.value })
-            }
-            placeholder="e.g., 125853"
-            className="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:border-green-500 focus:outline-none"
-          />
-        </div>
-
         <div className="flex gap-3 pt-4">
           <button
             type="submit"
-            className="flex-1 bg-green-600 text-white py-3 rounded-lg hover:bg-green-700 transition-colors flex items-center justify-center gap-2 font-semibold"
+            disabled={submitting}
+            className="flex-1 bg-green-600 text-white py-3 rounded-lg hover:bg-green-700 transition-colors flex items-center justify-center gap-2 font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <Check className="w-5 h-5" />
-            Add Disease
+            {submitting ? "Saving..." : "Add Disease"}
           </button>
           <button
             type="button"

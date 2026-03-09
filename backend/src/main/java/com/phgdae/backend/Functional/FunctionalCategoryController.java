@@ -1,5 +1,6 @@
 package com.phgdae.backend.Functional;
 
+import com.phgdae.backend.Service.FunctionalCategoryService;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.http.ResponseEntity;
 import java.util.List;
@@ -8,9 +9,11 @@ import java.util.List;
 @RequestMapping("/api/functional_categories")
 public class FunctionalCategoryController {
 
+    private final FunctionalCategoryService functionalCategoryService;
     private final FunctionalCategoryRepository functionalRepository;
 
-    public FunctionalCategoryController(FunctionalCategoryRepository functionalRepository) {
+    public FunctionalCategoryController(FunctionalCategoryService functionalCategoryService, FunctionalCategoryRepository functionalRepository) {
+        this.functionalCategoryService = functionalCategoryService;
         this.functionalRepository = functionalRepository;
     }
 
@@ -27,7 +30,7 @@ public class FunctionalCategoryController {
     }
 
     @PostMapping
-    public FunctionalCategory createDisease(@RequestBody FunctionalCategory functionalCategory) {
-        return functionalRepository.save(functionalCategory);
+    public FunctionalCategory createFunctionalCategory(@RequestBody FunctionalCategory functionalCategory) {
+        return functionalCategoryService.saveDisease(functionalCategory);
     }
 }

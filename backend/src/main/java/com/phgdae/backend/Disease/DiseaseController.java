@@ -1,5 +1,6 @@
 package com.phgdae.backend.Disease;
 
+import com.phgdae.backend.Service.DiseaseService;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.http.ResponseEntity;
 import java.util.List;
@@ -8,9 +9,11 @@ import java.util.List;
 @RequestMapping("/api/diseases")
 public class DiseaseController {
 
+    private final DiseaseService diseaseService;
     private final DiseaseRepository diseaseRepository;
 
-    public DiseaseController(DiseaseRepository diseaseRepository) {
+    public DiseaseController(DiseaseService diseaseService, DiseaseRepository diseaseRepository) {
+        this.diseaseService = diseaseService;
         this.diseaseRepository = diseaseRepository;
     }
 
@@ -28,6 +31,6 @@ public class DiseaseController {
 
     @PostMapping
     public Disease createDisease(@RequestBody Disease disease) {
-        return diseaseRepository.save(disease);
+        return diseaseService.saveDisease(disease);
     }
 }

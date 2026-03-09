@@ -1,5 +1,6 @@
 package com.phgdae.backend.GeneDisease;
 
+import com.phgdae.backend.Service.GeneDiseaseService;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.http.ResponseEntity;
 import java.util.List;
@@ -8,9 +9,11 @@ import java.util.List;
 @RequestMapping("/api/genedisease")
 public class GeneDiseaseController {
 
+    private final GeneDiseaseService geneDiseaseService;
     private final GeneDiseaseRepository geneDiseaseRepository;
 
-    public GeneDiseaseController(GeneDiseaseRepository geneDiseaseRepository) {
+    public GeneDiseaseController(GeneDiseaseService geneDiseaseService, GeneDiseaseRepository geneDiseaseRepository) {
+        this.geneDiseaseService = geneDiseaseService;
         this.geneDiseaseRepository = geneDiseaseRepository;
     }
 
@@ -20,14 +23,14 @@ public class GeneDiseaseController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<GeneDisease> getGeneById(@PathVariable String id) {
+    public ResponseEntity<GeneDisease> getGeneDiseaseById(@PathVariable String id) {
         return geneDiseaseRepository.findById(id)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
 
     @PostMapping
-    public GeneDisease createGene(@RequestBody GeneDisease gene) {
-        return geneDiseaseRepository.save(gene);
+    public GeneDisease createGeneDisease(@RequestBody GeneDisease geneDisease) {
+        return geneDiseaseService.saveGeneDisease(geneDisease);
     }
 }

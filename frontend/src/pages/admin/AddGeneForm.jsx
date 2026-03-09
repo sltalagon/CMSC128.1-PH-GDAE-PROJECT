@@ -1,27 +1,40 @@
 import React, { useState } from "react";
+import { apiGet, apiPost } from "../../api/api";
 import { X, Check, Database } from "lucide-react";
+
 
 export function AddGeneForm({ onClose }) {
   const [formData, setFormData] = useState({
-    symbol: "",
-    name: "",
-    chromosome: "",
+    geneSymbol: "",
+    fullGeneName: "",
+    geneType: "PROTEIN_CODING",
+    omimId: "",
     description: "",
-    function: "",
-    ncbiId: "",
   });
 
-  const handleSubmit = (e) => {
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState(null);
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    setSubmitting(true);
+    setError(null);
 
-    // In production, this would save to database
-    console.log("Submitting gene:", formData);
+    try {
+      await apiPost("/genes", {
+        geneSymbol: formData.geneSymbol,
+        fullGeneName: formData.fullGeneName,
+        geneType: formData.geneType,
+        omimId: formData.omimId ? parseFloat(formData.omimId) : null,
+        description: formData.description,
+      });
 
-    toast.success(`Gene ${formData.symbol} added successfully!`, {
-      description: "The gene has been registered in the system.",
-    });
-
-    onClose();
+      onClose();
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -46,6 +59,12 @@ export function AddGeneForm({ onClose }) {
         </button>
       </div>
 
+      {error && (
+        <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-700 rounded-lg text-sm">
+          {error}
+        </div>
+      )}
+
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="grid md:grid-cols-2 gap-4">
           <div>
@@ -55,9 +74,9 @@ export function AddGeneForm({ onClose }) {
             <input
               type="text"
               required
-              value={formData.symbol}
+              value={formData.geneSymbol}
               onChange={(e) =>
-                setFormData({ ...formData, symbol: e.target.value })
+                setFormData({ ...formData, geneSymbol: e.target.value })
               }
               placeholder="e.g., BRCA1"
               className="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:outline-none"
@@ -66,18 +85,20 @@ export function AddGeneForm({ onClose }) {
 
           <div>
             <label className="block text-sm font-semibold text-gray-700 mb-2">
-              Chromosome <span className="text-red-500">*</span>
+              Gene Type <span className="text-red-500">*</span>
             </label>
-            <input
-              type="text"
+            {/* ⚠️ Values must match your GeneType enum exactly */}
+            <select
               required
-              value={formData.chromosome}
+              value={formData.geneType}
               onChange={(e) =>
-                setFormData({ ...formData, chromosome: e.target.value })
+                setFormData({ ...formData, geneType: e.target.value })
               }
-              placeholder="e.g., 17 or X"
               className="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:outline-none"
-            />
+            >
+              <option value="PROTEIN_CODING">Protein-Coding</option>
+              <option value="NON_CODING">Non-Coding</option>
+            </select>
           </div>
         </div>
 
@@ -88,8 +109,10 @@ export function AddGeneForm({ onClose }) {
           <input
             type="text"
             required
-            value={formData.name}
-            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+            value={formData.fullGeneName}
+            onChange={(e) =>
+              setFormData({ ...formData, fullGeneName: e.target.value })
+            }
             placeholder="e.g., Breast Cancer Type 1 Susceptibility Protein"
             className="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:outline-none"
           />
@@ -97,10 +120,25 @@ export function AddGeneForm({ onClose }) {
 
         <div>
           <label className="block text-sm font-semibold text-gray-700 mb-2">
-            Description <span className="text-red-500">*</span>
+            OMIM ID <span className="text-red-500">*</span>
+          </label>
+          <input
+            type="number"
+            required
+            value={formData.omimId}
+            onChange={(e) =>
+              setFormData({ ...formData, omimId: e.target.value })
+            }
+            placeholder="e.g., 113705"
+            className="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:outline-none"
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm font-semibold text-gray-700 mb-2">
+            Description
           </label>
           <textarea
-            required
             value={formData.description}
             onChange={(e) =>
               setFormData({ ...formData, description: e.target.value })
@@ -111,44 +149,14 @@ export function AddGeneForm({ onClose }) {
           />
         </div>
 
-        <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-2">
-            Biological Function <span className="text-red-500">*</span>
-          </label>
-          <textarea
-            required
-            value={formData.function}
-            onChange={(e) =>
-              setFormData({ ...formData, function: e.target.value })
-            }
-            placeholder="Describe the primary biological function..."
-            rows={2}
-            className="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:outline-none resize-none"
-          />
-        </div>
-
-        <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-2">
-            NCBI Gene ID (Optional)
-          </label>
-          <input
-            type="text"
-            value={formData.ncbiId}
-            onChange={(e) =>
-              setFormData({ ...formData, ncbiId: e.target.value })
-            }
-            placeholder="e.g., 672"
-            className="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:outline-none"
-          />
-        </div>
-
         <div className="flex gap-3 pt-4">
           <button
             type="submit"
-            className="flex-1 bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center gap-2 font-semibold"
+            disabled={submitting}
+            className="flex-1 bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center gap-2 font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <Check className="w-5 h-5" />
-            Add Gene
+            {submitting ? "Saving..." : "Add Gene"}
           </button>
           <button
             type="button"

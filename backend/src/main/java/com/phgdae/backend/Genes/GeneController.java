@@ -1,5 +1,6 @@
 package com.phgdae.backend.Genes;
 
+import com.phgdae.backend.Service.GeneService;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.http.ResponseEntity;
 import java.util.List;
@@ -8,9 +9,11 @@ import java.util.List;
 @RequestMapping("/api/genes")
 public class GeneController {
 
+    private final GeneService geneService;
     private final GeneRepository geneRepository;
 
-    public GeneController(GeneRepository geneRepository) {
+    public GeneController(GeneService geneService, GeneRepository geneRepository) {
+        this.geneService = geneService;
         this.geneRepository = geneRepository;
     }
 
@@ -28,6 +31,6 @@ public class GeneController {
 
     @PostMapping
     public Gene createGene(@RequestBody Gene gene) {
-        return geneRepository.save(gene);
+        return geneService.saveGene(gene);
     }
 }

@@ -1,5 +1,6 @@
 package com.phgdae.backend.Disease;
 
+import com.phgdae.backend.enums.DiseaseCategory;
 import com.phgdae.backend.enums.Prevalence;
 import jakarta.persistence.*;
 import lombok.*;
@@ -19,8 +20,9 @@ public class Disease {
     @Column(name = "disease_name", nullable = false, unique = true)
     private String diseaseName;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "disease_category")
-    private String diseaseCategory;
+    private DiseaseCategory diseaseCategory;
 
     @Column(name = "inheritance_pattern", nullable = false)
     private String inheritancePattern;
