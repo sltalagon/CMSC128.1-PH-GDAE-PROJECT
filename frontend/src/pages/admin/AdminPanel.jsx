@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { Database, Activity, Link, BookOpen, Plus } from "lucide-react";
 import { AddGeneForm } from "./AddGeneForm";
 import { AddDiseaseForm } from "./AddDiseaseForm";
@@ -7,61 +8,103 @@ import { AddReferenceForm } from "./AddReferenceForm";
 
 const AdminPanel = () => {
   const [activeForm, setActiveForm] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [adminData, setAdminData] = useState(null);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    fetch('http://localhost:8080/api/admin/me', { credentials: 'include' })
+      .then(response => {
+        if (!response.ok) throw new Error('Not authenticated');
+        return response.json();
+      })
+      .then(data => {
+        setAdminData(data);
+        setIsLoading(false);
+      })
+      .catch(() => {
+        navigate('/admin/login');
+      });
+  }, [navigate]);
 
   const cards = [
     {
       title: "Add Gene",
       icon: Database,
-      color: "blue",
+      colors: { bg: "bg-blue-50", border: "border-blue-100", text: "text-blue-600" },
       form: "gene",
       desc: "Register a new gene with its information",
     },
     {
       title: "Add Disease",
       icon: Activity,
-      color: "green",
+      colors: { bg: "bg-green-50", border: "border-green-100", text: "text-green-600" },
       form: "disease",
       desc: "Register a new disease with Philippine prevalence data",
     },
     {
       title: "Add Gene-Disease Association",
       icon: Link,
-      color: "purple",
+      colors: { bg: "bg-purple-50", border: "border-purple-100", text: "text-purple-600" },
       form: "association",
       desc: "Link genes to diseases with association type",
     },
     {
       title: "Add Reference",
       icon: BookOpen,
-      color: "orange",
+      colors: { bg: "bg-orange-50", border: "border-orange-100", text: "text-orange-600" },
       form: "reference",
       desc: "Add supporting research references",
     },
   ];
 
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-slate-50">
+        <div className="text-lg font-medium text-slate-500 animate-pulse">
+          Verifying secure session...
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="max-w-6xl mx-auto py-8 px-4">
-      {/* Header */}
-      <div className="mb-8">
-        <h2 className="text-2xl font-bold text-slate-900 mb-2">Admin Panel</h2>
-        <p className="text-slate-600">
-          Manage genes, diseases, associations, and research references.
-        </p>
+      <div className="mb-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        <div>
+          <h2 className="text-2xl font-bold text-slate-900 mb-2">Admin Panel</h2>
+          <p className="text-slate-600">
+            Manage genes, diseases, associations, and research references.
+          </p>
+        </div>
+
+        {/* ✅ Profile badge — logout button removed */}
+        {adminData && (
+          <div className="flex items-center gap-3 bg-white p-2.5 rounded-xl shadow-sm border border-slate-200">
+            <img
+              src={adminData.picture}
+              alt="Profile"
+              className="w-10 h-10 rounded-full"
+              referrerPolicy="no-referrer"
+            />
+            <div className="hidden sm:block">
+              <p className="text-sm font-bold text-slate-900">{adminData.name}</p>
+              <p className="text-xs text-slate-500">{adminData.email}</p>
+            </div>
+          </div>
+        )}
       </div>
 
-      {/* Action Cards Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-        {cards.map(({ title, icon: Icon, color, form, desc }) => (
+        {cards.map(({ title, icon: Icon, colors, form, desc }) => (
           <div
             key={form}
-            className={`bg-${color}-50 p-6 rounded-xl border border-${color}-100 hover:shadow-md transition-shadow cursor-pointer flex items-start gap-4 group`}
+            className={`${colors.bg} p-6 rounded-xl border ${colors.border} hover:shadow-md transition-shadow cursor-pointer flex items-start gap-4 group`}
             onClick={() => setActiveForm(form)}
             role="button"
             aria-label={title}
           >
-            <div
-              className={`bg-white p-3 rounded-lg shadow-sm text-${color}-600 group-hover:scale-110 transition-transform`}
-            >
+            <div className={`bg-white p-3 rounded-lg shadow-sm ${colors.text} group-hover:scale-110 transition-transform`}>
               <Icon size={24} />
             </div>
             <div>
@@ -74,21 +117,11 @@ const AdminPanel = () => {
         ))}
       </div>
 
-      {/* Forms */}
-      {activeForm === "gene" && (
-        <AddGeneForm onClose={() => setActiveForm(null)} />
-      )}
-      {activeForm === "disease" && (
-        <AddDiseaseForm onClose={() => setActiveForm(null)} />
-      )}
-      {activeForm === "association" && (
-        <AddAssociationForm onClose={() => setActiveForm(null)} />
-      )}
-      {activeForm === "reference" && (
-        <AddReferenceForm onClose={() => setActiveForm(null)} />
-      )}
+      {activeForm === "gene" && <AddGeneForm onClose={() => setActiveForm(null)} />}
+      {activeForm === "disease" && <AddDiseaseForm onClose={() => setActiveForm(null)} />}
+      {activeForm === "association" && <AddAssociationForm onClose={() => setActiveForm(null)} />}
+      {activeForm === "reference" && <AddReferenceForm onClose={() => setActiveForm(null)} />}
 
-      {/* Warning/Note Box */}
       <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 text-sm text-yellow-800">
         <strong>Note:</strong> This is a demonstration with mock data. In
         production, these forms would save data to a database. Currently,

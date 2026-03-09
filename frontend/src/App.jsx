@@ -4,6 +4,7 @@ import {
   Route,
   Navigate,
 } from "react-router-dom";
+import { useState, useEffect } from "react";
 import Navbar from "./components/Navbar";
 import AdminNavbar from "./components/AdminNavbar";
 import GeneSearch from "./pages/public/GeneSearch";
@@ -17,7 +18,6 @@ import About from "./pages/public/About";
 import SuggestionTab from "./pages/public/SuggestionTab";
 import { Outlet } from "react-router-dom";
 
-// Layout for Public Pages (with Navbar)
 const PublicLayout = () => (
   <div className="min-h-screen bg-slate-50">
     <Navbar />
@@ -36,17 +36,39 @@ const AdminLayout = () => (
   </div>
 );
 
-// simple Protected Route component
 const ProtectedRoute = ({ children }) => {
-  const isAuthenticated = localStorage.getItem("isAdmin") === "true";
-  return isAuthenticated ? children : <Navigate replace to="/admin/login" />;
+  const [authState, setAuthState] = useState("loading");
+
+  useEffect(() => {
+    fetch("http://localhost:8080/api/admin/me", { credentials: "include" })
+      .then((res) => {
+        if (res.ok) {
+          setAuthState("auth");
+        } else {
+          setAuthState("unauth");
+        }
+      })
+      .catch(() => setAuthState("unauth"));
+  }, []);
+
+  if (authState === "loading") {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-slate-50">
+        <div className="text-lg font-medium text-slate-500 animate-pulse">
+          Verifying session...
+        </div>
+      </div>
+    );
+  }
+
+  return authState === "auth" ? children : <Navigate replace to="/admin/login" />;
 };
 
 function App() {
   return (
     <Router>
       <Routes>
-        {/* --- PUBLIC ROUTES (Shows Navbar) --- */}
+        {/* --- PUBLIC ROUTES --- */}
         <Route element={<PublicLayout />}>
           <Route path="/" element={<GeneSearch />} />
           <Route path="/diseases" element={<DiseaseSearch />} />
@@ -54,7 +76,7 @@ function App() {
           <Route path="/suggestion" element={<SuggestionTab />} />
         </Route>
 
-        {/* --- ADMIN ROUTES (No Public Navbar) --- */}
+        {/* --- ADMIN ROUTES --- */}
         <Route path="/admin/login" element={<AdminLogin />} />
         <Route element={<AdminLayout />}>
           <Route
@@ -65,7 +87,6 @@ function App() {
               </ProtectedRoute>
             }
           />
-
           <Route
             path="/admin/genes"
             element={
@@ -74,7 +95,6 @@ function App() {
               </ProtectedRoute>
             }
           />
-
           <Route
             path="/admin/diseases"
             element={
@@ -83,7 +103,6 @@ function App() {
               </ProtectedRoute>
             }
           />
-
           <Route
             path="/admin/suggestions"
             element={
@@ -94,7 +113,6 @@ function App() {
           />
         </Route>
 
-        {/* Catch-all redirect */}
         <Route path="*" element={<Navigate to="/" />} />
       </Routes>
     </Router>

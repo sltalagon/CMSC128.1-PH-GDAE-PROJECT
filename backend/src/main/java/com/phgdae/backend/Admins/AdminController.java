@@ -1,9 +1,12 @@
 package com.phgdae.backend.Admins;
 
 import com.phgdae.backend.Service.AdminService;
-import org.springframework.web.bind.annotation.*;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.HttpStatus;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.core.user.OAuth2User;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/admin")
@@ -15,22 +18,24 @@ public class AdminController {
         this.adminService = adminService;
     }
 
-    // Endpoint for creating an admin (e.g., initial setup)
-    @PostMapping("/register")
-    public ResponseEntity<String> register(@RequestBody AdminRegistrationRequest request) {
-        adminService.registerAdmin(request.getUsername(), request.getPassword());
-        return ResponseEntity.ok("Admin registered successfully");
+    @PostMapping("/add")
+    public ResponseEntity<String> addAdmin(@RequestBody Map<String, String> payload) {
+        String email = payload.get("email");
+        String username = payload.get("username");
+        
+        try {
+            adminService.addAdmin(email, username);
+            return ResponseEntity.ok("Admin added successfully!");
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 
-    // Endpoint for Login
-    @PostMapping("/login")
-    public ResponseEntity<String> login(@RequestBody LoginRequest request) {
-        boolean isAuthenticated = adminService.login(request.getUsername(), request.getPassword());
-
-        if (isAuthenticated) {
-            return ResponseEntity.ok("Login successful");
-        } else {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid credentials");
+    @GetMapping("/me")
+    public ResponseEntity<Map<String, Object>> getCurrentAdmin(@AuthenticationPrincipal OAuth2User principal) {
+        if (principal == null) {
+            return ResponseEntity.status(401).build();
         }
+        return ResponseEntity.ok(principal.getAttributes());
     }
 }

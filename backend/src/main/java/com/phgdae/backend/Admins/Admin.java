@@ -17,8 +17,9 @@ public class Admin {
     private UUID adminId;
 
     @Column(nullable = false, unique = true)
+    private String email;
+
+    @Column(nullable = false, unique = true)
     private String username;
 
-    @Column(name = "password_hash", nullable = false, length = 60)
-    private String passwordHash;
-}
+}       
