@@ -1,28 +1,13 @@
 // src/api/api.js
-// Central API utility — import this in all your JSX files instead of using fetch directly
+// Central API utility — uses session cookie from Google OAuth2 login
 
 const API_BASE = "http://localhost:8080/api";
 
-const USERNAME = import.meta.env.VITE_API_USERNAME;
-const PASSWORD = import.meta.env.VITE_API_PASSWORD;
-
-// Generates the Basic Auth header value
-const getAuthHeader = () => {
-  const credentials = btoa(`${USERNAME}:${PASSWORD}`);
-  return `Basic ${credentials}`;
-};
-
-// Default headers for every request
-const getHeaders = () => ({
-  "Content-Type": "application/json",
-  "Authorization": getAuthHeader(),
-});
-
-// GET request
+// GET request — public, no auth needed
 export const apiGet = async (endpoint) => {
   const response = await fetch(`${API_BASE}${endpoint}`, {
     method: "GET",
-    headers: getHeaders(),
+    credentials: "include", // sends session cookie
   });
 
   if (!response.ok) {
@@ -32,11 +17,12 @@ export const apiGet = async (endpoint) => {
   return response.json();
 };
 
-// POST request
+// POST request — requires admin session cookie
 export const apiPost = async (endpoint, body) => {
   const response = await fetch(`${API_BASE}${endpoint}`, {
     method: "POST",
-    headers: getHeaders(),
+    headers: { "Content-Type": "application/json" },
+    credentials: "include", // sends session cookie
     body: JSON.stringify(body),
   });
 
@@ -47,11 +33,12 @@ export const apiPost = async (endpoint, body) => {
   return response.json();
 };
 
-// PUT request
+// PUT request — requires admin session cookie
 export const apiPut = async (endpoint, body) => {
   const response = await fetch(`${API_BASE}${endpoint}`, {
     method: "PUT",
-    headers: getHeaders(),
+    headers: { "Content-Type": "application/json" },
+    credentials: "include", // sends session cookie
     body: JSON.stringify(body),
   });
 
@@ -62,11 +49,12 @@ export const apiPut = async (endpoint, body) => {
   return response.json();
 };
 
-// DELETE request
+// DELETE request — requires admin session cookie
 export const apiDelete = async (endpoint) => {
   const response = await fetch(`${API_BASE}${endpoint}`, {
     method: "DELETE",
-    headers: getHeaders(),
+    headers: { "Content-Type": "application/json" },
+    credentials: "include", // sends session cookie
   });
 
   if (!response.ok) {
@@ -74,4 +62,17 @@ export const apiDelete = async (endpoint) => {
   }
 
   return response.json();
+};
+
+// Helper to trigger Google login
+export const loginWithGoogle = () => {
+  window.location.href = "http://localhost:8080/oauth2/authorization/google";
+};
+
+// Helper to check if user is logged in
+export const checkAuthStatus = async () => {
+  const response = await fetch(`${API_BASE}/admin/me`, {
+    credentials: "include",
+  });
+  return response.ok;
 };

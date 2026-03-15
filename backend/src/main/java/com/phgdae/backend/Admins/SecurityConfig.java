@@ -8,10 +8,16 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.AuthorityUtils;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.client.oidc.userinfo.OidcUserRequest;
+import org.springframework.security.oauth2.client.oidc.userinfo.OidcUserService;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserService;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
+import org.springframework.security.oauth2.core.oidc.user.DefaultOidcUser;
+import org.springframework.security.oauth2.core.oidc.user.OidcUser;
 import org.springframework.security.oauth2.core.user.DefaultOAuth2User;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.web.SecurityFilterChain;
@@ -34,6 +40,11 @@ public class SecurityConfig {
     }
 
     @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
+
+    @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
@@ -46,25 +57,23 @@ public class SecurityConfig {
                 )
                 .oauth2Login(oauth2 -> oauth2
                         .userInfoEndpoint(userInfo -> userInfo
-                                .userService(this.adminOAuth2UserService())
+                                // REMOVED the old userService line
+                                // ADDED the new oidcUserService line connecting to your method
+                                .oidcUserService(this.adminOidcUserService())
                         )
-                        // ✅ Custom handler replaces defaultSuccessUrl to allow cross-origin redirect
                         .successHandler(customSuccessHandler())
                 );
 
         return http.build();
     }
 
-    // ✅ Allows redirect to React frontend on a different port after login
     @Bean
     public SimpleUrlAuthenticationSuccessHandler customSuccessHandler() {
         SimpleUrlAuthenticationSuccessHandler handler =
                 new SimpleUrlAuthenticationSuccessHandler("http://localhost:5173/admin");
-
         DefaultRedirectStrategy redirectStrategy = new DefaultRedirectStrategy();
-        redirectStrategy.setContextRelative(false); // ✅ Critical: permits external URL redirects
+        redirectStrategy.setContextRelative(false);
         handler.setRedirectStrategy(redirectStrategy);
-
         return handler;
     }
 
@@ -74,26 +83,30 @@ public class SecurityConfig {
         configuration.setAllowedOrigins(List.of("http://localhost:5173"));
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("*"));
-        configuration.setAllowCredentials(true); // ✅ Required so session cookie travels with requests
+        configuration.setAllowCredentials(true);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
         return source;
     }
 
-    private OAuth2UserService<OAuth2UserRequest, OAuth2User> adminOAuth2UserService() {
-        DefaultOAuth2UserService delegate = new DefaultOAuth2UserService();
+    private OAuth2UserService<OidcUserRequest, OidcUser> adminOidcUserService() {
+        OidcUserService delegate = new OidcUserService();
 
         return request -> {
-            OAuth2User user = delegate.loadUser(request);
+            OidcUser user = delegate.loadUser(request);
             String email = user.getAttribute("email");
 
-            if (email != null && adminRepository.existsByEmail(email)) {
-                List<GrantedAuthority> authorities = AuthorityUtils.createAuthorityList("ROLE_ADMIN");
-                return new DefaultOAuth2User(authorities, user.getAttributes(), "email");
+            if (email == null) {
+                throw new OAuth2AuthenticationException("Email not provided by Google.");
             }
 
-            throw new OAuth2AuthenticationException("Unauthorized: Your email is not registered as an Admin.");
+            if (!adminRepository.existsByEmail(email)) {
+                throw new OAuth2AuthenticationException("Access Denied: Admin email not registered.");
+            }
+
+            List<GrantedAuthority> authorities = AuthorityUtils.createAuthorityList("ROLE_ADMIN");
+            return new DefaultOidcUser(authorities, user.getIdToken(), user.getUserInfo());
         };
     }
 }
