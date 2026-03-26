@@ -16,11 +16,12 @@ public class DiseaseService {
 
     @Transactional
     public Disease saveDisease(Disease disease) {
-        long nextIdNumber = diseaseRepository.count() + 1;
+        String maxId = diseaseRepository.findTopByOrderByDiseaseIdDesc()
+                .map(Disease::getDiseaseId)
+                .orElse("D000");
 
-        // Format as DXXX (e.g., D001, D002)
-        String formattedId = String.format("D%03d", nextIdNumber);
-        disease.setDiseaseId(formattedId);
+        int nextIdNumber = Integer.parseInt(maxId.substring(1)) + 1;
+        disease.setDiseaseId(String.format("D%03d", nextIdNumber));
 
         return diseaseRepository.save(disease);
     }

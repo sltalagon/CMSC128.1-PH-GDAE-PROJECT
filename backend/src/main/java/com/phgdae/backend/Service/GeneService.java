@@ -16,11 +16,12 @@ public class GeneService {
 
     @Transactional
     public Gene saveGene(Gene gene) {
-        long nextIdNumber = geneRepository.count() + 1;
+        String maxId = geneRepository.findTopByOrderByGeneIdDesc()
+                .map(Gene::getGeneId)
+                .orElse("G000");
 
-        // Format as GXXX (e.g., G001, G002)
-        String formattedId = String.format("G%03d", nextIdNumber);
-        gene.setGeneId(formattedId);
+        int nextIdNumber = Integer.parseInt(maxId.substring(1)) + 1;
+        gene.setGeneId(String.format("G%03d", nextIdNumber));
 
         return geneRepository.save(gene);
     }

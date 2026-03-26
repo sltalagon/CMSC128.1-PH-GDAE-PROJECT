@@ -16,11 +16,12 @@ public class GeneDiseaseService {
 
     @Transactional
     public GeneDisease saveGeneDisease(GeneDisease geneDisease) {
-        long nextIdNumber = geneDiseaseRepository.count() + 1;
+        String maxId = geneDiseaseRepository.findTopByOrderByGeneDiseaseIdDesc()
+                .map(GeneDisease::getGeneDiseaseId)
+                .orElse("GDA000");
 
-        // Format as DXXX (e.g., D001, D002)
-        String formattedId = String.format("GDA%03d", nextIdNumber);
-        geneDisease.setGeneDiseaseId(formattedId);
+        int nextIdNumber = Integer.parseInt(maxId.substring(3)) + 1;
+        geneDisease.setGeneDiseaseId(String.format("GDA%03d", nextIdNumber));
 
         return geneDiseaseRepository.save(geneDisease);
     }

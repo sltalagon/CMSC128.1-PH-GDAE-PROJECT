@@ -16,6 +16,7 @@ import AdminGeneSearch from "./pages/admin/AdminGeneSearch";
 import SuggestionAdmin from "./pages/admin/SuggestionAdmin";
 import About from "./pages/public/About";
 import SuggestionTab from "./pages/public/SuggestionTab";
+import SuperAdminPanel from "./pages/admin/SuperAdminPanel";
 import { Outlet } from "react-router-dom";
 
 const PublicLayout = () => (
@@ -102,6 +103,14 @@ function App() {
                 <AdminDiseaseSearch />
               </ProtectedRoute>
             }
+          />
+          <Route 
+            path="/superadmin" 
+            element={
+            <ProtectedRoute>
+                <SuperAdminPanel />
+              </ProtectedRoute>
+            } 
           />
           <Route
             path="/admin/suggestions"

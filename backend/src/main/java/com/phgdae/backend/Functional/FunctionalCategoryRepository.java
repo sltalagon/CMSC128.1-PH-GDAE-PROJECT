@@ -6,6 +6,6 @@ import java.util.Optional;
 
 @Repository
 public interface FunctionalCategoryRepository extends JpaRepository<FunctionalCategory, String> {
-        Optional<FunctionalCategory> findByCategoryId(String categoryId);
+        Optional<FunctionalCategory> findTopByOrderByCategoryIdDesc();
 }
 

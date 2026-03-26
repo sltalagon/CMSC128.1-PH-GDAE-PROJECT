@@ -1,43 +1,43 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import logo from "../assets/logot.png";
 import { NavLink, useNavigate } from "react-router-dom";
 import {
   Search,
-  Database,
   Shield,
-  Lightbulb,
   ClipboardCheck,
-  BookOpen,
   LogOut,
+  Users,
 } from "lucide-react";
 
 const Navbar = ({ userEmail = "demo@phgdae.edu.ph", onSignOut }) => {
   const navigate = useNavigate();
+  const [isSuperAdmin, setIsSuperAdmin] = useState(false);
+
+  useEffect(() => {
+    fetch("http://localhost:8080/api/admin/me", { credentials: "include" })
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.role === "SUPER_ADMIN") setIsSuperAdmin(true);
+      })
+      .catch(() => {});
+  }, []);
 
   const handleSignOut = () => {
     localStorage.removeItem("isAdmin");
     navigate("/admin/login");
   };
+
   const navItems = [
     { name: "Gene Search", path: "/admin/genes", icon: <Search size={18} /> },
-    {
-      name: "Disease Search",
-      path: "/admin/diseases",
-      icon: <Search size={18} />,
-    },
+    { name: "Disease Search", path: "/admin/diseases", icon: <Search size={18} /> },
     { name: "Admin Panel", path: "/admin", icon: <Shield size={18} /> },
-    {
-      name: "Admin Suggestions",
-      path: "/admin/suggestions",
-      icon: <ClipboardCheck size={18} />,
-    },
+    { name: "Admin Suggestions", path: "/admin/suggestions", icon: <ClipboardCheck size={18} /> },
   ];
 
   return (
     <div className="w-full font-sans">
-      {/* Top Banner: Purple/Blue Gradient with Pattern */}
+      {/* Top Banner */}
       <div className="relative bg-gradient-to-r from-blue-600 to-purple-600 text-white overflow-hidden">
-        {/* Subtle SVG Pattern Overlay */}
         <div
           className="absolute inset-0 opacity-10 pointer-events-none"
           style={{
@@ -48,16 +48,10 @@ const Navbar = ({ userEmail = "demo@phgdae.edu.ph", onSignOut }) => {
         <div className="max-w-7xl mx-auto px-6 py-10 relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div className="flex items-center gap-4">
             <div className="bg-white rounded-full p-2 flex items-center justify-center shadow">
-              <img
-                src={logo}
-                className="h-28 w-auto object-contain"
-                alt="PH-GDAE Logo"
-              />
+              <img src={logo} className="h-28 w-auto object-contain" alt="PH-GDAE Logo" />
             </div>
             <div>
-              <h1 className="text-4xl font-extrabold tracking-tight">
-                PH-GDAE
-              </h1>
+              <h1 className="text-4xl font-extrabold tracking-tight">PH-GDAE</h1>
               <p className="text-blue-100 font-medium opacity-90">
                 Philippine Gene–Disease Association Explorer
               </p>
@@ -74,14 +68,13 @@ const Navbar = ({ userEmail = "demo@phgdae.edu.ph", onSignOut }) => {
           </div>
         </div>
 
-        {/* The White Bottom Curve */}
         <div
           className="absolute bottom-0 left-0 right-0 h-8 bg-white"
           style={{ borderRadius: "100% 100% 0 0 / 100% 100% 0 0" }}
         ></div>
       </div>
 
-      {/* Navigation: Pill Buttons */}
+      {/* Navigation */}
       <nav className="bg-white pb-6 pt-2">
         <div className="max-w-7xl mx-auto px-6">
           <div className="flex flex-wrap items-center gap-3">
@@ -89,7 +82,6 @@ const Navbar = ({ userEmail = "demo@phgdae.edu.ph", onSignOut }) => {
               <NavLink
                 key={item.name}
                 to={item.path}
-                // ADD THIS LINE BELOW
                 end={item.path === "/admin"}
                 className={({ isActive }) =>
                   `flex items-center gap-2 px-6 py-3 rounded-full text-sm font-bold transition-all duration-200 ${
@@ -103,6 +95,23 @@ const Navbar = ({ userEmail = "demo@phgdae.edu.ph", onSignOut }) => {
                 {item.name}
               </NavLink>
             ))}
+
+            {/* Only visible to Super Admins */}
+            {isSuperAdmin && (
+              <NavLink
+                to="/superadmin"
+                className={({ isActive }) =>
+                  `flex items-center gap-2 px-6 py-3 rounded-full text-sm font-bold transition-all duration-200 ${
+                    isActive
+                      ? "bg-red-600 text-white shadow-lg shadow-red-200 ring-2 ring-red-100"
+                      : "bg-red-50 text-red-600 hover:bg-red-100"
+                  }`
+                }
+              >
+                <Users size={18} />
+                Manage Accounts
+              </NavLink>
+            )}
 
             <button
               onClick={handleSignOut}

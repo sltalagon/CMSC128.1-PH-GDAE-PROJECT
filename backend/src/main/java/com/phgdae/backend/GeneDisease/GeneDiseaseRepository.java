@@ -6,7 +6,7 @@ import java.util.Optional;
 
 @Repository
 public interface GeneDiseaseRepository extends JpaRepository<GeneDisease, String> {
-    Optional<GeneDisease> findByGeneDiseaseId(String geneDiseaseId);
+    Optional<GeneDisease> findTopByOrderByGeneDiseaseIdDesc();
 }
 
 

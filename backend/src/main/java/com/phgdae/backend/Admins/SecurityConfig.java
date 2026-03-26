@@ -1,5 +1,6 @@
 package com.phgdae.backend.Admins;
 
+import com.phgdae.backend.enums.AdminRole;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -54,6 +55,8 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/**").permitAll()
                         .requestMatchers("/login/**", "/oauth2/**").permitAll()
+                        .requestMatchers("/superadmin/**").hasRole("SUPER_ADMIN")
+                        .requestMatchers("/api/admin/add", "/api/admin/remove/**", "/api/admin/all").hasRole("SUPER_ADMIN")
                         .anyRequest().hasRole("ADMIN")
                 )
                 .oauth2Login(oauth2 -> oauth2
@@ -69,12 +72,19 @@ public class SecurityConfig {
 
     @Bean
     public SimpleUrlAuthenticationSuccessHandler customSuccessHandler() {
-        SimpleUrlAuthenticationSuccessHandler handler =
-                new SimpleUrlAuthenticationSuccessHandler("http://localhost:5173/admin");
-        DefaultRedirectStrategy redirectStrategy = new DefaultRedirectStrategy();
-        redirectStrategy.setContextRelative(false);
-        handler.setRedirectStrategy(redirectStrategy);
-        return handler;
+        return new SimpleUrlAuthenticationSuccessHandler() {
+            @Override
+            protected String determineTargetUrl(jakarta.servlet.http.HttpServletRequest request,
+                                                jakarta.servlet.http.HttpServletResponse response,
+                                                org.springframework.security.core.Authentication authentication) {
+                boolean isSuperAdmin = authentication.getAuthorities().stream()
+                        .anyMatch(a -> a.getAuthority().equals("ROLE_SUPER_ADMIN"));
+
+                return isSuperAdmin
+                        ? "http://localhost:5173/superadmin"
+                        : "http://localhost:5173/admin";
+            }
+        };
     }
 
     // UPDATED BEAN: Corrected the route to match your frontend /admin/login path
@@ -107,11 +117,11 @@ public class SecurityConfig {
                 throw new OAuth2AuthenticationException("Email not provided by Google.");
             }
 
-            if (!adminRepository.existsByEmail(email)) {
-                throw new OAuth2AuthenticationException("Access Denied: Admin email not registered.");
-            }
+            Admin admin = adminRepository.findByEmail(email)
+                    .orElseThrow(() -> new OAuth2AuthenticationException("Access Denied: Admin email not registered."));
+            String springRole = admin.getRole() == AdminRole.SUPER_ADMIN ? "ROLE_SUPER_ADMIN" : "ROLE_MANAGER";
+            List<GrantedAuthority> authorities = AuthorityUtils.createAuthorityList("ROLE_ADMIN", springRole);
 
-            List<GrantedAuthority> authorities = AuthorityUtils.createAuthorityList("ROLE_ADMIN");
             return new DefaultOidcUser(authorities, user.getIdToken(), user.getUserInfo());
         };
     }

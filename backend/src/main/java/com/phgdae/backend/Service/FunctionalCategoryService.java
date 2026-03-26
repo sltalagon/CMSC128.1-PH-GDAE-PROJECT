@@ -15,12 +15,13 @@ public class FunctionalCategoryService {
     }
 
     @Transactional
-    public FunctionalCategory saveDisease(FunctionalCategory functionalCategory) {
-        long nextIdNumber = functionalCategoryRepository.count() + 1;
+    public FunctionalCategory saveFunctionalCategory(FunctionalCategory functionalCategory) {
+        String maxId = functionalCategoryRepository.findTopByOrderByCategoryIdDesc()
+                .map(FunctionalCategory::getCategoryId)
+                .orElse("FC000");
 
-        // Format as FXXX (e.g., F001, F002)
-        String formattedId = String.format("F%03d", nextIdNumber);
-        functionalCategory.setCategoryId(formattedId);
+        int nextIdNumber = Integer.parseInt(maxId.substring(2)) + 1;
+        functionalCategory.setCategoryId(String.format("FC%03d", nextIdNumber));
 
         return functionalCategoryRepository.save(functionalCategory);
     }

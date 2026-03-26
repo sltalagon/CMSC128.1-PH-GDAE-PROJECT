@@ -31,6 +31,6 @@ public class FunctionalCategoryController {
 
     @PostMapping
     public FunctionalCategory createFunctionalCategory(@RequestBody FunctionalCategory functionalCategory) {
-        return functionalCategoryService.saveDisease(functionalCategory);
+        return functionalCategoryService.saveFunctionalCategory(functionalCategory);
     }
 }
