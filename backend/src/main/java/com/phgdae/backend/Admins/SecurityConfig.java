@@ -23,6 +23,7 @@ import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.DefaultRedirectStrategy;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
+import org.springframework.security.web.authentication.SimpleUrlAuthenticationFailureHandler; 
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -57,11 +58,10 @@ public class SecurityConfig {
                 )
                 .oauth2Login(oauth2 -> oauth2
                         .userInfoEndpoint(userInfo -> userInfo
-                                // REMOVED the old userService line
-                                // ADDED the new oidcUserService line connecting to your method
                                 .oidcUserService(this.adminOidcUserService())
                         )
                         .successHandler(customSuccessHandler())
+                        .failureHandler(customFailureHandler()) 
                 );
 
         return http.build();
@@ -75,6 +75,12 @@ public class SecurityConfig {
         redirectStrategy.setContextRelative(false);
         handler.setRedirectStrategy(redirectStrategy);
         return handler;
+    }
+
+    // UPDATED BEAN: Corrected the route to match your frontend /admin/login path
+    @Bean
+    public SimpleUrlAuthenticationFailureHandler customFailureHandler() {
+        return new SimpleUrlAuthenticationFailureHandler("http://localhost:5173/admin/login?error=no_privileges");
     }
 
     @Bean

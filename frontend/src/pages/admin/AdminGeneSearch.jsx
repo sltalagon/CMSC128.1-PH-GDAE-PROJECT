@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
-import { apiGet, apiPost } from "\../../api/api";
+import { apiGet } from "../../api/api";
 import { Search, Info, Dna, ChevronRight } from "lucide-react";
-
+import GeneModal from "../../components/GeneModal"; 
 
 const AdminGeneSearch = () => {
   const [genes, setGenes] = useState([]);
@@ -9,6 +9,7 @@ const AdminGeneSearch = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
+  const [selectedGene, setSelectedGene] = useState(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -30,12 +31,34 @@ const AdminGeneSearch = () => {
     fetchData();
   }, []);
 
-  // Get diseases associated with a given geneId
-  const getDiseasesForGene = (geneId) => {
+  const getDetailedDiseasesForModal = (geneId) => {
     return geneDiseases
       .filter((gd) => gd.gene?.geneId === geneId)
-      .map((gd) => gd.disease?.diseaseName)
-      .filter(Boolean);
+      .map((gd) => ({
+        diseaseId: gd.disease?.diseaseId,
+        name: gd.disease?.diseaseName || "Unknown Disease",
+        category: gd.disease?.diseaseCategory || "N/A",
+        prevalence: gd.disease?.phPrevalence || "NONE",
+        inheritance: gd.disease?.inheritancePattern || "N/A",
+        associationType: gd.associationType || "Associated"
+      }));
+  };
+
+  const handleGeneClick = (gene) => {
+    const hasLocation = gene.chromosome && gene.chromosome.toString().trim() !== "";
+
+    setSelectedGene({
+      ...gene,
+      symbol: gene.geneSymbol,
+      name: gene.fullGeneName,
+      // Logic for Chromosome Location fallback
+      location: hasLocation ? `Chromosome ${gene.chromosome}` : "Location N/A",
+      description: gene.description || "No description provided.",
+      biologicalFunction: gene.function || "Function details not available.",
+      ncbiId: gene.ncbiId || "N/A",
+      omimId: gene.omimId || "123", 
+      associatedDiseases: getDetailedDiseasesForModal(gene.geneId)
+    });
   };
 
   const filteredGenes = genes.filter((gene) =>
@@ -45,8 +68,7 @@ const AdminGeneSearch = () => {
   );
 
   return (
-    <div className="max-w-5xl mx-auto py-8 px-4">
-      {/* Header */}
+    <div className="max-w-5xl mx-auto py-8 px-4 relative">
       <div className="mb-8">
         <h2 className="text-2xl font-bold text-slate-900 mb-2">Gene Search</h2>
         <p className="text-slate-600">
@@ -55,7 +77,6 @@ const AdminGeneSearch = () => {
         </p>
       </div>
 
-      {/* Search Bar */}
       <div className="relative mb-8">
         <Search className="absolute left-4 top-3.5 text-slate-400" size={20} />
         <input
@@ -67,20 +88,17 @@ const AdminGeneSearch = () => {
         />
       </div>
 
-      {/* Info Alert */}
       <div className="bg-blue-50 border-l-4 border-blue-500 p-4 rounded-r-lg mb-8 flex gap-4">
         <Info className="text-blue-600 flex-shrink-0" size={24} />
         <div>
           <h4 className="font-semibold text-blue-900">About Gene Search</h4>
           <p className="text-sm text-blue-800 mt-1">
-            This tool allows you to explore genes and their disease associations.
             Click on any gene card to view detailed information including gene type,
             function, and associated diseases with prevalence data for the Philippines.
           </p>
         </div>
       </div>
 
-      {/* States */}
       {error && (
         <div className="p-4 bg-red-50 border border-red-200 text-red-700 rounded-lg mb-4">
           {error}
@@ -93,57 +111,44 @@ const AdminGeneSearch = () => {
         <div className="text-center py-16 text-slate-500">No genes found.</div>
       ) : (
         <div className="space-y-4">
-          {filteredGenes.map((gene) => {
-            const associatedDiseases = getDiseasesForGene(gene.geneId);
-            return (
-              <div
-                key={gene.geneId}
-                className="bg-white rounded-xl border border-slate-200 shadow-sm hover:shadow-md transition-shadow cursor-pointer p-6 flex justify-between items-center group"
-              >
-                <div className="flex gap-4">
-                  <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center text-blue-600 flex-shrink-0">
-                    <Dna size={24} />
-                  </div>
-
-                  <div>
-                    <div className="flex items-baseline gap-2 mb-1">
-                      <h3 className="text-lg font-bold text-blue-600">{gene.geneSymbol}</h3>
-                      <span className="text-sm text-slate-500 capitalize">
-                        {gene.geneType?.replace("_", "-").toLowerCase()}
-                      </span>
-                    </div>
-
-                    <h4 className="font-semibold text-slate-900 mb-1">{gene.fullGeneName}</h4>
-
-                    {gene.description && (
-                      <p className="text-slate-600 text-sm mb-3 line-clamp-2">
-                        {gene.description}
-                      </p>
-                    )}
-
-                    {associatedDiseases.length > 0 && (
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <span className="text-xs font-semibold text-slate-500 uppercase">
-                          Associated Diseases:
-                        </span>
-                        {associatedDiseases.map((name) => (
-                          <span
-                            key={name}
-                            className="bg-red-50 text-red-700 px-2 py-1 rounded text-xs font-medium border border-red-100"
-                          >
-                            {name}
-                          </span>
-                        ))}
-                      </div>
-                    )}
-                  </div>
+          {filteredGenes.map((gene) => (
+            <div
+              key={gene.geneId}
+              onClick={() => handleGeneClick(gene)}
+              className="bg-white rounded-xl border border-slate-200 shadow-sm hover:shadow-md transition-shadow cursor-pointer p-6 flex justify-between items-center group"
+            >
+              <div className="flex gap-4">
+                <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center text-blue-600 flex-shrink-0">
+                  <Dna size={24} />
                 </div>
 
-                <ChevronRight className="text-slate-300 group-hover:text-blue-500 transition-colors flex-shrink-0" />
+                <div>
+                  <div className="flex items-baseline gap-2 mb-1">
+                    <h3 className="text-lg font-bold text-blue-600">{gene.geneSymbol}</h3>
+                    <span className="text-sm text-slate-500 capitalize">
+                      {gene.geneType?.replace("_", "-").toLowerCase()}
+                    </span>
+                  </div>
+                  <h4 className="font-semibold text-slate-900 mb-1">{gene.fullGeneName}</h4>
+                  {gene.description && (
+                    <p className="text-slate-600 text-sm mb-3 line-clamp-2">
+                      {gene.description}
+                    </p>
+                  )}
+                </div>
               </div>
-            );
-          })}
+              <ChevronRight className="text-slate-300 group-hover:text-blue-500 transition-colors flex-shrink-0" />
+            </div>
+          ))}
         </div>
+      )}
+
+      {selectedGene && (
+        <GeneModal 
+          isOpen={true} 
+          onClose={() => setSelectedGene(null)} 
+          geneData={selectedGene}
+        />
       )}
     </div>
   );

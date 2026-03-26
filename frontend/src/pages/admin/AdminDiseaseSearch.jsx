@@ -2,6 +2,9 @@ import { useState, useEffect } from "react";
 import { apiGet, apiPost } from "../../api/api";
 import { Search, Filter, Activity, ChevronRight, CheckCircle } from "lucide-react";
 
+// 1. IMPORT THE DISEASE MODAL
+// Ensure this path matches where your DiseaseModal component actually lives
+import DiseaseModal from "../../components/DiseaseModal"; 
 
 const AdminDiseaseSearch = () => {
   const [diseases, setDiseases] = useState([]);
@@ -11,6 +14,9 @@ const AdminDiseaseSearch = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategories, setSelectedCategories] = useState([]);
   const [selectedPrevalences, setSelectedPrevalences] = useState([]);
+
+  // 2. STATE TO TRACK WHICH DISEASE IS CLICKED
+  const [selectedDisease, setSelectedDisease] = useState(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -32,12 +38,42 @@ const AdminDiseaseSearch = () => {
     fetchData();
   }, []);
 
-  // Get associated gene symbols for a given diseaseId
+  // Get associated gene symbols for a given diseaseId (used for the small tags on the card)
   const getGenesForDisease = (diseaseId) => {
     return geneDiseases
       .filter((gd) => gd.disease?.diseaseId === diseaseId)
       .map((gd) => gd.gene?.geneSymbol)
       .filter(Boolean);
+  };
+
+  // 3. GET DETAILED GENES FORMATTED FOR THE MODAL
+  const getDetailedGenesForModal = (diseaseId) => {
+    return geneDiseases
+      .filter((gd) => gd.disease?.diseaseId === diseaseId)
+      .map((gd) => ({
+        symbol: gd.gene?.geneSymbol || "Unknown",
+        name: gd.gene?.fullGeneName || "Unknown Gene",
+        chromosome: gd.gene?.chromosome || "N/A",
+        // Defaulting these in case your API doesn't have them yet
+        associationType: gd.associationType || "Associated",
+        confidence: gd.confidenceScore || "High",
+        description: gd.gene?.description || "No description available.",
+        function: gd.gene?.function || "No function data available.",
+        references: gd.references || [] 
+      }));
+  };
+
+  // 4. CLICK HANDLER TO FORMAT DATA FOR THE MODAL
+  const handleDiseaseClick = (disease) => {
+    // We map your backend fields to the fields the modal expects (like "name" and "symptoms")
+    setSelectedDisease({
+      ...disease,
+      name: disease.diseaseName, 
+      description: disease.description || "No detailed description provided for this disease.",
+      // Fallback to empty array if symptoms don't exist in your API yet
+      symptoms: disease.symptoms || ["Data on symptoms currently unavailable."], 
+      associatedGenes: getDetailedGenesForModal(disease.diseaseId)
+    });
   };
 
   const toggleFilter = (value, list, setList) => {
@@ -66,7 +102,8 @@ const AdminDiseaseSearch = () => {
   });
 
   return (
-    <div className="max-w-6xl mx-auto py-8 px-4 flex gap-8">
+    // Added 'relative' to the parent div
+    <div className="max-w-6xl mx-auto py-8 px-4 flex gap-8 relative">
       {/* Sidebar Filters */}
       <div className="w-64 flex-shrink-0 hidden md:block">
         <div className="bg-white p-5 rounded-lg border border-slate-200 shadow-sm sticky top-24">
@@ -158,6 +195,8 @@ const AdminDiseaseSearch = () => {
               return (
                 <div
                   key={disease.diseaseId}
+                  // 5. TRIGGER CLICK HANDLER
+                  onClick={() => handleDiseaseClick(disease)}
                   className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm hover:shadow-md transition-all group cursor-pointer"
                 >
                   <div className="flex justify-between items-start">
@@ -205,6 +244,13 @@ const AdminDiseaseSearch = () => {
           </div>
         )}
       </div>
+
+      {/* 6. RENDER THE DISEASE MODAL */}
+      <DiseaseModal 
+        isOpen={!!selectedDisease} 
+        onClose={() => setSelectedDisease(null)} 
+        diseaseData={selectedDisease} 
+      />
     </div>
   );
 };

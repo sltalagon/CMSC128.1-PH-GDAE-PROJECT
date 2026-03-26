@@ -1,9 +1,25 @@
-import { Mail, ArrowLeft } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { Mail, ArrowLeft, AlertCircle } from 'lucide-react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 
 const AdminLogin = () => {
   const navigate = useNavigate();
-  
+  // 1. Initialize search params to read the URL
+  const [searchParams] = useSearchParams();
+  const [errorMessage, setErrorMessage] = useState('');
+
+  // 2. Check for the specific error on component mount
+  useEffect(() => {
+    const error = searchParams.get('error');
+    if (error === 'no_privileges') {
+      setErrorMessage("Access Denied: Your Google account does not have admin privileges.");
+      
+      // NEW: Clear the error from the URL without reloading the page
+      // This prevents the error from getting stuck if the user hits refresh or back
+      window.history.replaceState(null, '', window.location.pathname);
+    }
+  }, [searchParams]);
+
   const handleGoogleSignIn = () => {
     window.location.href = 'http://localhost:8080/oauth2/authorization/google';
   };
@@ -12,7 +28,7 @@ const AdminLogin = () => {
     <div className="min-h-screen flex items-center justify-center bg-slate-50 px-4 font-sans">
       <div className="bg-white p-8 rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] w-full max-w-[400px] border border-slate-100 text-center">
         
-        {/* ✅ Back to Home button */}
+        {/* Back to Home button */}
         <button
           onClick={() => navigate('/')}
           className="flex items-center gap-1.5 text-sm text-slate-400 hover:text-slate-600 transition-colors mb-6"
@@ -25,6 +41,14 @@ const AdminLogin = () => {
           <h2 className="text-2xl font-bold text-slate-900">Admin Access</h2>
           <p className="text-slate-500 text-sm mt-2">Sign in using your authorized Google account</p>
         </div>
+
+        {/* 3. Conditionally rendered Error Card styled with Tailwind */}
+        {errorMessage && (
+          <div className="mb-6 bg-red-50 border border-red-200 rounded-lg p-4 text-sm text-left flex items-start gap-3 animate-in fade-in slide-in-from-top-2 duration-300">
+            <AlertCircle className="text-red-500 shrink-0 mt-0.5" size={18} />
+            <span className="text-red-800 font-medium">{errorMessage}</span>
+          </div>
+        )}
 
         <button 
           onClick={handleGoogleSignIn}

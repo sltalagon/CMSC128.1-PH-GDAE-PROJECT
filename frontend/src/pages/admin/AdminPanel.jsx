@@ -1,13 +1,19 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Database, Activity, Link, BookOpen, Plus } from "lucide-react";
+import { Database, Activity, Link, BookOpen, Plus, Search, X } from "lucide-react";
+
+// Form Components
 import { AddGeneForm } from "./AddGeneForm";
 import { AddDiseaseForm } from "./AddDiseaseForm";
 import { AddAssociationForm } from "./AddAssociationForm";
 import { AddReferenceForm } from "./AddReferenceForm";
 
+// Correctly importing the specific Admin Search tools from your file tree!
+import AdminGeneSearch from "./AdminGeneSearch";
+import AdminDiseaseSearch from "./AdminDiseaseSearch";
+
 const AdminPanel = () => {
-  const [activeForm, setActiveForm] = useState(null);
+  const [activeView, setActiveView] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [adminData, setAdminData] = useState(null);
   const navigate = useNavigate();
@@ -32,30 +38,44 @@ const AdminPanel = () => {
       title: "Add Gene",
       icon: Database,
       colors: { bg: "bg-blue-50", border: "border-blue-100", text: "text-blue-600" },
-      form: "gene",
+      view: "add-gene",
       desc: "Register a new gene with its information",
     },
     {
       title: "Add Disease",
       icon: Activity,
       colors: { bg: "bg-green-50", border: "border-green-100", text: "text-green-600" },
-      form: "disease",
+      view: "add-disease",
       desc: "Register a new disease with Philippine prevalence data",
     },
     {
       title: "Add Gene-Disease Association",
       icon: Link,
       colors: { bg: "bg-purple-50", border: "border-purple-100", text: "text-purple-600" },
-      form: "association",
+      view: "add-association",
       desc: "Link genes to diseases with association type",
     },
     {
       title: "Add Reference",
       icon: BookOpen,
       colors: { bg: "bg-orange-50", border: "border-orange-100", text: "text-orange-600" },
-      form: "reference",
+      view: "add-reference",
       desc: "Add supporting research references",
     },
+    {
+      title: "Search Genes",
+      icon: Search,
+      colors: { bg: "bg-indigo-50", border: "border-indigo-100", text: "text-indigo-600" },
+      view: "search-genes",
+      desc: "Browse and search the existing genes database",
+    },
+    {
+      title: "Search Diseases",
+      icon: Search,
+      colors: { bg: "bg-teal-50", border: "border-teal-100", text: "text-teal-600" },
+      view: "search-diseases",
+      desc: "Browse and search the existing diseases database",
+    }
   ];
 
   if (isLoading) {
@@ -68,17 +88,18 @@ const AdminPanel = () => {
     );
   }
 
+  const handleCloseView = () => setActiveView(null);
+
   return (
-    <div className="max-w-6xl mx-auto py-8 px-4">
+    <div className="max-w-7xl mx-auto py-8 px-4 relative">
       <div className="mb-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
           <h2 className="text-2xl font-bold text-slate-900 mb-2">Admin Panel</h2>
           <p className="text-slate-600">
-            Manage genes, diseases, associations, and research references.
+            Manage and explore genes, diseases, associations, and research references.
           </p>
         </div>
 
-        {/* ✅ Profile badge — logout button removed */}
         {adminData && (
           <div className="flex items-center gap-3 bg-white p-2.5 rounded-xl shadow-sm border border-slate-200">
             <img
@@ -95,21 +116,21 @@ const AdminPanel = () => {
         )}
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-        {cards.map(({ title, icon: Icon, colors, form, desc }) => (
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+        {cards.map(({ title, icon: Icon, colors, view, desc }) => (
           <div
-            key={form}
-            className={`${colors.bg} p-6 rounded-xl border ${colors.border} hover:shadow-md transition-shadow cursor-pointer flex items-start gap-4 group`}
-            onClick={() => setActiveForm(form)}
+            key={view}
+            className={`${colors.bg} p-6 rounded-xl border ${colors.border} hover:shadow-md transition-shadow cursor-pointer flex items-start gap-4 group ${activeView === view ? 'ring-2 ring-offset-2 ring-blue-500' : ''}`}
+            onClick={() => setActiveView(activeView === view ? null : view)}
             role="button"
-            aria-label={title}
           >
             <div className={`bg-white p-3 rounded-lg shadow-sm ${colors.text} group-hover:scale-110 transition-transform`}>
               <Icon size={24} />
             </div>
             <div>
               <h3 className="text-lg font-bold text-slate-900 flex items-center gap-2">
-                {title} <Plus size={16} className="text-slate-400" />
+                {title} 
+                {view.startsWith('add') && <Plus size={16} className="text-slate-400" />}
               </h3>
               <p className="text-slate-600 text-sm mt-1">{desc}</p>
             </div>
@@ -117,16 +138,58 @@ const AdminPanel = () => {
         ))}
       </div>
 
-      {activeForm === "gene" && <AddGeneForm onClose={() => setActiveForm(null)} />}
-      {activeForm === "disease" && <AddDiseaseForm onClose={() => setActiveForm(null)} />}
-      {activeForm === "association" && <AddAssociationForm onClose={() => setActiveForm(null)} />}
-      {activeForm === "reference" && <AddReferenceForm onClose={() => setActiveForm(null)} />}
-
-      <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 text-sm text-yellow-800">
-        <strong>Note:</strong> This is a demonstration with mock data. In
-        production, these forms would save data to a database. Currently,
-        submissions will be displayed but not persisted.
+      <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 text-sm text-yellow-800 mb-8">
+        <strong>Note:</strong> This is a demonstration with mock data. In production, these forms would save data to a database.
       </div>
+
+      {/* =========================================
+          INLINE SEARCH VIEWS (ON THE ADMIN PANEL) 
+          ========================================= */}
+      {activeView === "search-genes" && (
+        <div className="bg-white rounded-2xl shadow-sm border border-slate-200 relative pt-12 pb-4 px-4 animate-in fade-in slide-in-from-bottom-4 duration-300">
+          <button 
+            onClick={handleCloseView}
+            className="absolute top-4 right-4 z-10 flex items-center gap-1 p-2 bg-slate-100 hover:bg-slate-200 text-slate-600 hover:text-slate-900 font-medium rounded-lg transition-colors"
+          >
+            <X size={18} /> Close Search
+          </button>
+          <AdminGeneSearch />
+        </div>
+      )}
+
+      {activeView === "search-diseases" && (
+        <div className="bg-white rounded-2xl shadow-sm border border-slate-200 relative pt-12 pb-4 px-4 animate-in fade-in slide-in-from-bottom-4 duration-300">
+          <button 
+            onClick={handleCloseView}
+            className="absolute top-4 right-4 z-10 flex items-center gap-1 p-2 bg-slate-100 hover:bg-slate-200 text-slate-600 hover:text-slate-900 font-medium rounded-lg transition-colors"
+          >
+            <X size={18} /> Close Search
+          </button>
+          <AdminDiseaseSearch />
+        </div>
+      )}
+
+      {/* =========================================
+          POPUP MODALS (ONLY FOR THE ADD FORMS) 
+          ========================================= */}
+      {activeView && activeView.startsWith("add") && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4 sm:p-6 overflow-y-auto">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-3xl max-h-[90vh] overflow-y-auto relative animate-in fade-in zoom-in-95 duration-200">
+            <button 
+              onClick={handleCloseView}
+              className="absolute top-4 right-4 z-50 p-2 bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-800 rounded-full transition-colors"
+            >
+              <X size={20} />
+            </button>
+            <div className="p-6">
+              {activeView === "add-gene" && <AddGeneForm onClose={handleCloseView} />}
+              {activeView === "add-disease" && <AddDiseaseForm onClose={handleCloseView} />}
+              {activeView === "add-association" && <AddAssociationForm onClose={handleCloseView} />}
+              {activeView === "add-reference" && <AddReferenceForm onClose={handleCloseView} />}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

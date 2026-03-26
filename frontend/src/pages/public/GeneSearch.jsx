@@ -1,5 +1,6 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Search, Info, Dna, ChevronRight } from "lucide-react";
+import GeneModal from "../../components/GeneModal";
 
 const API_BASE = "http://localhost:8080/api";
 
@@ -9,6 +10,7 @@ const GeneSearch = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
+  const [selectedGene, setSelectedGene] = useState(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -34,18 +36,37 @@ const GeneSearch = () => {
     fetchData();
   }, []);
 
-  const getDiseasesForGene = (geneId) =>
-    geneDiseases
-      .filter((gd) => gd.gene?.geneId === geneId)
-      .map((gd) => gd.disease?.diseaseName)
-      .filter(Boolean);
+  const geneToDiseasesMap = useMemo(() => {
+    const map = {};
+    geneDiseases.forEach((gd) => {
+      const gId = gd.gene?.geneId;
+      const disease = gd.disease;
+      
+      if (gId && disease) {
+        if (!map[gId]) map[gId] = [];
+        
+        map[gId].push({
+          name: disease.diseaseName,
+          type: disease.diseaseCategory || "Unknown Category",
+          description: disease.diseaseDescription || "No description available.",
+          associationType: "Associated", 
+          confidence: "Verified",
+          references: [] 
+        });
+      }
+    });
+    return map;
+  }, [geneDiseases]);
 
-  const filteredGenes = genes.filter(
-    (gene) =>
-      gene.geneSymbol?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      gene.fullGeneName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      gene.description?.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const filteredGenes = useMemo(() => {
+    const query = searchQuery.toLowerCase();
+    return genes.filter(
+      (gene) =>
+        gene.geneSymbol?.toLowerCase().includes(query) ||
+        gene.fullGeneName?.toLowerCase().includes(query) ||
+        gene.description?.toLowerCase().includes(query)
+    );
+  }, [genes, searchQuery]);
 
   return (
     <div className="max-w-5xl mx-auto py-8 px-4">
@@ -90,10 +111,12 @@ const GeneSearch = () => {
       ) : (
         <div className="space-y-4">
           {filteredGenes.map((gene) => {
-            const associatedDiseases = getDiseasesForGene(gene.geneId);
+            const associatedDiseases = geneToDiseasesMap[gene.geneId] || [];
+            
             return (
               <div
                 key={gene.geneId}
+                onClick={() => setSelectedGene(gene)}
                 className="bg-white rounded-xl border border-slate-200 shadow-sm hover:shadow-md transition-shadow cursor-pointer p-6 flex justify-between items-center group"
               >
                 <div className="flex gap-4">
@@ -120,9 +143,9 @@ const GeneSearch = () => {
                         <span className="text-xs font-semibold text-slate-500 uppercase">
                           Associated Diseases:
                         </span>
-                        {associatedDiseases.map((name) => (
-                          <span key={name} className="bg-red-50 text-red-700 px-2 py-1 rounded text-xs font-medium border border-red-100">
-                            {name}
+                        {associatedDiseases.map((disease, idx) => (
+                          <span key={idx} className="bg-red-50 text-red-700 px-2 py-1 rounded text-xs font-medium border border-red-100">
+                            {disease.name}
                           </span>
                         ))}
                       </div>
@@ -135,6 +158,22 @@ const GeneSearch = () => {
           })}
         </div>
       )}
+
+      <GeneModal 
+        isOpen={!!selectedGene} 
+        onClose={() => setSelectedGene(null)} 
+        geneData={selectedGene ? {
+          symbol: selectedGene.geneSymbol,
+          name: selectedGene.fullGeneName,
+          chromosome: selectedGene.chromosomeLocation || "Location N/A",
+          ncbiId: selectedGene.ncbiGeneId || "N/A",
+          omimId: selectedGene.omimId || "N/A",
+          description: selectedGene.description || "No description provided.",
+          biologicalFunction: selectedGene.biologicalFunction || "Function details not available.",
+          associatedDiseases: geneToDiseasesMap[selectedGene.geneId] || []
+        } : null} 
+      />
+
     </div>
   );
 };
