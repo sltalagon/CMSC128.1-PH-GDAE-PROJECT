@@ -1,12 +1,13 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Database, Activity, Link, BookOpen, Plus, Search, X } from "lucide-react";
+import { Database, Activity, Link, BookOpen, Plus, Search, X, Tag } from "lucide-react";
 
 // Form Components
 import { AddGeneForm } from "./AddGeneForm";
 import { AddDiseaseForm } from "./AddDiseaseForm";
 import { AddAssociationForm } from "./AddAssociationForm";
-import { AddReferenceForm } from "./AddReferenceForm";
+import { AddFunctionalCategoryForm } from "./AddFunctionalCategoryForm";
+import { AddGeneCategoryForm } from "./AddGeneCategoryForm";
 
 // Correctly importing the specific Admin Search tools from your file tree!
 import AdminGeneSearch from "./AdminGeneSearch";
@@ -55,12 +56,23 @@ const AdminPanel = () => {
       view: "add-association",
       desc: "Link genes to diseases with association type",
     },
-    {
-      title: "Add Reference",
-      icon: BookOpen,
-      colors: { bg: "bg-orange-50", border: "border-orange-100", text: "text-orange-600" },
-      view: "add-reference",
-      desc: "Add supporting research references",
+    { 
+      title: "Add Functional Category", 
+      icon: Tag, 
+      colors: { bg: "bg-orange-50", 
+        border: "border-orange-100", 
+        text: "text-orange-600" }, 
+        view: "add-functional-category", 
+        desc: "Register a new gene functional category" 
+    },
+    { 
+      title: "Add Gene–Category", 
+      icon: Tag, 
+      colors: { bg: "bg-yellow-50", 
+        border: "border-yellow-100", 
+        text: "text-yellow-600" }, 
+        view: "add-gene-category", 
+        desc: "Link a gene to a functional category" 
     },
     {
       title: "Search Genes",
@@ -185,7 +197,8 @@ const AdminPanel = () => {
               {activeView === "add-gene" && <AddGeneForm onClose={handleCloseView} />}
               {activeView === "add-disease" && <AddDiseaseForm onClose={handleCloseView} />}
               {activeView === "add-association" && <AddAssociationForm onClose={handleCloseView} />}
-              {activeView === "add-reference" && <AddReferenceForm onClose={handleCloseView} />}
+              {activeView === "add-functional-category" && <AddFunctionalCategoryForm onClose={handleCloseView} />}
+              {activeView === "add-gene-category" && <AddGeneCategoryForm onClose={handleCloseView} />}
             </div>
           </div>
         </div>

@@ -3,7 +3,7 @@ import { apiGet, apiPost } from "../../api/api";
 import { X, Check, Database } from "lucide-react";
 
 
-export function AddGeneForm({ onClose }) {
+export function AddGeneForm({ onClose, mode = "admin", suggestionMeta = null }) {
   const [formData, setFormData] = useState({
     geneSymbol: "",
     fullGeneName: "",
@@ -21,20 +21,34 @@ export function AddGeneForm({ onClose }) {
     setError(null);
 
     try {
-      await apiPost("/genes", {
-        geneSymbol: formData.geneSymbol,
-        fullGeneName: formData.fullGeneName,
-        geneType: formData.geneType,
-        omimId: formData.omimId ? parseFloat(formData.omimId) : null,
-        description: formData.description,
-      });
-
+      if (mode === "suggestion") {
+        await fetch("http://localhost:8080/api/suggestions", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            submitterName: suggestionMeta.submitterName,
+            submitterEmail: suggestionMeta.submitterEmail,
+            suggestionType: "GENE",
+            content: JSON.stringify(formData),
+            referenceUrl: suggestionMeta.referenceUrl,
+          }),
+        });
+      } else {
+        await apiPost("/genes", {
+          geneSymbol: formData.geneSymbol,
+          fullGeneName: formData.fullGeneName,
+          geneType: formData.geneType,
+          omimId: formData.omimId ? parseFloat(formData.omimId) : null,
+          description: formData.description,
+        });
+      }
       onClose();
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setSubmitting(false);
-    }
+    } 
+    catch (err) {
+        setError(err.message);
+      } finally {
+        setSubmitting(false);
+      }
   };
 
   return (
@@ -156,7 +170,7 @@ export function AddGeneForm({ onClose }) {
             className="flex-1 bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center gap-2 font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <Check className="w-5 h-5" />
-            {submitting ? "Saving..." : "Add Gene"}
+            {submitting ? "Saving..." : mode === "suggestion" ? "Submit Suggestion" : "Add Gene"}
           </button>
           <button
             type="button"

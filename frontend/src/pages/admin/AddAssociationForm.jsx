@@ -3,7 +3,7 @@ import { apiGet, apiPost } from "../../api/api";
 import { X, Check, Link } from "lucide-react";
 
 
-export function AddAssociationForm({ onClose }) {
+export function AddAssociationForm({ onClose, mode = "admin", suggestionMeta = null }) {
   const [formData, setFormData] = useState({
     geneId: "",
     diseaseId: "",
@@ -44,20 +44,34 @@ export function AddAssociationForm({ onClose }) {
     setError(null);
 
     try {
-      await apiPost("/genedisease", {
-        gene: { geneId: formData.geneId },
-        disease: { diseaseId: formData.diseaseId },
-        associationType: formData.associationType,
-        citationUrl: formData.citationUrl,
-        citationDescription: formData.citationDescription,
-      });
-
+      if (mode === "suggestion") {
+        await fetch("http://localhost:8080/api/suggestions", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            submitterName: suggestionMeta.submitterName,
+            submitterEmail: suggestionMeta.submitterEmail,
+            suggestionType: "ASSOCIATION",
+            content: JSON.stringify(formData),
+            referenceUrl: suggestionMeta.referenceUrl,
+          }),
+        });
+      } else {
+        await apiPost("/genedisease", {
+          gene: { geneId: formData.geneId },
+          disease: { diseaseId: formData.diseaseId },
+          associationType: formData.associationType,
+          citationUrl: formData.citationUrl,
+          citationDescription: formData.citationDescription,
+        });
+      }
       onClose();
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setSubmitting(false);
     }
+    catch (err) {
+        setError(err.message);
+      } finally {
+        setSubmitting(false);
+      }
   };
 
   return (
@@ -196,7 +210,7 @@ export function AddAssociationForm({ onClose }) {
               className="flex-1 bg-purple-600 text-white py-3 rounded-lg hover:bg-purple-700 transition-colors flex items-center justify-center gap-2 font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <Check className="w-5 h-5" />
-              {submitting ? "Saving..." : "Create Association"}
+              {submitting ? "Saving..." : mode === "suggestion" ? "Submit Suggestion" : "Create Association"}
             </button>
             <button
               type="button"

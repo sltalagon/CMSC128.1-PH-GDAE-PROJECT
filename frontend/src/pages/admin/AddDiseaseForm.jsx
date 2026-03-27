@@ -3,7 +3,7 @@ import { apiGet, apiPost } from "../../api/api";
 import { X, Check, Activity } from "lucide-react";
 
 
-export function AddDiseaseForm({ onClose }) {
+export function AddDiseaseForm({ onClose, mode = "admin", suggestionMeta = null }) {
   const [formData, setFormData] = useState({
     diseaseName: "",
     diseaseCategory: "",
@@ -22,21 +22,35 @@ export function AddDiseaseForm({ onClose }) {
     setError(null);
 
     try {
-      await apiPost("/diseases", {
-        diseaseName: formData.diseaseName,
-        diseaseCategory: formData.diseaseCategory,
-        inheritancePattern: formData.inheritancePattern,
-        omimId: formData.omimId ? parseFloat(formData.omimId) : null,
-        phPrevalence: formData.phPrevalence,
-        description: formData.description,
-      });
-
+      if (mode === "suggestion") {
+        await fetch("http://localhost:8080/api/suggestions", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            submitterName: suggestionMeta.submitterName,
+            submitterEmail: suggestionMeta.submitterEmail,
+            suggestionType: "DISEASE",
+            content: JSON.stringify(formData),
+            referenceUrl: suggestionMeta.referenceUrl,
+          }),
+        });
+      } else {
+        await apiPost("/diseases", {
+          diseaseName: formData.diseaseName,
+          diseaseCategory: formData.diseaseCategory,
+          inheritancePattern: formData.inheritancePattern,
+          omimId: formData.omimId ? parseFloat(formData.omimId) : null,
+          phPrevalence: formData.phPrevalence,
+          description: formData.description,
+        });
+      }
       onClose();
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setSubmitting(false);
-    }
+    } 
+    catch (err) {
+        setError(err.message);
+      } finally {
+        setSubmitting(false);
+      }
   };
 
   return (
@@ -175,7 +189,7 @@ export function AddDiseaseForm({ onClose }) {
             className="flex-1 bg-green-600 text-white py-3 rounded-lg hover:bg-green-700 transition-colors flex items-center justify-center gap-2 font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <Check className="w-5 h-5" />
-            {submitting ? "Saving..." : "Add Disease"}
+            {submitting ? "Saving..." : mode === "suggestion" ? "Submit Suggestion" : "Add Disease"}
           </button>
           <button
             type="button"
