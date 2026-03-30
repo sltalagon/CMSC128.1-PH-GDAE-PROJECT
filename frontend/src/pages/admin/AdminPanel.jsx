@@ -1,6 +1,15 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Database, Activity, Link, BookOpen, Plus, Search, X, Tag } from "lucide-react";
+import {
+  Database,
+  Activity,
+  Link,
+  BookOpen,
+  Plus,
+  Search,
+  X,
+  Tag,
+} from "lucide-react";
 
 // Form Components
 import { AddGeneForm } from "./AddGeneForm";
@@ -20,17 +29,17 @@ const AdminPanel = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    fetch('http://localhost:8080/api/admin/me', { credentials: 'include' })
-      .then(response => {
-        if (!response.ok) throw new Error('Not authenticated');
+    fetch("http://localhost:8080/api/admin/me", { credentials: "include" })
+      .then((response) => {
+        if (!response.ok) throw new Error("Not authenticated");
         return response.json();
       })
-      .then(data => {
+      .then((data) => {
         setAdminData(data);
         setIsLoading(false);
       })
       .catch(() => {
-        navigate('/admin/login');
+        navigate("/admin/login");
       });
   }, [navigate]);
 
@@ -38,56 +47,80 @@ const AdminPanel = () => {
     {
       title: "Add Gene",
       icon: Database,
-      colors: { bg: "bg-blue-50", border: "border-blue-100", text: "text-blue-600" },
+      colors: {
+        bg: "bg-blue-50",
+        border: "border-blue-100",
+        text: "text-blue-600",
+      },
       view: "add-gene",
       desc: "Register a new gene with its information",
     },
     {
       title: "Add Disease",
       icon: Activity,
-      colors: { bg: "bg-green-50", border: "border-green-100", text: "text-green-600" },
+      colors: {
+        bg: "bg-green-50",
+        border: "border-green-100",
+        text: "text-green-600",
+      },
       view: "add-disease",
       desc: "Register a new disease with Philippine prevalence data",
     },
     {
       title: "Add Gene-Disease Association",
       icon: Link,
-      colors: { bg: "bg-purple-50", border: "border-purple-100", text: "text-purple-600" },
+      colors: {
+        bg: "bg-purple-50",
+        border: "border-purple-100",
+        text: "text-purple-600",
+      },
       view: "add-association",
       desc: "Link genes to diseases with association type",
     },
-    { 
-      title: "Add Functional Category", 
-      icon: Tag, 
-      colors: { bg: "bg-orange-50", 
-        border: "border-orange-100", 
-        text: "text-orange-600" }, 
-        view: "add-functional-category", 
-        desc: "Register a new gene functional category" 
+    {
+      title: "Add Functional Category",
+      icon: Tag,
+      colors: {
+        bg: "bg-orange-50",
+        border: "border-orange-100",
+        text: "text-orange-600",
+      },
+      view: "add-functional-category",
+      desc: "Register a new gene functional category",
     },
-    { 
-      title: "Add Gene–Category", 
-      icon: Tag, 
-      colors: { bg: "bg-yellow-50", 
-        border: "border-yellow-100", 
-        text: "text-yellow-600" }, 
-        view: "add-gene-category", 
-        desc: "Link a gene to a functional category" 
+    {
+      title: "Add Gene–Category",
+      icon: Tag,
+      colors: {
+        bg: "bg-yellow-50",
+        border: "border-yellow-100",
+        text: "text-yellow-600",
+      },
+      view: "add-gene-category",
+      desc: "Link a gene to a functional category",
     },
     {
       title: "Search Genes",
       icon: Search,
-      colors: { bg: "bg-indigo-50", border: "border-indigo-100", text: "text-indigo-600" },
+      colors: {
+        bg: "bg-indigo-50",
+        border: "border-indigo-100",
+        text: "text-indigo-600",
+      },
       view: "search-genes",
       desc: "Browse and search the existing genes database",
     },
     {
       title: "Search Diseases",
       icon: Search,
-      colors: { bg: "bg-teal-50", border: "border-teal-100", text: "text-teal-600" },
+      colors: {
+        bg: "bg-teal-50",
+        border: "border-teal-100",
+        text: "text-teal-600",
+      },
       view: "search-diseases",
       desc: "Browse and search the existing diseases database",
-    }
+    },
   ];
 
   if (isLoading) {
@@ -106,9 +139,12 @@ const AdminPanel = () => {
     <div className="max-w-7xl mx-auto py-8 px-4 relative">
       <div className="mb-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
-          <h2 className="text-2xl font-bold text-slate-900 mb-2">Admin Panel</h2>
+          <h2 className="text-2xl font-bold text-slate-900 mb-2">
+            Admin Panel
+          </h2>
           <p className="text-slate-600">
-            Manage and explore genes, diseases, associations, and research references.
+            Manage and explore genes, diseases, associations, and research
+            references.
           </p>
         </div>
 
@@ -121,7 +157,9 @@ const AdminPanel = () => {
               referrerPolicy="no-referrer"
             />
             <div className="hidden sm:block">
-              <p className="text-sm font-bold text-slate-900">{adminData.name}</p>
+              <p className="text-sm font-bold text-slate-900">
+                {adminData.name}
+              </p>
               <p className="text-xs text-slate-500">{adminData.email}</p>
             </div>
           </div>
@@ -132,17 +170,21 @@ const AdminPanel = () => {
         {cards.map(({ title, icon: Icon, colors, view, desc }) => (
           <div
             key={view}
-            className={`${colors.bg} p-6 rounded-xl border ${colors.border} hover:shadow-md transition-shadow cursor-pointer flex items-start gap-4 group ${activeView === view ? 'ring-2 ring-offset-2 ring-blue-500' : ''}`}
+            className={`${colors.bg} p-6 rounded-xl border ${colors.border} hover:shadow-md transition-shadow cursor-pointer flex items-start gap-4 group ${activeView === view ? "ring-2 ring-offset-2 ring-blue-500" : ""}`}
             onClick={() => setActiveView(activeView === view ? null : view)}
             role="button"
           >
-            <div className={`bg-white p-3 rounded-lg shadow-sm ${colors.text} group-hover:scale-110 transition-transform`}>
+            <div
+              className={`bg-white p-3 rounded-lg shadow-sm ${colors.text} group-hover:scale-110 transition-transform`}
+            >
               <Icon size={24} />
             </div>
             <div>
               <h3 className="text-lg font-bold text-slate-900 flex items-center gap-2">
-                {title} 
-                {view.startsWith('add') && <Plus size={16} className="text-slate-400" />}
+                {title}
+                {view.startsWith("add") && (
+                  <Plus size={16} className="text-slate-400" />
+                )}
               </h3>
               <p className="text-slate-600 text-sm mt-1">{desc}</p>
             </div>
@@ -151,7 +193,8 @@ const AdminPanel = () => {
       </div>
 
       <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 text-sm text-yellow-800 mb-8">
-        <strong>Note:</strong> This is a demonstration with mock data. In production, these forms would save data to a database.
+        <strong>Note:</strong> This is a demonstration with mock data. In
+        production, these forms would save data to a database.
       </div>
 
       {/* =========================================
@@ -159,7 +202,7 @@ const AdminPanel = () => {
           ========================================= */}
       {activeView === "search-genes" && (
         <div className="bg-white rounded-2xl shadow-sm border border-slate-200 relative pt-12 pb-4 px-4 animate-in fade-in slide-in-from-bottom-4 duration-300">
-          <button 
+          <button
             onClick={handleCloseView}
             className="absolute top-4 right-4 z-10 flex items-center gap-1 p-2 bg-slate-100 hover:bg-slate-200 text-slate-600 hover:text-slate-900 font-medium rounded-lg transition-colors"
           >
@@ -171,7 +214,7 @@ const AdminPanel = () => {
 
       {activeView === "search-diseases" && (
         <div className="bg-white rounded-2xl shadow-sm border border-slate-200 relative pt-12 pb-4 px-4 animate-in fade-in slide-in-from-bottom-4 duration-300">
-          <button 
+          <button
             onClick={handleCloseView}
             className="absolute top-4 right-4 z-10 flex items-center gap-1 p-2 bg-slate-100 hover:bg-slate-200 text-slate-600 hover:text-slate-900 font-medium rounded-lg transition-colors"
           >
@@ -187,18 +230,22 @@ const AdminPanel = () => {
       {activeView && activeView.startsWith("add") && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4 sm:p-6 overflow-y-auto">
           <div className="bg-white rounded-2xl shadow-2xl w-full max-w-3xl max-h-[90vh] overflow-y-auto relative animate-in fade-in zoom-in-95 duration-200">
-            <button 
-              onClick={handleCloseView}
-              className="absolute top-4 right-4 z-50 p-2 bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-800 rounded-full transition-colors"
-            >
-              <X size={20} />
-            </button>
             <div className="p-6">
-              {activeView === "add-gene" && <AddGeneForm onClose={handleCloseView} />}
-              {activeView === "add-disease" && <AddDiseaseForm onClose={handleCloseView} />}
-              {activeView === "add-association" && <AddAssociationForm onClose={handleCloseView} />}
-              {activeView === "add-functional-category" && <AddFunctionalCategoryForm onClose={handleCloseView} />}
-              {activeView === "add-gene-category" && <AddGeneCategoryForm onClose={handleCloseView} />}
+              {activeView === "add-gene" && (
+                <AddGeneForm onClose={handleCloseView} />
+              )}
+              {activeView === "add-disease" && (
+                <AddDiseaseForm onClose={handleCloseView} />
+              )}
+              {activeView === "add-association" && (
+                <AddAssociationForm onClose={handleCloseView} />
+              )}
+              {activeView === "add-functional-category" && (
+                <AddFunctionalCategoryForm onClose={handleCloseView} />
+              )}
+              {activeView === "add-gene-category" && (
+                <AddGeneCategoryForm onClose={handleCloseView} />
+              )}
             </div>
           </div>
         </div>

@@ -1,23 +1,19 @@
 import React, { useEffect, useState } from "react";
 import logo from "../assets/logot.png";
 import { NavLink, useNavigate } from "react-router-dom";
-import {
-  Search,
-  Shield,
-  ClipboardCheck,
-  LogOut,
-  Users,
-} from "lucide-react";
+import { Search, Shield, ClipboardCheck, LogOut, Users } from "lucide-react";
 
-const Navbar = ({ userEmail = "demo@phgdae.edu.ph", onSignOut }) => {
+const Navbar = ({ onSignOut }) => {
   const navigate = useNavigate();
   const [isSuperAdmin, setIsSuperAdmin] = useState(false);
+  const [userEmail, setUserEmail] = useState("");
 
   useEffect(() => {
     fetch("http://localhost:8080/api/admin/me", { credentials: "include" })
       .then((res) => res.json())
       .then((data) => {
         if (data.role === "SUPER_ADMIN") setIsSuperAdmin(true);
+        if (data.email) setUserEmail(data.email);
       })
       .catch(() => {});
   }, []);
@@ -29,9 +25,17 @@ const Navbar = ({ userEmail = "demo@phgdae.edu.ph", onSignOut }) => {
 
   const navItems = [
     { name: "Gene Search", path: "/admin/genes", icon: <Search size={18} /> },
-    { name: "Disease Search", path: "/admin/diseases", icon: <Search size={18} /> },
+    {
+      name: "Disease Search",
+      path: "/admin/diseases",
+      icon: <Search size={18} />,
+    },
     { name: "Admin Panel", path: "/admin", icon: <Shield size={18} /> },
-    { name: "Admin Suggestions", path: "/admin/suggestions", icon: <ClipboardCheck size={18} /> },
+    {
+      name: "Admin Suggestions",
+      path: "/admin/suggestions",
+      icon: <ClipboardCheck size={18} />,
+    },
   ];
 
   return (
@@ -48,10 +52,16 @@ const Navbar = ({ userEmail = "demo@phgdae.edu.ph", onSignOut }) => {
         <div className="max-w-7xl mx-auto px-6 py-10 relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div className="flex items-center gap-4">
             <div className="bg-white rounded-full p-2 flex items-center justify-center shadow">
-              <img src={logo} className="h-28 w-auto object-contain" alt="PH-GDAE Logo" />
+              <img
+                src={logo}
+                className="h-28 w-auto object-contain"
+                alt="PH-GDAE Logo"
+              />
             </div>
             <div>
-              <h1 className="text-4xl font-extrabold tracking-tight">PH-GDAE</h1>
+              <h1 className="text-4xl font-extrabold tracking-tight">
+                PH-GDAE
+              </h1>
               <p className="text-blue-100 font-medium opacity-90">
                 Philippine Gene–Disease Association Explorer
               </p>
