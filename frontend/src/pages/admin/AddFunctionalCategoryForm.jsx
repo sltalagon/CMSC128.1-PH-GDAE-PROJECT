@@ -2,7 +2,11 @@ import React, { useState } from "react";
 import { apiPost } from "../../api/api";
 import { X, Check, Tag } from "lucide-react";
 
-export function AddFunctionalCategoryForm({ onClose, mode = "admin", suggestionMeta = null }) {
+export function AddFunctionalCategoryForm({
+  onClose,
+  mode = "admin",
+  suggestionMeta = null,
+}) {
   const [formData, setFormData] = useState({
     categoryName: "",
     description: "",
@@ -36,12 +40,11 @@ export function AddFunctionalCategoryForm({ onClose, mode = "admin", suggestionM
         });
       }
       onClose();
-    } 
-    catch (err) {
-        setError(err.message);
-      } finally {
-        setSubmitting(false);
-      }
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -52,8 +55,12 @@ export function AddFunctionalCategoryForm({ onClose, mode = "admin", suggestionM
             <Tag className="w-6 h-6 text-orange-600" />
           </div>
           <div>
-            <h3 className="text-xl font-bold text-gray-900">Add Functional Category</h3>
-            <p className="text-sm text-gray-600">Register a new gene functional category</p>
+            <h3 className="text-xl font-bold text-gray-900">
+              Add Functional Category
+            </h3>
+            <p className="text-sm text-gray-600">
+              Register a new gene functional category
+            </p>
           </div>
         </div>
         <button
@@ -79,7 +86,9 @@ export function AddFunctionalCategoryForm({ onClose, mode = "admin", suggestionM
             type="text"
             required
             value={formData.categoryName}
-            onChange={(e) => setFormData({ ...formData, categoryName: e.target.value })}
+            onChange={(e) =>
+              setFormData({ ...formData, categoryName: e.target.value })
+            }
             placeholder="e.g., Tumor Suppressor, Oncogene, DNA Repair"
             className="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:border-orange-500 focus:outline-none"
           />
@@ -92,7 +101,9 @@ export function AddFunctionalCategoryForm({ onClose, mode = "admin", suggestionM
           <textarea
             rows={4}
             value={formData.description}
-            onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+            onChange={(e) =>
+              setFormData({ ...formData, description: e.target.value })
+            }
             placeholder="Describe the functional role of this category..."
             className="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:border-orange-500 focus:outline-none resize-none"
           />
@@ -105,7 +116,11 @@ export function AddFunctionalCategoryForm({ onClose, mode = "admin", suggestionM
             className="flex-1 bg-orange-600 text-white py-3 rounded-lg hover:bg-orange-700 transition-colors flex items-center justify-center gap-2 font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <Check className="w-5 h-5" />
-            {submitting ? "Saving..." : mode === "suggestion" ? "Submit Suggestion" : "Add Category"}
+            {submitting
+              ? "Saving..."
+              : mode === "suggestion"
+                ? "Submit Suggestion"
+                : "Add Category"}
           </button>
           <button
             type="button"

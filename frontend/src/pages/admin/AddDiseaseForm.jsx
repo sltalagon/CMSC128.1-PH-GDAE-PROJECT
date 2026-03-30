@@ -2,8 +2,11 @@ import React, { useState } from "react";
 import { apiGet, apiPost } from "../../api/api";
 import { X, Check, Activity } from "lucide-react";
 
-
-export function AddDiseaseForm({ onClose, mode = "admin", suggestionMeta = null }) {
+export function AddDiseaseForm({
+  onClose,
+  mode = "admin",
+  suggestionMeta = null,
+}) {
   const [formData, setFormData] = useState({
     diseaseName: "",
     diseaseCategory: "",
@@ -45,12 +48,11 @@ export function AddDiseaseForm({ onClose, mode = "admin", suggestionMeta = null 
         });
       }
       onClose();
-    } 
-    catch (err) {
-        setError(err.message);
-      } finally {
-        setSubmitting(false);
-      }
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -90,7 +92,9 @@ export function AddDiseaseForm({ onClose, mode = "admin", suggestionMeta = null 
             type="text"
             required
             value={formData.diseaseName}
-            onChange={(e) => setFormData({ ...formData, diseaseName: e.target.value })}
+            onChange={(e) =>
+              setFormData({ ...formData, diseaseName: e.target.value })
+            }
             placeholder="e.g., Type 2 Diabetes Mellitus"
             className="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:border-green-500 focus:outline-none"
           />
@@ -104,7 +108,9 @@ export function AddDiseaseForm({ onClose, mode = "admin", suggestionMeta = null 
             <select
               required
               value={formData.diseaseCategory}
-              onChange={(e) => setFormData({ ...formData, diseaseCategory: e.target.value })}
+              onChange={(e) =>
+                setFormData({ ...formData, diseaseCategory: e.target.value })
+              }
               className="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:border-green-500 focus:outline-none"
             >
               <option value="">Select category</option>
@@ -129,7 +135,9 @@ export function AddDiseaseForm({ onClose, mode = "admin", suggestionMeta = null 
             <select
               required
               value={formData.phPrevalence}
-              onChange={(e) => setFormData({ ...formData, phPrevalence: e.target.value })}
+              onChange={(e) =>
+                setFormData({ ...formData, phPrevalence: e.target.value })
+              }
               className="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:border-green-500 focus:outline-none"
             >
               <option value="HIGH">High</option>
@@ -148,7 +156,9 @@ export function AddDiseaseForm({ onClose, mode = "admin", suggestionMeta = null 
             type="text"
             required
             value={formData.inheritancePattern}
-            onChange={(e) => setFormData({ ...formData, inheritancePattern: e.target.value })}
+            onChange={(e) =>
+              setFormData({ ...formData, inheritancePattern: e.target.value })
+            }
             placeholder="e.g., Autosomal Dominant, Autosomal Recessive, X-Linked"
             className="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:border-green-500 focus:outline-none"
           />
@@ -162,7 +172,9 @@ export function AddDiseaseForm({ onClose, mode = "admin", suggestionMeta = null 
             type="number"
             required
             value={formData.omimId}
-            onChange={(e) => setFormData({ ...formData, omimId: e.target.value })}
+            onChange={(e) =>
+              setFormData({ ...formData, omimId: e.target.value })
+            }
             placeholder="e.g., 125853"
             className="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:border-green-500 focus:outline-none"
           />
@@ -175,7 +187,9 @@ export function AddDiseaseForm({ onClose, mode = "admin", suggestionMeta = null 
           <textarea
             required
             value={formData.description}
-            onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+            onChange={(e) =>
+              setFormData({ ...formData, description: e.target.value })
+            }
             placeholder="Describe the disease, its characteristics, and impact..."
             rows={3}
             className="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:border-green-500 focus:outline-none resize-none"
@@ -189,7 +203,11 @@ export function AddDiseaseForm({ onClose, mode = "admin", suggestionMeta = null 
             className="flex-1 bg-green-600 text-white py-3 rounded-lg hover:bg-green-700 transition-colors flex items-center justify-center gap-2 font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <Check className="w-5 h-5" />
-            {submitting ? "Saving..." : mode === "suggestion" ? "Submit Suggestion" : "Add Disease"}
+            {submitting
+              ? "Saving..."
+              : mode === "suggestion"
+                ? "Submit Suggestion"
+                : "Add Disease"}
           </button>
           <button
             type="button"
