@@ -22,9 +22,9 @@ const SuggestionAdmin = () => {
   const [searchQuery, setSearchQuery] = useState("");
 
   // For the review modal
-  const [reviewing, setReviewing] = useState(null); // holds suggestion being reviewed
+  const [reviewing, setReviewing] = useState(null);
   const [adminNotes, setAdminNotes] = useState("");
-  const [submitting, setSubmitting] = useState(false);
+  const [submittingAction, setSubmittingAction] = useState(null); // "APPROVED" | "REJECTED" | null
 
   useEffect(() => {
     fetchSuggestions();
@@ -45,7 +45,7 @@ const SuggestionAdmin = () => {
   };
 
   const handleReview = async (status) => {
-    setSubmitting(true);
+    setSubmittingAction(status);
     try {
       const res = await fetch(
         `${API_BASE}/suggestions/${reviewing.suggestionId}/review`,
@@ -63,9 +63,32 @@ const SuggestionAdmin = () => {
     } catch (err) {
       setError(err.message);
     } finally {
-      setSubmitting(false);
+      setSubmittingAction(null);
     }
   };
+
+  const Spinner = () => (
+    <svg
+      className="animate-spin w-4 h-4"
+      viewBox="0 0 24 24"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <circle
+        className="opacity-25"
+        cx="12"
+        cy="12"
+        r="10"
+        stroke="currentColor"
+        strokeWidth="4"
+      />
+      <path
+        className="opacity-75"
+        fill="currentColor"
+        d="M4 12a8 8 0 018-8v8H4z"
+      />
+    </svg>
+  );
 
   const filteredSuggestions = suggestions
     .filter(
@@ -97,6 +120,36 @@ const SuggestionAdmin = () => {
         return "bg-red-100 text-red-800";
       default:
         return "bg-gray-100 text-gray-800";
+    }
+  };
+
+  const renderContent = (content) => {
+    try {
+      const parsed = JSON.parse(content);
+      return (
+        <div className="bg-gray-50 rounded-lg p-4 space-y-2 text-sm">
+          {Object.entries(parsed).map(([key, value]) => {
+            if (!value) return null;
+            const label = key
+              .replace(/([A-Z])/g, " $1")
+              .replace(/^./, (s) => s.toUpperCase());
+            return (
+              <div key={key} className="flex gap-2">
+                <span className="font-semibold text-gray-600 min-w-[160px]">
+                  {label}:
+                </span>
+                <span className="text-gray-800">{value}</span>
+              </div>
+            );
+          })}
+        </div>
+      );
+    } catch {
+      return (
+        <p className="text-gray-700 bg-gray-50 p-3 rounded-lg text-sm">
+          {content}
+        </p>
+      );
     }
   };
 
@@ -249,42 +302,13 @@ const SuggestionAdmin = () => {
               </div>
 
               <div className="space-y-3">
-                {/* Description */}
                 <div>
                   <p className="text-sm font-semibold text-gray-700 mb-1">
                     Description
                   </p>
-                  {(() => {
-                    try {
-                      const parsed = JSON.parse(suggestion.content);
-                      return (
-                        <div className="bg-gray-50 rounded-lg p-4 space-y-2 text-sm">
-                          {Object.entries(parsed).map(([key, value]) => {
-                            if (!value) return null;
-                            const label = key
-                              .replace(/([A-Z])/g, " $1")
-                              .replace(/^./, (s) => s.toUpperCase());
-                            return (
-                              <div key={key} className="flex gap-2">
-                                <span className="font-semibold text-gray-600 min-w-[160px]">
-                                  {label}:
-                                </span>
-                                <span className="text-gray-800">{value}</span>
-                              </div>
-                            );
-                          })}
-                        </div>
-                      );
-                    } catch {
-                      return (
-                        <p className="text-gray-700 bg-gray-50 p-3 rounded-lg text-sm">
-                          {suggestion.content}
-                        </p>
-                      );
-                    }
-                  })()}
+                  {renderContent(suggestion.content)}
                 </div>
-                {/* Reference */}
+
                 {suggestion.referenceUrl && (
                   <div>
                     <p className="text-sm font-semibold text-gray-700 mb-1">
@@ -344,35 +368,11 @@ const SuggestionAdmin = () => {
               From {reviewing.submitterName} —{" "}
               {reviewing.suggestionType?.replace("_", " ")}
             </p>
-            {(() => {
-              try {
-                const parsed = JSON.parse(reviewing.content);
-                return (
-                  <div className="bg-gray-50 rounded-lg p-4 space-y-2 text-sm mb-4">
-                    {Object.entries(parsed).map(([key, value]) => {
-                      if (!value) return null;
-                      const label = key
-                        .replace(/([A-Z])/g, " $1")
-                        .replace(/^./, (s) => s.toUpperCase());
-                      return (
-                        <div key={key} className="flex gap-2">
-                          <span className="font-semibold text-gray-600 min-w-[160px]">
-                            {label}:
-                          </span>
-                          <span className="text-gray-800">{value}</span>
-                        </div>
-                      );
-                    })}
-                  </div>
-                );
-              } catch {
-                return (
-                  <p className="text-slate-700 bg-gray-50 p-3 rounded-lg text-sm mb-4">
-                    {reviewing.content}
-                  </p>
-                );
-              }
-            })()}
+
+            <div className="mb-4">
+              {renderContent(reviewing.content)}
+            </div>
+
             <div className="mb-4">
               <label className="block text-sm font-semibold text-gray-700 mb-2">
                 Admin Notes{" "}
@@ -386,24 +386,38 @@ const SuggestionAdmin = () => {
                 className="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:outline-none resize-none"
               />
             </div>
+
             <div className="flex gap-3">
               <button
                 onClick={() => handleReview("APPROVED")}
-                disabled={submitting}
-                className="flex-1 flex items-center justify-center gap-2 bg-green-600 text-white py-2.5 rounded-lg hover:bg-green-700 font-semibold disabled:opacity-50"
+                disabled={submittingAction !== null}
+                className="flex-1 flex items-center justify-center gap-2 bg-green-600 text-white py-2.5 rounded-lg hover:bg-green-700 font-semibold disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
-                <CheckCircle size={18} /> Approve
+                {submittingAction === "APPROVED" ? (
+                  <Spinner />
+                ) : (
+                  <CheckCircle size={18} />
+                )}
+                {submittingAction === "APPROVED" ? "Approving..." : "Approve"}
               </button>
+
               <button
                 onClick={() => handleReview("REJECTED")}
-                disabled={submitting}
-                className="flex-1 flex items-center justify-center gap-2 bg-red-600 text-white py-2.5 rounded-lg hover:bg-red-700 font-semibold disabled:opacity-50"
+                disabled={submittingAction !== null}
+                className="flex-1 flex items-center justify-center gap-2 bg-red-600 text-white py-2.5 rounded-lg hover:bg-red-700 font-semibold disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
-                <XCircle size={18} /> Reject
+                {submittingAction === "REJECTED" ? (
+                  <Spinner />
+                ) : (
+                  <XCircle size={18} />
+                )}
+                {submittingAction === "REJECTED" ? "Rejecting..." : "Reject"}
               </button>
+
               <button
                 onClick={() => setReviewing(null)}
-                className="px-4 py-2.5 border-2 border-gray-200 text-gray-700 rounded-lg hover:bg-gray-50 font-semibold"
+                disabled={submittingAction !== null}
+                className="px-4 py-2.5 border-2 border-gray-200 text-gray-700 rounded-lg hover:bg-gray-50 font-semibold disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
                 Cancel
               </button>

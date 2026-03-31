@@ -13,18 +13,13 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.client.oidc.userinfo.OidcUserRequest;
 import org.springframework.security.oauth2.client.oidc.userinfo.OidcUserService;
-import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
-import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserService;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.oauth2.core.oidc.user.DefaultOidcUser;
 import org.springframework.security.oauth2.core.oidc.user.OidcUser;
-import org.springframework.security.oauth2.core.user.DefaultOAuth2User;
-import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.DefaultRedirectStrategy;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
-import org.springframework.security.web.authentication.SimpleUrlAuthenticationFailureHandler; 
+import org.springframework.security.web.authentication.SimpleUrlAuthenticationFailureHandler;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -65,7 +60,7 @@ public class SecurityConfig {
                                 .oidcUserService(this.adminOidcUserService())
                         )
                         .successHandler(customSuccessHandler())
-                        .failureHandler(customFailureHandler()) 
+                        .failureHandler(customFailureHandler())
                 );
 
         return http.build();
@@ -88,7 +83,6 @@ public class SecurityConfig {
         };
     }
 
-    // UPDATED BEAN: Corrected the route to match your frontend /admin/login path
     @Bean
     public SimpleUrlAuthenticationFailureHandler customFailureHandler() {
         return new SimpleUrlAuthenticationFailureHandler("http://localhost:5173/admin/login?error=no_privileges");
@@ -98,7 +92,7 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowedOrigins(List.of("http://localhost:5173"));
-        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS")); // ← added PATCH
         configuration.setAllowedHeaders(List.of("*"));
         configuration.setAllowCredentials(true);
 
@@ -120,6 +114,7 @@ public class SecurityConfig {
 
             Admin admin = adminRepository.findByEmail(email)
                     .orElseThrow(() -> new OAuth2AuthenticationException("Access Denied: Admin email not registered."));
+
             String springRole = admin.getRole() == AdminRole.SUPER_ADMIN ? "ROLE_SUPER_ADMIN" : "ROLE_MANAGER";
             List<GrantedAuthority> authorities = AuthorityUtils.createAuthorityList("ROLE_ADMIN", springRole);
 

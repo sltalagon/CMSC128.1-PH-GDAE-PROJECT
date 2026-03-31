@@ -1,12 +1,9 @@
 import React, { useState } from "react";
-import { apiGet, apiPost } from "../../api/api";
-import { X, Check, Activity } from "lucide-react";
+import { X, Check, Activity, AlertTriangle } from "lucide-react";
 
-export function AddDiseaseForm({
-  onClose,
-  mode = "admin",
-  suggestionMeta = null,
-}) {
+const API_BASE = "http://localhost:8080/api";
+
+export function AddDiseaseForm({ onClose, mode = "admin", suggestionMeta = null }) {
   const [formData, setFormData] = useState({
     diseaseName: "",
     diseaseCategory: "",
@@ -18,15 +15,17 @@ export function AddDiseaseForm({
 
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState(null);
+  const [duplicate, setDuplicate] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSubmitting(true);
     setError(null);
+    setDuplicate(false);
 
     try {
       if (mode === "suggestion") {
-        await fetch("http://localhost:8080/api/suggestions", {
+        const res = await fetch(`${API_BASE}/suggestions`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -37,16 +36,40 @@ export function AddDiseaseForm({
             referenceUrl: suggestionMeta.referenceUrl,
           }),
         });
+
+        if (!res.ok) {
+          const body = await res.json().catch(() => ({}));
+          if (res.status === 409) {
+            setDuplicate(true);
+            return;
+          }
+          throw new Error(body.message || `Request failed: ${res.status}`);
+        }
       } else {
-        await apiPost("/diseases", {
-          diseaseName: formData.diseaseName,
-          diseaseCategory: formData.diseaseCategory,
-          inheritancePattern: formData.inheritancePattern,
-          omimId: formData.omimId ? parseFloat(formData.omimId) : null,
-          phPrevalence: formData.phPrevalence,
-          description: formData.description,
+        const res = await fetch(`${API_BASE}/diseases`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify({
+            diseaseName: formData.diseaseName,
+            diseaseCategory: formData.diseaseCategory,
+            inheritancePattern: formData.inheritancePattern,
+            omimId: formData.omimId ? parseInt(formData.omimId, 10) : null,
+            phPrevalence: formData.phPrevalence,
+            description: formData.description,
+          }),
         });
+
+        if (!res.ok) {
+          const body = await res.json().catch(() => ({}));
+          if (res.status === 409) {
+            setDuplicate(true);
+            return;
+          }
+          throw new Error(body.message || `Request failed: ${res.status}`);
+        }
       }
+
       onClose();
     } catch (err) {
       setError(err.message);
@@ -77,6 +100,15 @@ export function AddDiseaseForm({
         </button>
       </div>
 
+      {/* Duplicate warning — yellow */}
+      {duplicate && (
+        <div className="mb-4 p-3 bg-yellow-50 border border-yellow-300 text-yellow-800 rounded-lg text-sm flex items-center gap-2">
+          <AlertTriangle className="w-4 h-4 shrink-0" />
+          This disease already exists in the database.
+        </div>
+      )}
+
+      {/* General error — red */}
       {error && (
         <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-700 rounded-lg text-sm">
           {error}

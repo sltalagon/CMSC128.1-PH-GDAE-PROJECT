@@ -1,7 +1,7 @@
 import React, { useState } from "react";
-import { apiGet, apiPost } from "../../api/api";
-import { X, Check, Database } from "lucide-react";
+import { X, Check, Database, AlertTriangle } from "lucide-react";
 
+const API_BASE = "http://localhost:8080/api";
 
 export function AddGeneForm({ onClose, mode = "admin", suggestionMeta = null }) {
   const [formData, setFormData] = useState({
@@ -14,15 +14,17 @@ export function AddGeneForm({ onClose, mode = "admin", suggestionMeta = null }) 
 
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState(null);
+  const [duplicate, setDuplicate] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSubmitting(true);
     setError(null);
+    setDuplicate(false);
 
     try {
       if (mode === "suggestion") {
-        await fetch("http://localhost:8080/api/suggestions", {
+        const res = await fetch(`${API_BASE}/suggestions`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -33,22 +35,45 @@ export function AddGeneForm({ onClose, mode = "admin", suggestionMeta = null }) 
             referenceUrl: suggestionMeta.referenceUrl,
           }),
         });
+
+        if (!res.ok) {
+          const body = await res.json().catch(() => ({}));
+          if (res.status === 409) {
+            setDuplicate(true);
+            return;
+          }
+          throw new Error(body.message || `Request failed: ${res.status}`);
+        }
       } else {
-        await apiPost("/genes", {
-          geneSymbol: formData.geneSymbol,
-          fullGeneName: formData.fullGeneName,
-          geneType: formData.geneType,
-          omimId: formData.omimId ? parseFloat(formData.omimId) : null,
-          description: formData.description,
+        const res = await fetch(`${API_BASE}/genes`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify({
+            geneSymbol: formData.geneSymbol,
+            fullGeneName: formData.fullGeneName,
+            geneType: formData.geneType,
+            omimId: formData.omimId ? parseInt(formData.omimId, 10) : null,
+            description: formData.description,
+          }),
         });
+
+        if (!res.ok) {
+          const body = await res.json().catch(() => ({}));
+          if (res.status === 409) {
+            setDuplicate(true);
+            return;
+          }
+          throw new Error(body.message || `Request failed: ${res.status}`);
+        }
       }
+
       onClose();
-    } 
-    catch (err) {
-        setError(err.message);
-      } finally {
-        setSubmitting(false);
-      }
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -73,6 +98,15 @@ export function AddGeneForm({ onClose, mode = "admin", suggestionMeta = null }) 
         </button>
       </div>
 
+      {/* Duplicate warning — yellow */}
+      {duplicate && (
+        <div className="mb-4 p-3 bg-yellow-50 border border-yellow-300 text-yellow-800 rounded-lg text-sm flex items-center gap-2">
+          <AlertTriangle className="w-4 h-4 shrink-0" />
+          This gene already exists in the database.
+        </div>
+      )}
+
+      {/* General error — red */}
       {error && (
         <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-700 rounded-lg text-sm">
           {error}
@@ -101,7 +135,6 @@ export function AddGeneForm({ onClose, mode = "admin", suggestionMeta = null }) 
             <label className="block text-sm font-semibold text-gray-700 mb-2">
               Gene Type <span className="text-red-500">*</span>
             </label>
-            {/* ⚠️ Values must match your GeneType enum exactly */}
             <select
               required
               value={formData.geneType}
