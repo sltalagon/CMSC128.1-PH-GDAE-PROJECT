@@ -34,6 +34,9 @@ public class Gene {
     // Constraint: Decimal, Not Null, Unique
     private java.math.BigDecimal omimId;
 
+    @Column(name = "ncbi_id", unique = true)
+    private String ncbiId;
+
     @Column(name = "description", columnDefinition = "TEXT")
     // Constraint: Can be null
     private String description;

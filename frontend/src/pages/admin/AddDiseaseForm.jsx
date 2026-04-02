@@ -3,7 +3,7 @@ import { X, Check, Activity, AlertTriangle } from "lucide-react";
 
 const API_BASE = "http://localhost:8080/api";
 
-export function AddDiseaseForm({ onClose, mode = "admin", suggestionMeta = null }) {
+export function AddDiseaseForm({ onClose, onCancel, mode = "admin", suggestionMeta = null }) {
   const [formData, setFormData] = useState({
     diseaseName: "",
     diseaseCategory: "",
@@ -243,7 +243,7 @@ export function AddDiseaseForm({ onClose, mode = "admin", suggestionMeta = null 
           </button>
           <button
             type="button"
-            onClick={onClose}
+            onClick={onCancel ?? onClose}
             className="px-6 py-3 border-2 border-gray-200 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-semibold"
           >
             Cancel

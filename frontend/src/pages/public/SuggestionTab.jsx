@@ -64,6 +64,7 @@ function SuggestionTab() {
   if (step === "form") {
     const formProps = {
       onClose: handleFormClose,
+      onCancel: () => setStep("info"),
       mode: "suggestion",
       suggestionMeta: submitterInfo,
     };

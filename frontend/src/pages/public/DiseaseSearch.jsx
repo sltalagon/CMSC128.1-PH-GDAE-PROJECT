@@ -114,13 +114,24 @@ const DiseaseSearch = () => {
           <div className="mb-6">
             <h4 className="text-sm font-semibold text-slate-500 uppercase mb-3">Category</h4>
             <div className="space-y-2">
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="radio"
+                  name="category"
+                  checked={selectedCategories.length === 0}
+                  onChange={() => setSelectedCategories([])}
+                  className="text-blue-600 focus:ring-blue-500"
+                />
+                <span className="text-sm text-slate-700">All</span>
+              </label>
               {categories.map((cat) => (
                 <label key={cat} className="flex items-center gap-2 cursor-pointer">
                   <input
-                    type="checkbox"
+                    type="radio"
+                    name="category"
                     checked={selectedCategories.includes(cat)}
-                    onChange={() => toggleFilter(cat, selectedCategories, setSelectedCategories)}
-                    className="rounded text-blue-600 focus:ring-blue-500"
+                    onChange={() => setSelectedCategories([cat])}
+                    className="text-blue-600 focus:ring-blue-500"
                   />
                   <span className="text-sm text-slate-700">{cat}</span>
                 </label>
@@ -131,13 +142,24 @@ const DiseaseSearch = () => {
           <div className="mb-6">
             <h4 className="text-sm font-semibold text-slate-500 uppercase mb-3">PH Prevalence</h4>
             <div className="space-y-2">
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="radio"
+                  name="prevalence"
+                  checked={selectedPrevalences.length === 0}
+                  onChange={() => setSelectedPrevalences([])}
+                  className="text-blue-600 focus:ring-blue-500"
+                />
+                <span className="text-sm text-slate-700">All</span>
+              </label>
               {prevalences.map((prev) => (
                 <label key={prev} className="flex items-center gap-2 cursor-pointer">
                   <input
-                    type="checkbox"
+                    type="radio"
+                    name="prevalence"
                     checked={selectedPrevalences.includes(prev)}
-                    onChange={() => toggleFilter(prev, selectedPrevalences, setSelectedPrevalences)}
-                    className="rounded text-blue-600 focus:ring-blue-500"
+                    onChange={() => setSelectedPrevalences([prev])}
+                    className="text-blue-600 focus:ring-blue-500"
                   />
                   <span className="text-sm text-slate-700">{prev}</span>
                 </label>

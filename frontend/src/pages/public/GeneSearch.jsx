@@ -11,13 +11,15 @@ const GeneSearch = () => {
   const [error, setError] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedGene, setSelectedGene] = useState(null);
+  const [geneCategories, setGeneCategories] = useState([]);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [genesRes, geneDiseaseRes] = await Promise.all([
+        const [genesRes, geneDiseaseRes, geneCategoryRes] = await Promise.all([
           fetch(`${API_BASE}/genes`),
           fetch(`${API_BASE}/genedisease`),
+          fetch(`${API_BASE}/gene-categories`),
         ]);
 
         if (!genesRes.ok || !geneDiseaseRes.ok) {
@@ -26,6 +28,7 @@ const GeneSearch = () => {
 
         setGenes(await genesRes.json());
         setGeneDiseases(await geneDiseaseRes.json());
+        setGeneCategories(await geneCategoryRes.json());
       } catch (err) {
         setError(err.message);
       } finally {
@@ -57,6 +60,16 @@ const GeneSearch = () => {
     });
     return map;
   }, [geneDiseases]);
+
+  const getCategoriesForGene = (geneId) => {
+    return geneCategories
+      .filter((gc) => gc.gene?.geneId === geneId)
+      .map((gc) => ({
+        name: gc.functionalCategory?.categoryName,
+        description: gc.functionalCategory?.description,
+      }))
+      .filter((cat) => cat.name);
+  };
 
   const filteredGenes = useMemo(() => {
     const query = searchQuery.toLowerCase();
@@ -166,11 +179,11 @@ const GeneSearch = () => {
           symbol: selectedGene.geneSymbol,
           name: selectedGene.fullGeneName,
           chromosome: selectedGene.chromosomeLocation || "Location N/A",
-          ncbiId: selectedGene.ncbiGeneId || "N/A",
+          ncbiId: selectedGene.ncbiId || "N/A",
           omimId: selectedGene.omimId || "N/A",
           description: selectedGene.description || "No description provided.",
-          biologicalFunction: selectedGene.biologicalFunction || "Function details not available.",
-          associatedDiseases: geneToDiseasesMap[selectedGene.geneId] || []
+          associatedDiseases: geneToDiseasesMap[selectedGene.geneId] || [],
+          functionalCategories: getCategoriesForGene(selectedGene.geneId)
         } : null} 
       />
 

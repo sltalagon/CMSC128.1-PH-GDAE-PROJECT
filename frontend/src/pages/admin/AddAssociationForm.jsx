@@ -3,7 +3,7 @@ import { apiGet, apiPost } from "../../api/api";
 import { X, Check, Link } from "lucide-react";
 
 
-export function AddAssociationForm({ onClose, mode = "admin", suggestionMeta = null }) {
+export function AddAssociationForm({ onClose, onCancel, mode = "admin", suggestionMeta = null }) {
   const [formData, setFormData] = useState({
     geneId: "",
     diseaseId: "",
@@ -214,7 +214,7 @@ export function AddAssociationForm({ onClose, mode = "admin", suggestionMeta = n
             </button>
             <button
               type="button"
-              onClick={onClose}
+              onClick={onCancel ?? onClose}
               className="px-6 py-3 border-2 border-gray-200 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-semibold"
             >
               Cancel

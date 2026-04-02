@@ -3,12 +3,13 @@ import { X, Check, Database, AlertTriangle } from "lucide-react";
 
 const API_BASE = "http://localhost:8080/api";
 
-export function AddGeneForm({ onClose, mode = "admin", suggestionMeta = null }) {
+export function AddGeneForm({ onClose, onCancel, mode = "admin", suggestionMeta = null }) {
   const [formData, setFormData] = useState({
     geneSymbol: "",
     fullGeneName: "",
     geneType: "PROTEIN_CODING",
     omimId: "",
+    ncbiId: "",
     description: "",
   });
 
@@ -54,6 +55,7 @@ export function AddGeneForm({ onClose, mode = "admin", suggestionMeta = null }) 
             fullGeneName: formData.fullGeneName,
             geneType: formData.geneType,
             omimId: formData.omimId ? parseInt(formData.omimId, 10) : null,
+            ncbiId: formData.ncbiId || null,
             description: formData.description,
           }),
         });
@@ -172,11 +174,25 @@ export function AddGeneForm({ onClose, mode = "admin", suggestionMeta = null }) 
           <input
             type="number"
             required
+            min="100000"
+            max="999999"
             value={formData.omimId}
-            onChange={(e) =>
-              setFormData({ ...formData, omimId: e.target.value })
-            }
-            placeholder="e.g., 113705"
+            onChange={(e) => setFormData({ ...formData, omimId: e.target.value })}
+            placeholder="e.g., 113705 (6-digit number)"
+            className="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:outline-none"
+          />
+          <p className="mt-1 text-xs text-gray-500">Must be a valid 6-digit OMIM identifier.</p>
+        </div>
+
+        <div>
+          <label className="block text-sm font-semibold text-gray-700 mb-2">
+            NCBI Gene ID
+          </label>
+          <input
+            type="text"
+            value={formData.ncbiId}
+            onChange={(e) => setFormData({ ...formData, ncbiId: e.target.value })}
+            placeholder="e.g., NM_0012345.1"
             className="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:outline-none"
           />
         </div>
@@ -207,7 +223,7 @@ export function AddGeneForm({ onClose, mode = "admin", suggestionMeta = null }) 
           </button>
           <button
             type="button"
-            onClick={onClose}
+            onClick={onCancel ?? onClose}
             className="px-6 py-3 border-2 border-gray-200 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-semibold"
           >
             Cancel

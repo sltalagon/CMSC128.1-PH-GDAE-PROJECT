@@ -4,9 +4,7 @@ import {
   Database,
   Activity,
   Link,
-  BookOpen,
   Plus,
-  Search,
   X,
   Tag,
 } from "lucide-react";
@@ -18,9 +16,6 @@ import { AddAssociationForm } from "./AddAssociationForm";
 import { AddFunctionalCategoryForm } from "./AddFunctionalCategoryForm";
 import { AddGeneCategoryForm } from "./AddGeneCategoryForm";
 
-// Correctly importing the specific Admin Search tools from your file tree!
-import AdminGeneSearch from "./AdminGeneSearch";
-import AdminDiseaseSearch from "./AdminDiseaseSearch";
 
 const AdminPanel = () => {
   const [activeView, setActiveView] = useState(null);
@@ -99,28 +94,6 @@ const AdminPanel = () => {
       view: "add-gene-category",
       desc: "Link a gene to a functional category",
     },
-    {
-      title: "Search Genes",
-      icon: Search,
-      colors: {
-        bg: "bg-indigo-50",
-        border: "border-indigo-100",
-        text: "text-indigo-600",
-      },
-      view: "search-genes",
-      desc: "Browse and search the existing genes database",
-    },
-    {
-      title: "Search Diseases",
-      icon: Search,
-      colors: {
-        bg: "bg-teal-50",
-        border: "border-teal-100",
-        text: "text-teal-600",
-      },
-      view: "search-diseases",
-      desc: "Browse and search the existing diseases database",
-    },
   ];
 
   if (isLoading) {
@@ -196,33 +169,6 @@ const AdminPanel = () => {
         <strong>Note:</strong> This is a demonstration with mock data. In
         production, these forms would save data to a database.
       </div>
-
-      {/* =========================================
-          INLINE SEARCH VIEWS (ON THE ADMIN PANEL) 
-          ========================================= */}
-      {activeView === "search-genes" && (
-        <div className="bg-white rounded-2xl shadow-sm border border-slate-200 relative pt-12 pb-4 px-4 animate-in fade-in slide-in-from-bottom-4 duration-300">
-          <button
-            onClick={handleCloseView}
-            className="absolute top-4 right-4 z-10 flex items-center gap-1 p-2 bg-slate-100 hover:bg-slate-200 text-slate-600 hover:text-slate-900 font-medium rounded-lg transition-colors"
-          >
-            <X size={18} /> Close Search
-          </button>
-          <AdminGeneSearch />
-        </div>
-      )}
-
-      {activeView === "search-diseases" && (
-        <div className="bg-white rounded-2xl shadow-sm border border-slate-200 relative pt-12 pb-4 px-4 animate-in fade-in slide-in-from-bottom-4 duration-300">
-          <button
-            onClick={handleCloseView}
-            className="absolute top-4 right-4 z-10 flex items-center gap-1 p-2 bg-slate-100 hover:bg-slate-200 text-slate-600 hover:text-slate-900 font-medium rounded-lg transition-colors"
-          >
-            <X size={18} /> Close Search
-          </button>
-          <AdminDiseaseSearch />
-        </div>
-      )}
 
       {/* =========================================
           POPUP MODALS (ONLY FOR THE ADD FORMS) 

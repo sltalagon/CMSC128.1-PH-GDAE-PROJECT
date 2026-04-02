@@ -11,8 +11,6 @@ import GeneSearch from "./pages/public/GeneSearch";
 import DiseaseSearch from "./pages/public/DiseaseSearch";
 import AdminPanel from "./pages/admin/AdminPanel";
 import AdminLogin from "./pages/admin/AdminLogin";
-import AdminDiseaseSearch from "./pages/admin/AdminDiseaseSearch";
-import AdminGeneSearch from "./pages/admin/AdminGeneSearch";
 import SuggestionAdmin from "./pages/admin/SuggestionAdmin";
 import About from "./pages/public/About";
 import SuggestionTab from "./pages/public/SuggestionTab";
@@ -85,22 +83,6 @@ function App() {
             element={
               <ProtectedRoute>
                 <AdminPanel />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/admin/genes"
-            element={
-              <ProtectedRoute>
-                <AdminGeneSearch />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/admin/diseases"
-            element={
-              <ProtectedRoute>
-                <AdminDiseaseSearch />
               </ProtectedRoute>
             }
           />

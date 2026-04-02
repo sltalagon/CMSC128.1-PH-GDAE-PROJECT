@@ -35,16 +35,21 @@ public class GeneController {
     @PostMapping
     public ResponseEntity<?> createGene(@RequestBody Gene gene) {
         try {
+            // Basic OMIM ID range validation (valid OMIM IDs are 6 digits)
+            if (gene.getOmimId() != null) {
+                long omim = gene.getOmimId().longValue();
+                if (omim < 100000 || omim > 999999) {
+                    return ResponseEntity.badRequest()
+                            .body(Map.of("message", "OMIM ID must be a 6-digit number."));
+                }
+            }
             Gene saved = geneService.saveGene(gene);
             return ResponseEntity.ok(saved);
         } catch (DataIntegrityViolationException e) {
-            return ResponseEntity
-                    .status(409)
-                    .body(Map.of("message", "A gene with this symbol or ID already exists."));
+            return ResponseEntity.status(409)
+                    .body(Map.of("message", "A gene with this symbol, OMIM ID, or NCBI ID already exists."));
         } catch (IllegalArgumentException e) {
-            return ResponseEntity
-                    .badRequest()
-                    .body(Map.of("message", e.getMessage()));
+            return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
         }
     }
 }
