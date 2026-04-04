@@ -1,0 +1,33 @@
+gene_disease_id,gene_id (FK),disease_id (FK),association_type
+GDA001,G001 (HBB),D001 (Thalassemia),Germline
+GDA002,G002 (HBA1),D001 (Thalassemia),Germline
+GDA003,G003 (G6PD),D002 (G6PD Deficiency),Germline
+GDA004,G004 (BCKDHA),D003 (MSUD),Germline
+GDA005,G005 (TAF1),D004 (Lubag / XDP),Germline
+GDA006,G006 (DUOX2),D005 (Congenital Hypothyroidism),Germline
+GDA007,G007 (BRCA1),D006 (Breast Cancer),Germline
+GDA008,G008 (BRCA2),D006 (Breast Cancer),Germline
+GDA009,G009 (TCF7L2),D007 (Type 2 Diabetes),Predisposition
+GDA010,G010 (PAH),D008 (Phenylketonuria),Germline
+GDA011,G011 (F8),D009 (Hemophilia A),Germline
+GDA012,G012 (CFTR),D010 (Cystic Fibrosis),Germline
+GDA013,G013 (SMN1),D011 (Spinal Muscular Atrophy),Germline
+GDA014,G014 (DMD),D012 (DMD),Germline
+GDA015,G015 (GBA1),D013 (Gaucher Disease),Germline
+GDA016,G016 (GAA),D014 (Pompe Disease),Germline
+GDA017,G017 (LDLR),D015 (Familial Hypercholesterolemia),Germline
+GDA018,G018 (DYRK1A),D016 (Down Syndrome),Germline
+GDA019,G019 (HLA-A),D017 (Nasopharyngeal Carcinoma),Predisposition
+GDA020,G020 (RET),D018 (Hirschsprung Disease),Germline
+GDA021,G021 (COL1A1),D019 (Osteogenesis Imperfecta),Germline
+GDA022,G022 (IDS),D020 (Hunter Syndrome),Germline
+GDA023,G023 (MLH1),D021 (Colorectal Cancer),Germline
+GDA024,G024 (ATP7B),D022 (Wilson Disease),Germline
+GDA025,G025 (GALT),D023 (Galactosemia),Germline
+GDA026,G026 (RB1),D024 (Retinoblastoma),Germline
+GDA027,G027 (PKD1),D025 (Polycystic Kidney Disease),Germline
+GDA028,G028 (NF1),D026 (Neurofibromatosis Type 1),Germline
+GDA029,G029 (IDUA),D027 (Hurler Syndrome),Germline
+GDA030,G030 (STAT4),D028 (Systemic Lupus Erythematosus),Predisposition
+GDA031,G031 (EDA),D029 (Ectodermal Dysplasia),Germline
+GDA032,G032 (NIPBL),D030 (Cornelia de Lange Syndrome),Germline

@@ -1,0 +1,33 @@
+s,gene_symbol,omim_id,full_gene_name,gene_type,Description
+G001,HBB,141900,Hemoglobin Subunit Beta,Protein-coding,Encodes beta-globin; mutations cause Beta-Thalassemia.
+G002,HBA1,141800,Hemoglobin Subunit Alpha 1,Protein-coding,Encodes alpha-globin; mutations cause Alpha-Thalassemia.
+G003,G6PD,305900,Glucose-6-Phosphate Dehydrogenase,Protein-coding,Produces enzyme protecting RBCs from oxidative damage.
+G004,BCKDHA,608348,Branched Chain Keto Acid Dehydrogenase E1 Subunit Alpha,Protein-coding,Critical for breaking down amino acids; linked to MSUD.
+G005,TAF1,313650,TATA-Box Binding Protein Associated Factor 1,Protein-coding,Contains SVA retrotransposon insertion specific to XDP (Lubag).
+G006,DUOX2,606759,Dual Oxidase 2,Protein-coding,Essential for thyroid hormone synthesis; linked to hypothyroidism.
+G007,BRCA1,113705,BRCA1 DNA Repair Associated,Protein-coding,Tumor suppressor gene; mutations increase breast cancer risk.
+G008,BRCA2,600185,BRCA2 DNA Repair Associated,Protein-coding,Tumor suppressor gene; mutations increase breast/ovarian cancer risk.
+G009,TCF7L2,602228,Transcription Factor 7 Like 2,Protein-coding,Strongest genetic risk factor for Type 2 Diabetes susceptibility.
+G010,PAH,612349,Phenylalanine Hydroxylase,Protein-coding,Enzyme converting phenylalanine to tyrosine; deficient in PKU.
+G011,F8,300841,Coagulation Factor VIII,Protein-coding,Essential blood-clotting protein; mutated in Hemophilia A.
+G012,CFTR,602421,Cystic Fibrosis Transmembrane Conductance Regulator,Protein-coding,Chloride channel; mutations cause mucus buildup in CF.
+G013,SMN1,600354,Survival of Motor Neuron 1,Protein-coding,Maintains motor neurons; deletion causes Spinal Muscular Atrophy.
+G014,DMD,300377,Dystrophin,Protein-coding,Stabilizes muscle cell membranes; mutated in Duchenne/Becker.
+G015,GBA1,606463,Glucosylceramidase Beta 1,Protein-coding,Enzyme breaking down glucocerebroside; deficient in Gaucher.
+G016,GAA,606800,"Glucosidase Alpha, Acid",Protein-coding,Breaks down glycogen in lysosomes; deficient in Pompe disease.
+G017,LDLR,606945,Low Density Lipoprotein Receptor,Protein-coding,Clears LDL cholesterol from blood; mutated in Familial Hypercholesterolemia.
+G018,DYRK1A,600855,Dual Specificity Tyrosine Phosphorylation Regulated Kinase 1A,Protein-coding,Located on Chr 21; overexpression contributes to Down Syndrome cognitive traits.
+G019,HLA-A,142800,"Major Histocompatibility Complex, Class I, A",Protein-coding,Immune system regulation; specific alleles linked to Nasopharyngeal Carcinoma risk.
+G020,RET,164761,Ret Proto-Oncogene,Protein-coding,Critical for enteric nervous system development; mutated in Hirschsprung.
+G021,COL1A1,120150,Collagen Type I Alpha 1 Chain,Protein-coding,Major component of bone collagen; mutated in Osteogenesis Imperfecta.
+G022,IDS,300823,Iduronate 2-Sulfatase,Protein-coding,Breaks down GAGs; deficient in Hunter Syndrome (MPS II).
+G023,MLH1,120436,MutL Homolog 1,Protein-coding,DNA mismatch repair gene; mutated in Lynch Syndrome (Colorectal Cancer).
+G024,ATP7B,606882,ATPase Copper Transporting Beta,Protein-coding,Transports copper in liver; mutated in Wilson Disease.
+G025,GALT,606999,Galactose-1-Phosphate Uridylyltransferase,Protein-coding,Metabolizes galactose; deficient in Classic Galactosemia.
+G026,RB1,614041,RB Transcriptional Corepressor 1,Protein-coding,"Tumor suppressor; first ""two-hit"" hypothesis gene; causes Retinoblastoma."
+G027,PKD1,601313,Polycystin 1,Protein-coding,Regulates kidney tube structure; mutated in Polycystic Kidney Disease.
+G028,NF1,613113,Neurofibromin 1,Protein-coding,Tumor suppressor; mutations cause neurofibromas and skin spots.
+G029,IDUA,252800,"Iduronidase, Alpha-L-",Protein-coding,Breaks down GAGs; deficient in Hurler Syndrome (MPS I).
+G030,STAT4,600558,Signal Transducer and Activator of Transcription 4,Protein-coding,Immune regulation; variants strongly associated with SLE risk in Asians.
+G031,EDA,300451,Ectodysplasin A,Protein-coding,Regulates ectodermal tissue development; mutated in X-linked Ectodermal Dysplasia.
+G032,NIPBL,608667,NIPBL Cohesin Loading Factor,Protein-coding,Regulates cohesin complex; mutated in Cornelia de Lange Syndrome.

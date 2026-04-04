@@ -1,0 +1,5 @@
+com\phgdae\backend\Genes\GeneSeeder.class
+com\phgdae\backend\GeneDisease\GeneDiseaseSeeder.class
+com\phgdae\backend\Disease\DiseaseSeeder.class
+com\phgdae\backend\Functional\FunctionalCategorySeeder.class
+com\phgdae\backend\GeneCategory\GeneCategorySeeder.class

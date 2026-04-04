@@ -1,0 +1,11 @@
+category_id,category_name,description
+FC001,Enzyme,Proteins that catalyze biochemical reactions; deficiency typically causes metabolic disorders.
+FC002,Tumor Suppressor,Proteins that slow down cell division or repair DNA errors; loss of function leads to cancer.
+FC003,Structural Protein,"Provides physical support or shape to cells and tissues (e.g., muscle, bone, blood)."
+FC004,Transporter / Ion Channel,Controls the movement of ions or molecules across cell membranes.
+FC005,Transcription Factor,Proteins that bind to DNA to turn other genes on or off.
+FC006,Proto-Oncogene,"Genes that normally help cells grow; mutations can permanently activate them, causing cancer."
+FC007,DNA Repair,Specialized proteins that identify and correct damage to the DNA sequence.
+FC008,Coagulation Factor,Proteins specifically involved in the blood clotting cascade.
+FC009,Immune Regulator,Proteins that control the immune system's ability to recognize and fight pathogens.
+FC010,Signaling Molecule,Ligands or receptors involved in transmitting information between or within cells.

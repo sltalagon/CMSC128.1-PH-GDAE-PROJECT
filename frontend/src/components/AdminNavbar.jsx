@@ -24,18 +24,10 @@ const Navbar = ({ onSignOut }) => {
   };
 
   const navItems = [
-    { name: "Gene Search", path: "/admin/genes", icon: <Search size={18} /> },
-    {
-      name: "Disease Search",
-      path: "/admin/diseases",
-      icon: <Search size={18} />,
-    },
-    { name: "Admin Panel", path: "/admin", icon: <Shield size={18} /> },
-    {
-      name: "Admin Suggestions",
-      path: "/admin/suggestions",
-      icon: <ClipboardCheck size={18} />,
-    },
+    { name: "Gene Search",        path: "/admin/gene-search",    icon: <Search size={18} /> },
+    { name: "Disease Search",     path: "/admin/disease-search", icon: <Search size={18} /> },
+    { name: "Admin Panel",        path: "/admin",                icon: <Shield size={18} /> },
+    { name: "Admin Suggestions",  path: "/admin/suggestions",    icon: <ClipboardCheck size={18} /> },
   ];
 
   return (

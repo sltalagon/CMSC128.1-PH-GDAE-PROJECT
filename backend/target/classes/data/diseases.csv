@@ -1,0 +1,31 @@
+disease_id,disease_name,disease_category,inheritance_pattern,omim_id,Description
+D001,Thalassemia (Alpha/Beta),Hematologic,Autosomal Recessive,604131,Chronic anemia; hemoglobin subunit mutations.
+D002,G6PD Deficiency,Metabolic,X-linked Recessive,300908,Hemolytic anemia trigger; most common PH defect.
+D003,Maple Syrup Urine Disease,Metabolic,Autosomal Recessive,248600,"Defect processing amino acids; ""maple"" odor urine."
+D004,X-Linked Dystonia-Parkinsonism,Neuromuscular,X-linked Recessive,314250,Progressive dystonia; endemic to Panay Island.
+D005,Congenital Hypothyroidism,Endocrine,Varies,218700,Thyroid hormone deficiency; newborn screening target.
+D006,Breast Cancer (BRCA),Cancer,Autosomal Dominant,114480,Malignancy risk linked to BRCA1/BRCA2.
+D007,Type 2 Diabetes Mellitus,Metabolic,Polygenic,125853,Insulin resistance; high PH prevalence.
+D008,Phenylketonuria (PKU),Metabolic,Autosomal Recessive,261600,Phenylalanine buildup; causes intellectual disability.
+D009,Hemophilia A,Hematologic,X-linked Recessive,306700,Clotting failure due to Factor VIII deficiency.
+D010,Cystic Fibrosis,Respiratory,Autosomal Recessive,219700,Thick mucus buildup in lungs and gut.
+D011,Spinal Muscular Atrophy,Neuromuscular,Autosomal Recessive,253300,Progressive loss of spinal motor neurons.
+D012,Duchenne Muscular Dystrophy,Neuromuscular,X-linked Recessive,310200,Severe muscle degeneration in males.
+D013,Gaucher Disease,Metabolic,Autosomal Recessive,230800,"Lipid buildup in spleen, liver, and bones."
+D014,Pompe Disease,Metabolic,Autosomal Recessive,232300,Glycogen buildup in heart and skeletal muscle.
+D015,Familial Hypercholesterolemia,Cardiovascular,Autosomal Dominant,143890,High LDL; early cardiovascular disease risk.
+D016,Down Syndrome,Chromosomal,N/A (Aneuploidy),190685,Trisomy 21; developmental delay and distinct features.
+D017,Nasopharyngeal Carcinoma,Cancer,Polygenic/Viral,161550,Throat cancer; high risk in SE Asia.
+D018,Hirschsprung Disease,Gastrointestinal,Varies/Complex,142623,Missing colon nerve cells; causes megacolon.
+D019,Osteogenesis Imperfecta,Musculoskeletal,Autosomal Dominant,166200,Brittle bones due to collagen defect.
+D020,Hunter Syndrome (MPS II),Metabolic,X-linked Recessive,309900,GAG buildup; organ damage and physical changes.
+D021,Colorectal Cancer (Lynch),Cancer,Autosomal Dominant,120435,Hereditary non-polyposis colon cancer.
+D022,Wilson Disease,Metabolic,Autosomal Recessive,277900,Copper accumulation in liver and brain.
+D023,Galactosemia,Metabolic,Autosomal Recessive,230400,Inability to metabolize galactose sugar.
+D024,Retinoblastoma,Cancer,Autosomal Dominant,180200,Malignant tumor of the retina in children.
+D025,Polycystic Kidney Disease,Renal,Autosomal Dominant,173900,Growth of multiple fluid-filled kidney cysts.
+D026,Neurofibromatosis Type 1,Neurological,Autosomal Dominant,162200,Skin pigmentation changes and nerve tumors.
+D027,Hurler Syndrome (MPS I),Metabolic,Autosomal Recessive,607014,Severe skeletal abnormalities and cognitive decline.
+D028,Systemic Lupus Erythematosus,Autoimmune,Polygenic,152700,Autoimmune inflammation; high severity in Filipinos.
+D029,Ectodermal Dysplasia,Dermatologic,Varies,305100,"Abnormalities in hair, teeth, nails, sweat glands."
+D030,Cornelia de Lange Syndrome,Multisystem,Autosomal Dominant,122470,Growth delay; distinct facial features; limb defects.
