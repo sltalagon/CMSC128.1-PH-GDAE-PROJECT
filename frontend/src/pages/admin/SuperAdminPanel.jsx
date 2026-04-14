@@ -35,7 +35,7 @@ const SuperAdminPanel = () => {
 
   const fetchAdmins = async () => {
     try {
-      const res = await fetch("http://localhost:8080/api/admin/all", {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api`, {
         credentials: "include",
       });
       if (!res.ok) throw new Error("Failed to fetch admins");
