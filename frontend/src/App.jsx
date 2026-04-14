@@ -41,7 +41,9 @@ const ProtectedRoute = ({ children }) => {
   const [authState, setAuthState] = useState("loading");
 
   useEffect(() => {
-    fetch("http://localhost:8080/api/admin/me", { credentials: "include" })
+    const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:8080/api";
+
+    fetch(`${apiUrl}/admin/me`, { credentials: "include" })
       .then((res) => {
         if (res.ok) {
           setAuthState("auth");
