@@ -24,8 +24,6 @@ import org.springframework.security.web.authentication.SimpleUrlAuthenticationSu
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-import org.springframework.session.web.http.CookieSerializer;
-import org.springframework.session.web.http.DefaultCookieSerializer;
 
 import java.util.Arrays;
 import java.util.List;
@@ -51,15 +49,6 @@ public class SecurityConfig {
         return new BCryptPasswordEncoder();
     }
 
-    // ✅ NEW — fixes session cookie for cross-origin (Vercel → Render)
-    @Bean
-    public CookieSerializer cookieSerializer() {
-        DefaultCookieSerializer serializer = new DefaultCookieSerializer();
-        serializer.setSameSite("None");
-        serializer.setUseSecureCookie(true);
-        return serializer;
-    }
-
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
@@ -78,7 +67,6 @@ public class SecurityConfig {
                         .userInfoEndpoint(userInfo -> userInfo
                                 .oidcUserService(this.adminOidcUserService())
                         )
-                        // ✅ UPDATED — explicit redirect URI using backendUrl
                         .redirectionEndpoint(redirection -> redirection
                                 .baseUri("/login/oauth2/code/*")
                         )
