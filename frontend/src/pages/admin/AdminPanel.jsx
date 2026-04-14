@@ -24,7 +24,9 @@ const AdminPanel = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    fetch('https://your-render-url.com/api/admin/data', { credentials: "include" })
+    const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:8080/api";
+
+    fetch(`${apiUrl}/admin/me`, { credentials: "include" })
       .then((response) => {
         if (!response.ok) throw new Error("Not authenticated");
         return response.json();
