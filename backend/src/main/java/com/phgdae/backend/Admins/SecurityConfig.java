@@ -19,11 +19,13 @@ import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.oauth2.core.oidc.user.DefaultOidcUser;
 import org.springframework.security.oauth2.core.oidc.user.OidcUser;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationFailureHandler;
+import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.session.web.http.CookieSerializer;
+import org.springframework.session.web.http.DefaultCookieSerializer;
 
 import java.util.Arrays;
 import java.util.List;
@@ -37,6 +39,9 @@ public class SecurityConfig {
     @Value("${FRONTEND_URL:http://localhost:5173}")
     private String frontendUrl;
 
+    @Value("${BACKEND_URL:http://localhost:8080}")
+    private String backendUrl;
+
     public SecurityConfig(AdminRepository adminRepository) {
         this.adminRepository = adminRepository;
     }
@@ -44,6 +49,15 @@ public class SecurityConfig {
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
+    }
+
+    // ✅ NEW — fixes session cookie for cross-origin (Vercel → Render)
+    @Bean
+    public CookieSerializer cookieSerializer() {
+        DefaultCookieSerializer serializer = new DefaultCookieSerializer();
+        serializer.setSameSite("None");
+        serializer.setUseSecureCookie(true);
+        return serializer;
     }
 
     @Bean
@@ -63,6 +77,10 @@ public class SecurityConfig {
                 .oauth2Login(oauth2 -> oauth2
                         .userInfoEndpoint(userInfo -> userInfo
                                 .oidcUserService(this.adminOidcUserService())
+                        )
+                        // ✅ UPDATED — explicit redirect URI using backendUrl
+                        .redirectionEndpoint(redirection -> redirection
+                                .baseUri("/login/oauth2/code/*")
                         )
                         .successHandler(customSuccessHandler())
                         .failureHandler(customFailureHandler())
