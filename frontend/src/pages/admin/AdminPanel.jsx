@@ -24,7 +24,7 @@ const AdminPanel = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    fetch("http://localhost:8080/api/admin/me", { credentials: "include" })
+    fetch('https://your-render-url.com/api/admin/data', { credentials: "include" })
       .then((response) => {
         if (!response.ok) throw new Error("Not authenticated");
         return response.json();
