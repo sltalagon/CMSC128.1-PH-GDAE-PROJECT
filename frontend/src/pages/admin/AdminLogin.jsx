@@ -4,24 +4,24 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 
 const AdminLogin = () => {
   const navigate = useNavigate();
-  // 1. Initialize search params to read the URL
   const [searchParams] = useSearchParams();
   const [errorMessage, setErrorMessage] = useState('');
 
-  // 2. Check for the specific error on component mount
   useEffect(() => {
     const error = searchParams.get('error');
     if (error === 'no_privileges') {
       setErrorMessage("Access Denied: Your Google account does not have admin privileges.");
       
-      // NEW: Clear the error from the URL without reloading the page
-      // This prevents the error from getting stuck if the user hits refresh or back
       window.history.replaceState(null, '', window.location.pathname);
     }
   }, [searchParams]);
 
   const handleGoogleSignIn = () => {
-    window.location.href = 'http://localhost:8080/oauth2/authorization/google';
+    const backendUrl = import.meta.env.VITE_API_URL 
+      ? import.meta.env.VITE_API_URL.replace('/api', '') 
+      : 'http://localhost:8080';
+
+    window.location.href = `${backendUrl}/oauth2/authorization/google`;
   };
 
   return (
@@ -42,7 +42,7 @@ const AdminLogin = () => {
           <p className="text-slate-500 text-sm mt-2">Sign in using your authorized Google account</p>
         </div>
 
-        {/* 3. Conditionally rendered Error Card styled with Tailwind */}
+        {/* Conditionally rendered Error Card styled with Tailwind */}
         {errorMessage && (
           <div className="mb-6 bg-red-50 border border-red-200 rounded-lg p-4 text-sm text-left flex items-start gap-3 animate-in fade-in slide-in-from-top-2 duration-300">
             <AlertCircle className="text-red-500 shrink-0 mt-0.5" size={18} />
