@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo } from "react";
 import { Search, Info, Dna, ChevronRight } from "lucide-react";
 import GeneModal from "../../components/GeneModal";
 
-const API_BASE = "http://localhost:8080/api";
+const API_BASE = `${import.meta.env.VITE_API_URL}/api`;
 
 const GeneSearch = () => {
   const [genes, setGenes] = useState([]);
