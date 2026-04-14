@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo } from "react";
 import { Search, Filter, Activity, ChevronRight } from "lucide-react";
 import DiseaseModal from "../../components/DiseaseModal";
 
-const API_BASE = "http://localhost:8080/api";
+const API_BASE = `${import.meta.env.VITE_API_URL}/api`;
 
 const DiseaseSearch = () => {
   const [diseases, setDiseases] = useState([]);
