@@ -1,6 +1,7 @@
 // src/api/api.js
 // Central API utility — uses session cookie from Google OAuth2 login
-const API_BASE = `${import.meta.env.VITE_API_URL}/api`;
+
+const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:8080/api";
 
 // GET request — public, no auth needed
 export const apiGet = async (endpoint) => {
@@ -57,7 +58,8 @@ export const apiDelete = async (endpoint) => {
 
 // Helper to trigger Google login
 export const loginWithGoogle = () => {
-  window.location.href = `${import.meta.env.VITE_API_URL}/oauth2/authorization/google`;
+  const baseUrl = API_BASE.replace(/\/api$/, "");
+  window.location.href = `${baseUrl}/oauth2/authorization/google`;
 };
 
 // Helper to check if user is logged in
