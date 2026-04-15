@@ -26,7 +26,13 @@ export const apiPost = async (endpoint, body) => {
   if (!response.ok) {
     throw new Error(`POST ${endpoint} failed: ${response.status}`);
   }
-  return response.json();
+  
+  const contentType = response.headers.get("content-type");
+  if (contentType && contentType.includes("application/json")) {
+    return response.json();
+  } else {
+    return response.text();
+  }
 };
 
 // PUT request
@@ -40,7 +46,13 @@ export const apiPut = async (endpoint, body) => {
   if (!response.ok) {
     throw new Error(`PUT ${endpoint} failed: ${response.status}`);
   }
-  return response.json();
+  
+  const contentType = response.headers.get("content-type");
+  if (contentType && contentType.includes("application/json")) {
+    return response.json();
+  } else {
+    return response.text();
+  }
 };
 
 // PATCH request
@@ -54,7 +66,13 @@ export const apiPatch = async (endpoint, body) => {
   if (!response.ok) {
     throw new Error(`PATCH ${endpoint} failed: ${response.status}`);
   }
-  return response.json();
+  
+  const contentType = response.headers.get("content-type");
+  if (contentType && contentType.includes("application/json")) {
+    return response.json();
+  } else {
+    return response.text();
+  }
 };
 
 // DELETE request
