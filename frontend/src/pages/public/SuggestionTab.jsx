@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { Lightbulb, CheckCircle, ArrowLeft } from "lucide-react";
 import { AddGeneForm } from "../admin/AddGeneForm";
 import { AddDiseaseForm } from "../admin/AddDiseaseForm";
@@ -41,6 +41,12 @@ function SuggestionTab() {
 
   const handleFormClose = () => setStep("done");
 
+  const resetForm = () => {
+    setStep("info");
+    setSuggestionType("");
+    setSubmitterInfo({ submitterName: "", submitterEmail: "", referenceUrl: "" });
+  };
+
   if (step === "done") {
     return (
       <div className="max-w-2xl mx-auto py-16 px-4 text-center">
@@ -51,7 +57,7 @@ function SuggestionTab() {
             Thank you! Your suggestion will be reviewed by our team before being added to the database.
           </p>
           <button
-            onClick={() => { setStep("info"); setSuggestionType(""); setSubmitterInfo({ submitterName: "", submitterEmail: "", referenceUrl: "" }); }}
+            onClick={resetForm}
             className="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 font-semibold transition-colors"
           >
             Submit Another
@@ -123,9 +129,13 @@ function SuggestionTab() {
                 value={submitterInfo.submitterName}
                 onChange={(e) => setSubmitterInfo({ ...submitterInfo, submitterName: e.target.value })}
                 placeholder="e.g., Juan dela Cruz"
-                className={`w-full px-4 py-3 border-2 rounded-lg focus:outline-none ${infoErrors.submitterName ? "border-red-400" : "border-gray-200 focus:border-blue-500"}`}
+                className={`w-full px-4 py-3 border-2 rounded-lg focus:outline-none ${
+                  infoErrors.submitterName ? "border-red-400" : "border-gray-200 focus:border-blue-500"
+                }`}
               />
-              {infoErrors.submitterName && <p className="mt-1 text-xs text-red-600">{infoErrors.submitterName}</p>}
+              {infoErrors.submitterName && (
+                <p className="mt-1 text-xs text-red-600">{infoErrors.submitterName}</p>
+              )}
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -136,9 +146,13 @@ function SuggestionTab() {
                 value={submitterInfo.submitterEmail}
                 onChange={(e) => setSubmitterInfo({ ...submitterInfo, submitterEmail: e.target.value })}
                 placeholder="e.g., researcher@up.edu.ph"
-                className={`w-full px-4 py-3 border-2 rounded-lg focus:outline-none ${infoErrors.submitterEmail ? "border-red-400" : "border-gray-200 focus:border-blue-500"}`}
+                className={`w-full px-4 py-3 border-2 rounded-lg focus:outline-none ${
+                  infoErrors.submitterEmail ? "border-red-400" : "border-gray-200 focus:border-blue-500"
+                }`}
               />
-              {infoErrors.submitterEmail && <p className="mt-1 text-xs text-red-600">{infoErrors.submitterEmail}</p>}
+              {infoErrors.submitterEmail && (
+                <p className="mt-1 text-xs text-red-600">{infoErrors.submitterEmail}</p>
+              )}
             </div>
           </div>
           <div className="mt-4">
@@ -150,10 +164,16 @@ function SuggestionTab() {
               value={submitterInfo.referenceUrl}
               onChange={(e) => setSubmitterInfo({ ...submitterInfo, referenceUrl: e.target.value })}
               placeholder="https://pubmed.ncbi.nlm.nih.gov/..."
-              className={`w-full px-4 py-3 border-2 rounded-lg focus:outline-none ${infoErrors.referenceUrl ? "border-red-400" : "border-gray-200 focus:border-blue-500"}`}
+              className={`w-full px-4 py-3 border-2 rounded-lg focus:outline-none ${
+                infoErrors.referenceUrl ? "border-red-400" : "border-gray-200 focus:border-blue-500"
+              }`}
             />
-            {infoErrors.referenceUrl && <p className="mt-1 text-xs text-red-600">{infoErrors.referenceUrl}</p>}
-            <p className="mt-1 text-xs text-gray-500">Link to a PubMed article, DOI, or other published source supporting your suggestion.</p>
+            {infoErrors.referenceUrl && (
+              <p className="mt-1 text-xs text-red-600">{infoErrors.referenceUrl}</p>
+            )}
+            <p className="mt-1 text-xs text-gray-500">
+              Link to a PubMed article, DOI, or other published source supporting your suggestion.
+            </p>
           </div>
         </div>
 
@@ -179,7 +199,9 @@ function SuggestionTab() {
               </button>
             ))}
           </div>
-          {infoErrors.suggestionType && <p className="mt-2 text-xs text-red-600">{infoErrors.suggestionType}</p>}
+          {infoErrors.suggestionType && (
+            <p className="mt-2 text-xs text-red-600">{infoErrors.suggestionType}</p>
+          )}
         </div>
 
         <button
