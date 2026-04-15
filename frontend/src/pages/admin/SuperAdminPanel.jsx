@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { apiGet, apiPost } from "../../api/api"; // Added api helpers
+import { apiGet, apiPost, apiDelete } from "../../api/api";
 import { Shield, UserPlus, Trash2, X, Check, AlertCircle, Users } from "lucide-react";
 
 const SuperAdminPanel = () => {
@@ -11,14 +11,12 @@ const SuperAdminPanel = () => {
   const [success, setSuccess] = useState(null);
   const navigate = useNavigate();
 
-  // Add form state
   const [showAddForm, setShowAddForm] = useState(false);
   const [newEmail, setNewEmail] = useState("");
   const [newUsername, setNewUsername] = useState("");
   const [newRole, setNewRole] = useState("MANAGER");
   const [submitting, setSubmitting] = useState(false);
 
-  // Confirm delete state
   const [confirmDelete, setConfirmDelete] = useState(null);
 
   useEffect(() => {
@@ -48,10 +46,10 @@ const SuperAdminPanel = () => {
     setSuccess(null);
 
     try {
-      await apiPost("/admin/add", { 
-        email: newEmail, 
-        username: newUsername, 
-        role: newRole 
+      await apiPost("/admin/add", {
+        email: newEmail,
+        username: newUsername,
+        role: newRole,
       });
 
       setSuccess(`${newEmail} has been added as ${newRole === "SUPER_ADMIN" ? "Super Admin" : "Manager"}.`);
@@ -69,14 +67,7 @@ const SuperAdminPanel = () => {
 
   const handleRemoveAdmin = async (adminId, email) => {
     try {
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/admin/remove/${adminId}`, {
-        method: "DELETE",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include", 
-      });
-
-      if (!res.ok) throw new Error("Failed to remove admin");
-
+      await apiDelete(`/admin/remove/${adminId}`);
       setSuccess(`${email} has been removed.`);
       setConfirmDelete(null);
       fetchAdmins();
@@ -248,7 +239,6 @@ const SuperAdminPanel = () => {
               }`}>
                 {admin.role === "SUPER_ADMIN" ? "Super Admin" : "Manager"}
               </span>
-              {/* Prevent deleting yourself */}
               {admin.email !== adminData?.email && (
                 <button
                   onClick={() => setConfirmDelete(admin)}
@@ -269,8 +259,8 @@ const SuperAdminPanel = () => {
             <h3 className="text-lg font-bold text-slate-900 mb-2">Remove Account</h3>
             <p className="text-slate-600 mb-6">
               Are you sure you want to remove{" "}
-              <span className="font-semibold text-red-600">{confirmDelete.email}</span> from the whitelist?
-              They will lose all admin access immediately.
+              <span className="font-semibold text-red-600">{confirmDelete.email}</span> from the
+              whitelist? They will lose all admin access immediately.
             </p>
             <div className="flex gap-3">
               <button
