@@ -5,7 +5,7 @@ const API_BASE = import.meta.env.VITE_API_URL
   ? `${import.meta.env.VITE_API_URL}/api` 
   : "http://localhost:8080/api";
 
-// GET request — public, no auth needed
+// GET request
 export const apiGet = async (endpoint) => {
   const response = await fetch(`${API_BASE}${endpoint}`, {
     method: "GET",
@@ -17,7 +17,7 @@ export const apiGet = async (endpoint) => {
   return response.json();
 };
 
-// POST request — requires admin session cookie
+// POST request
 export const apiPost = async (endpoint, body) => {
   const response = await fetch(`${API_BASE}${endpoint}`, {
     method: "POST",
@@ -31,7 +31,7 @@ export const apiPost = async (endpoint, body) => {
   return response.json();
 };
 
-// PUT request — requires admin session cookie
+// PUT request
 export const apiPut = async (endpoint, body) => {
   const response = await fetch(`${API_BASE}${endpoint}`, {
     method: "PUT",
@@ -45,7 +45,21 @@ export const apiPut = async (endpoint, body) => {
   return response.json();
 };
 
-// DELETE request — requires admin session cookie
+// PATCH request — ADDED THIS TO FIX BUILD ERROR
+export const apiPatch = async (endpoint, body) => {
+  const response = await fetch(`${API_BASE}${endpoint}`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    credentials: "include",
+    body: JSON.stringify(body),
+  });
+  if (!response.ok) {
+    throw new Error(`PATCH ${endpoint} failed: ${response.status}`);
+  }
+  return response.json();
+};
+
+// DELETE request
 export const apiDelete = async (endpoint) => {
   const response = await fetch(`${API_BASE}${endpoint}`, {
     method: "DELETE",
@@ -55,6 +69,8 @@ export const apiDelete = async (endpoint) => {
   if (!response.ok) {
     throw new Error(`DELETE ${endpoint} failed: ${response.status}`);
   }
+  // Some DELETE endpoints return no content (204)
+  if (response.status === 204) return null;
   return response.json();
 };
 
@@ -66,8 +82,12 @@ export const loginWithGoogle = () => {
 
 // Helper to check if user is logged in
 export const checkAuthStatus = async () => {
-  const response = await fetch(`${API_BASE}/admin/me`, {
-    credentials: "include",
-  });
-  return response.ok;
+  try {
+    const response = await fetch(`${API_BASE}/admin/me`, {
+      credentials: "include",
+    });
+    return response.ok;
+  } catch {
+    return false;
+  }
 };
