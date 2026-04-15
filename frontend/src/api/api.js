@@ -85,9 +85,16 @@ export const apiDelete = async (endpoint) => {
   if (!response.ok) {
     throw new Error(`DELETE ${endpoint} failed: ${response.status}`);
   }
+  
   // Some DELETE endpoints return no content (204)
   if (response.status === 204) return null;
-  return response.json();
+  
+  const contentType = response.headers.get("content-type");
+  if (contentType && contentType.includes("application/json")) {
+    return response.json();
+  } else {
+    return response.text(); 
+  }
 };
 
 // Helper to trigger Google login
