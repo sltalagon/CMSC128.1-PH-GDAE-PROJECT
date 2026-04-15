@@ -5,17 +5,16 @@ import {
   Activity,
   Link,
   Plus,
-  X,
   Tag,
 } from "lucide-react";
 
-// Form Components
+import { apiGet } from "../../api/api"; 
+
 import { AddGeneForm } from "./AddGeneForm";
 import { AddDiseaseForm } from "./AddDiseaseForm";
 import { AddAssociationForm } from "./AddAssociationForm";
 import { AddFunctionalCategoryForm } from "./AddFunctionalCategoryForm";
 import { AddGeneCategoryForm } from "./AddGeneCategoryForm";
-
 
 const AdminPanel = () => {
   const [activeView, setActiveView] = useState(null);
@@ -24,13 +23,7 @@ const AdminPanel = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:8080/api";
-
-    fetch(`${apiUrl}/admin/me`, { credentials: "include" })
-      .then((response) => {
-        if (!response.ok) throw new Error("Not authenticated");
-        return response.json();
-      })
+    apiGet("/admin/me")
       .then((data) => {
         setAdminData(data);
         setIsLoading(false);
@@ -165,11 +158,6 @@ const AdminPanel = () => {
             </div>
           </div>
         ))}
-      </div>
-
-      <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 text-sm text-yellow-800 mb-8">
-        <strong>Note:</strong> This is a demonstration with mock data. In
-        production, these forms would save data to a database.
       </div>
 
       {/* =========================================
