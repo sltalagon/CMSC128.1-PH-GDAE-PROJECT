@@ -40,16 +40,12 @@ export function AddGeneCategoryForm({ onClose, onCancel, mode = "admin", suggest
 
     try {
       if (mode === "suggestion") {
-        await fetch("http://localhost:8080/api/suggestions", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            submitterName: suggestionMeta.submitterName,
-            submitterEmail: suggestionMeta.submitterEmail,
-            suggestionType: "GENE_CATEGORY",
-            content: JSON.stringify(formData),
-            referenceUrl: suggestionMeta.referenceUrl,
-          }),
+        await apiPost("/suggestions", {
+          submitterName: suggestionMeta.submitterName,
+          submitterEmail: suggestionMeta.submitterEmail,
+          suggestionType: "GENE_CATEGORY",
+          content: JSON.stringify(formData),
+          referenceUrl: suggestionMeta.referenceUrl,
         });
       } else {
         await apiPost("/gene-categories", {
@@ -60,10 +56,10 @@ export function AddGeneCategoryForm({ onClose, onCancel, mode = "admin", suggest
       onClose();
     } 
     catch (err) {
-        setError(err.message);
-      } finally {
-        setSubmitting(false);
-      }
+      setError(err.message || "An unexpected error occurred.");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
