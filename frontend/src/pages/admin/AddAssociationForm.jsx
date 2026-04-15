@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 import { apiGet, apiPost } from "../../api/api";
 import { X, Check, Link } from "lucide-react";
 
-
 export function AddAssociationForm({ onClose, onCancel, mode = "admin", suggestionMeta = null }) {
   const [formData, setFormData] = useState({
     geneId: "",
@@ -45,18 +44,15 @@ export function AddAssociationForm({ onClose, onCancel, mode = "admin", suggesti
 
     try {
       if (mode === "suggestion") {
-        await fetch("http://localhost:8080/api/suggestions", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            submitterName: suggestionMeta.submitterName,
-            submitterEmail: suggestionMeta.submitterEmail,
-            suggestionType: "ASSOCIATION",
-            content: JSON.stringify(formData),
-            referenceUrl: suggestionMeta.referenceUrl,
-          }),
+        await apiPost("/suggestions", {
+          submitterName: suggestionMeta.submitterName,
+          submitterEmail: suggestionMeta.submitterEmail,
+          suggestionType: "ASSOCIATION",
+          content: JSON.stringify(formData),
+          referenceUrl: suggestionMeta.referenceUrl,
         });
       } else {
+        // USE apiPost
         await apiPost("/genedisease", {
           gene: { geneId: formData.geneId },
           disease: { diseaseId: formData.diseaseId },
@@ -66,12 +62,11 @@ export function AddAssociationForm({ onClose, onCancel, mode = "admin", suggesti
         });
       }
       onClose();
+    } catch (err) {
+      setError(err.message || "An unexpected error occurred.");
+    } finally {
+      setSubmitting(false);
     }
-    catch (err) {
-        setError(err.message);
-      } finally {
-        setSubmitting(false);
-      }
   };
 
   return (
