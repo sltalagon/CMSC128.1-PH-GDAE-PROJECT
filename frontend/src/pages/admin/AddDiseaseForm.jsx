@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import { X, Check, Activity, AlertTriangle } from "lucide-react";
-
-const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:8080/api";
+import { apiPost } from "../../api/api"; 
 
 export function AddDiseaseForm({ onClose, onCancel, mode = "admin", suggestionMeta = null }) {
   const [formData, setFormData] = useState({
@@ -25,54 +24,31 @@ export function AddDiseaseForm({ onClose, onCancel, mode = "admin", suggestionMe
 
     try {
       if (mode === "suggestion") {
-        const res = await fetch(`${API_BASE}/suggestions`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            submitterName: suggestionMeta.submitterName,
-            submitterEmail: suggestionMeta.submitterEmail,
-            suggestionType: "DISEASE",
-            content: JSON.stringify(formData),
-            referenceUrl: suggestionMeta.referenceUrl,
-          }),
+        await apiPost("/suggestions", {
+          submitterName: suggestionMeta.submitterName,
+          submitterEmail: suggestionMeta.submitterEmail,
+          suggestionType: "DISEASE",
+          content: JSON.stringify(formData),
+          referenceUrl: suggestionMeta.referenceUrl,
         });
-
-        if (!res.ok) {
-          const body = await res.json().catch(() => ({}));
-          if (res.status === 409) {
-            setDuplicate(true);
-            return;
-          }
-          throw new Error(body.message || `Request failed: ${res.status}`);
-        }
       } else {
-        const res = await fetch(`${API_BASE}/diseases`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          credentials: "include",
-          body: JSON.stringify({
-            diseaseName: formData.diseaseName,
-            diseaseCategory: formData.diseaseCategory,
-            inheritancePattern: formData.inheritancePattern,
-            omimId: formData.omimId ? parseInt(formData.omimId, 10) : null,
-            phPrevalence: formData.phPrevalence,
-            description: formData.description,
-          }),
+        await apiPost("/diseases", {
+          diseaseName: formData.diseaseName,
+          diseaseCategory: formData.diseaseCategory,
+          inheritancePattern: formData.inheritancePattern,
+          omimId: formData.omimId ? parseInt(formData.omimId, 10) : null,
+          phPrevalence: formData.phPrevalence,
+          description: formData.description,
         });
-
-        if (!res.ok) {
-          const body = await res.json().catch(() => ({}));
-          if (res.status === 409) {
-            setDuplicate(true);
-            return;
-          }
-          throw new Error(body.message || `Request failed: ${res.status}`);
-        }
       }
 
       onClose();
     } catch (err) {
-      setError(err.message);
+      if (err.message.includes("409")) {
+        setDuplicate(true);
+      } else {
+        setError(err.message || "An unexpected error occurred.");
+      }
     } finally {
       setSubmitting(false);
     }
