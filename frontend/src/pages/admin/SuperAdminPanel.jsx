@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { apiGet, apiPost } from "../../api/api"; // Added api helpers
 import { Shield, UserPlus, Trash2, X, Check, AlertCircle, Users } from "lucide-react";
 
 const SuperAdminPanel = () => {
@@ -18,28 +19,20 @@ const SuperAdminPanel = () => {
   const [submitting, setSubmitting] = useState(false);
 
   // Confirm delete state
-  const [confirmDelete, setConfirmDelete] = useState(null); // holds the admin to delete
+  const [confirmDelete, setConfirmDelete] = useState(null);
 
   useEffect(() => {
-    fetch("http://localhost:8080/api/admin/me", { credentials: "include" })
-      .then((res) => {
-        if (!res.ok) throw new Error("Not authenticated");
-        return res.json();
-      })
+    apiGet("/admin/me")
       .then(async (data) => {
         setAdminData(data);
         await fetchAdmins();
       })
       .catch(() => navigate("/admin/login"));
-}, [navigate]);
+  }, [navigate]);
 
   const fetchAdmins = async () => {
     try {
-      const res = await fetch(`http://localhost:8080/api/admin/all`, {
-        credentials: "include",
-      });
-      if (!res.ok) throw new Error("Failed to fetch admins");
-      const data = await res.json();
+      const data = await apiGet("/admin/all");
       setAdmins(data);
     } catch (err) {
       setError(err.message);
@@ -55,17 +48,11 @@ const SuperAdminPanel = () => {
     setSuccess(null);
 
     try {
-      const res = await fetch("http://localhost:8080/api/admin/add", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify({ email: newEmail, username: newUsername, role: newRole }),
+      await apiPost("/admin/add", { 
+        email: newEmail, 
+        username: newUsername, 
+        role: newRole 
       });
-
-      if (!res.ok) {
-        const msg = await res.text();
-        throw new Error(msg);
-      }
 
       setSuccess(`${newEmail} has been added as ${newRole === "SUPER_ADMIN" ? "Super Admin" : "Manager"}.`);
       setNewEmail("");
@@ -82,9 +69,10 @@ const SuperAdminPanel = () => {
 
   const handleRemoveAdmin = async (adminId, email) => {
     try {
-      const res = await fetch(`http://localhost:8080/api/admin/remove/${adminId}`, {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/admin/remove/${adminId}`, {
         method: "DELETE",
-        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include", 
       });
 
       if (!res.ok) throw new Error("Failed to remove admin");
