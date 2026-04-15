@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import logo from "../assets/logot.png";
 import { NavLink, useNavigate } from "react-router-dom";
 import { Search, Shield, ClipboardCheck, LogOut, Users } from "lucide-react";
+import { apiGet } from "../api/api"; 
 
 const Navbar = ({ onSignOut }) => {
   const navigate = useNavigate();
@@ -9,13 +10,13 @@ const Navbar = ({ onSignOut }) => {
   const [userEmail, setUserEmail] = useState("");
 
   useEffect(() => {
-    fetch("http://localhost:8080/api/admin/me", { credentials: "include" })
-      .then((res) => res.json())
+    apiGet("/admin/me")
       .then((data) => {
         if (data.role === "SUPER_ADMIN") setIsSuperAdmin(true);
         if (data.email) setUserEmail(data.email);
       })
-      .catch(() => {});
+      .catch(() => {
+      });
   }, []);
 
   const handleSignOut = () => {
@@ -24,7 +25,7 @@ const Navbar = ({ onSignOut }) => {
   };
 
   const navItems = [
-    { name: "Gene Search",        path: "/admin/gene-search",    icon: <Search size={18} /> },
+    { name: "Gene Search",        path: "/admin/gene-search",  icon: <Search size={18} /> },
     { name: "Disease Search",     path: "/admin/disease-search", icon: <Search size={18} /> },
     { name: "Admin Panel",        path: "/admin",                icon: <Shield size={18} /> },
     { name: "Admin Suggestions",  path: "/admin/suggestions",    icon: <ClipboardCheck size={18} /> },
