@@ -19,6 +19,8 @@ import AdminGeneSearch from "./pages/admin/AdminGeneSearch";
 import AdminDiseaseSearch from "./pages/admin/AdminDiseaseSearch";
 import { Outlet } from "react-router-dom";
 
+import { checkAuthStatus } from "./api/api"; 
+
 const PublicLayout = () => (
   <div className="min-h-screen bg-slate-50">
     <Navbar />
@@ -41,11 +43,9 @@ const ProtectedRoute = ({ children }) => {
   const [authState, setAuthState] = useState("loading");
 
   useEffect(() => {
-    const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:8080/api";
-
-    fetch(`${apiUrl}/admin/me`, { credentials: "include" })
-      .then((res) => {
-        if (res.ok) {
+    checkAuthStatus()
+      .then((isAuthenticated) => {
+        if (isAuthenticated) {
           setAuthState("auth");
         } else {
           setAuthState("unauth");
