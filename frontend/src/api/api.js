@@ -1,9 +1,7 @@
 // src/api/api.js
 // Central API utility — uses session cookie from Google OAuth2 login
 
-const API_BASE = import.meta.env.VITE_API_URL 
-  ? `${import.meta.env.VITE_API_URL}/api` 
-  : "http://localhost:8080/api";
+const API_BASE = `${import.meta.env.VITE_API_URL || "http://localhost:8080"}/api`;
 
 // GET request
 export const apiGet = async (endpoint) => {
@@ -45,7 +43,7 @@ export const apiPut = async (endpoint, body) => {
   return response.json();
 };
 
-// PATCH request — ADDED THIS TO FIX BUILD ERROR
+// PATCH request
 export const apiPatch = async (endpoint, body) => {
   const response = await fetch(`${API_BASE}${endpoint}`, {
     method: "PATCH",
@@ -83,10 +81,8 @@ export const loginWithGoogle = () => {
 // Helper to check if user is logged in
 export const checkAuthStatus = async () => {
   try {
-    const response = await fetch(`${API_BASE}/admin/me`, {
-      credentials: "include",
-    });
-    return response.ok;
+    await apiGet("/admin/me");
+    return true;
   } catch {
     return false;
   }
