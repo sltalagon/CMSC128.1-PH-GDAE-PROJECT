@@ -23,16 +23,12 @@ export function AddFunctionalCategoryForm({
 
     try {
       if (mode === "suggestion") {
-        await fetch("http://localhost:8080/api/suggestions", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            submitterName: suggestionMeta.submitterName,
-            submitterEmail: suggestionMeta.submitterEmail,
-            suggestionType: "FUNCTIONAL_CATEGORY",
-            content: JSON.stringify(formData),
-            referenceUrl: suggestionMeta.referenceUrl,
-          }),
+        await apiPost("/suggestions", {
+          submitterName: suggestionMeta.submitterName,
+          submitterEmail: suggestionMeta.submitterEmail,
+          suggestionType: "FUNCTIONAL_CATEGORY",
+          content: JSON.stringify(formData),
+          referenceUrl: suggestionMeta.referenceUrl,
         });
       } else {
         await apiPost("/functional_categories", {
@@ -42,7 +38,7 @@ export function AddFunctionalCategoryForm({
       }
       onClose();
     } catch (err) {
-      setError(err.message);
+      setError(err.message || "An error occurred while saving.");
     } finally {
       setSubmitting(false);
     }
