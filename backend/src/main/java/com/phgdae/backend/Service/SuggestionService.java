@@ -9,7 +9,7 @@ import com.phgdae.backend.Suggestion.*;
 import com.phgdae.backend.enums.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import tools.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.core.type.TypeReference;
 
 import java.math.BigDecimal;
@@ -72,71 +72,93 @@ public class SuggestionService {
         try {
             ObjectMapper mapper = new ObjectMapper();
             String content = suggestion.getContent();
+            Map<String, Object> data = mapper.readValue(content, new TypeReference<Map<String, Object>>() {});
 
             switch (suggestion.getSuggestionType()) {
                 case GENE -> {
-                    Map<String, Object> data = mapper.readValue(content, Map.class);
                     Gene gene = new Gene();
                     gene.setGeneSymbol((String) data.get("geneSymbol"));
                     gene.setFullGeneName((String) data.get("fullGeneName"));
-                    gene.setGeneType(GeneType.valueOf((String) data.get("geneType")));
+                    gene.setGeneType(parseEnum(GeneType.class, data.get("geneType")));
                     gene.setDescription((String) data.get("description"));
-                    if (data.get("omimId") != null) {
-                        gene.setOmimId(new BigDecimal(data.get("omimId").toString()));
-                    }
+                    gene.setOmimId(parseBigDecimal(data.get("omimId")));
+                    
                     geneService.saveGene(gene);
                 }
                 case DISEASE -> {
-                    Map<String, Object> data = mapper.readValue(content, Map.class);
                     Disease disease = new Disease();
                     disease.setDiseaseName((String) data.get("diseaseName"));
-                    disease.setDiseaseCategory(DiseaseCategory.valueOf((String) data.get("diseaseCategory")));
+                    disease.setDiseaseCategory(parseEnum(DiseaseCategory.class, data.get("diseaseCategory")));
                     disease.setInheritancePattern((String) data.get("inheritancePattern"));
-                    disease.setPhPrevalence(Prevalence.valueOf((String) data.get("phPrevalence")));
+                    disease.setPhPrevalence(parseEnum(Prevalence.class, data.get("phPrevalence")));
                     disease.setDescription((String) data.get("description"));
-                    if (data.get("omimId") != null) {
-                        disease.setOmimId(new BigDecimal(data.get("omimId").toString()));
-                    }
+                    disease.setOmimId(parseBigDecimal(data.get("omimId")));
+                    
                     diseaseService.saveDisease(disease);
                 }
                 case ASSOCIATION -> {
-                    Map<String, Object> data = mapper.readValue(content, Map.class);
                     GeneDisease geneDisease = new GeneDisease();
-                    Gene gene = new Gene();
-                    gene.setGeneId((String) data.get("geneId"));
+                    
+                    // Fetch existing entities to prevent Transient Object crashes
+                    Gene gene = geneService.getGeneById((String) data.get("geneId"));
+                    Disease disease = diseaseService.getDiseaseById((String) data.get("diseaseId"));
+                    
                     geneDisease.setGene(gene);
-                    Disease disease = new Disease();
-                    disease.setDiseaseId((String) data.get("diseaseId"));
                     geneDisease.setDisease(disease);
-                    geneDisease.setAssociationType(AssociationType.valueOf((String) data.get("associationType")));
+                    geneDisease.setAssociationType(parseEnum(AssociationType.class, data.get("associationType")));
                     geneDisease.setCitationUrl((String) data.get("citationUrl"));
                     geneDisease.setCitationDescription((String) data.get("citationDescription"));
+                    
                     geneDiseaseService.saveGeneDisease(geneDisease);
                 }
                 case FUNCTIONAL_CATEGORY -> {
-                    Map<String, Object> data = mapper.readValue(content, Map.class);
                     FunctionalCategory category = new FunctionalCategory();
                     category.setCategoryName((String) data.get("categoryName"));
                     category.setDescription((String) data.get("description"));
+                    
                     functionalCategoryService.saveFunctionalCategory(category);
                 }
                 case GENE_CATEGORY -> {
-                    Map<String, Object> data = mapper.readValue(content, Map.class);
                     GeneCategory geneCategory = new GeneCategory();
-                    Gene gene = new Gene();
-                    gene.setGeneId((String) data.get("geneId"));
+                    
+                    // Fetch existing entities
+                    Gene gene = geneService.getGeneById((String) data.get("geneId"));
+                    FunctionalCategory category = functionalCategoryService.getFunctionalCategoryById((String) data.get("categoryId"));
+                    
                     geneCategory.setGene(gene);
-                    FunctionalCategory category = new FunctionalCategory();
-                    category.setCategoryId((String) data.get("categoryId"));
                     geneCategory.setFunctionalCategory(category);
+                    
                     geneCategoryService.saveGeneCategory(geneCategory);
                 }
             }
         } catch (Exception e) {
-            throw new RuntimeException("Failed to process approved suggestion: " + e.getMessage());
+            // This will print the EXACT reason for the crash in your Spring Boot terminal
+            e.printStackTrace(); 
+            throw new RuntimeException("Failed to process approved suggestion: " + e.getMessage(), e);
         }
     }
 
+    // --- HELPER METHODS FOR SAFE PARSING ---
+
+    /**
+     * Safely parses a BigDecimal, handling nulls and empty strings.
+     */
+    private BigDecimal parseBigDecimal(Object value) {
+        if (value == null) return null;
+        String strVal = value.toString().trim();
+        if (strVal.isEmpty()) return null;
+        return new BigDecimal(strVal);
+    }
+
+    /**
+     * Safely parses an Enum, converting it to uppercase and replacing spaces/dashes with underscores.
+     */
+    private <T extends Enum<T>> T parseEnum(Class<T> enumType, Object value) {
+        if (value == null) return null;
+        String strVal = value.toString().trim().toUpperCase().replace(" ", "_").replace("-", "_");
+        if (strVal.isEmpty()) return null;
+        return Enum.valueOf(enumType, strVal);
+    }
 
     public List<Suggestion> getAllSuggestions() {
         return suggestionRepository.findAll();
