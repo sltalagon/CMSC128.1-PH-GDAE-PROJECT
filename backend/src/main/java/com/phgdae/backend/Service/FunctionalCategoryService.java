@@ -25,4 +25,9 @@ public class FunctionalCategoryService {
 
         return functionalCategoryRepository.save(functionalCategory);
     }
+
+    public FunctionalCategory getFunctionalCategoryById(String id) {
+        return functionalCategoryRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Functional Category not found with ID: " + id));
+    }
 }
