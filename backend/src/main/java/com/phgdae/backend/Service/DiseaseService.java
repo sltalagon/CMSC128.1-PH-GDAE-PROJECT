@@ -25,4 +25,9 @@ public class DiseaseService {
 
         return diseaseRepository.save(disease);
     }
+
+    public Disease getDiseaseById(String id) {
+        return diseaseRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Disease not found with ID: " + id));
+    }
 }
