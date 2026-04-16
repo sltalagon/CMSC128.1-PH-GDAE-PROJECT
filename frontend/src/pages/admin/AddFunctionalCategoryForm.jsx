@@ -5,6 +5,7 @@ import { X, Check, Tag } from "lucide-react";
 export function AddFunctionalCategoryForm({
   onClose,
   onCancel,
+  onSuccess,
   mode = "admin",
   suggestionMeta = null,
 }) {
@@ -36,7 +37,12 @@ export function AddFunctionalCategoryForm({
           description: formData.description,
         });
       }
-      onClose();
+      
+      if (onSuccess) {
+        onSuccess();
+      } else {
+        onClose();
+      }
     } catch (err) {
       setError(err.message || "An error occurred while saving.");
     } finally {

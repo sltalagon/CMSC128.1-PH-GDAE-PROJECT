@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { apiGet, apiPost } from "../../api/api";
 import { X, Check, Tag } from "lucide-react";
 
-export function AddGeneCategoryForm({ onClose, onCancel, mode = "admin", suggestionMeta = null }) {
+export function AddGeneCategoryForm({ onClose, onCancel, onSuccess, mode = "admin", suggestionMeta = null }) {
   const [formData, setFormData] = useState({
     geneId: "",
     categoryId: "",
@@ -53,7 +53,12 @@ export function AddGeneCategoryForm({ onClose, onCancel, mode = "admin", suggest
           functionalCategory: { categoryId: formData.categoryId },
         });
       }
-      onClose();
+      
+      if (onSuccess) {
+        onSuccess();
+      } else {
+        onClose();
+      }
     } 
     catch (err) {
       setError(err.message || "An unexpected error occurred.");

@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { X, Check, Database, AlertTriangle } from "lucide-react";
 import { apiPost } from "../../api/api"; 
 
-export function AddGeneForm({ onClose, onCancel, mode = "admin", suggestionMeta = null }) {
+export function AddGeneForm({ onClose, onCancel, onSuccess, mode = "admin", suggestionMeta = null }) {
   const [formData, setFormData] = useState({
     geneSymbol: "",
     fullGeneName: "",
@@ -42,7 +42,12 @@ export function AddGeneForm({ onClose, onCancel, mode = "admin", suggestionMeta 
         });
       }
 
-      onClose();
+      if (onSuccess) {
+        onSuccess();
+      } else {
+        onClose(); 
+      }
+      
     } catch (err) {
       if (err.message.includes("409")) {
         setDuplicate(true);

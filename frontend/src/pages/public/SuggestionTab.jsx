@@ -193,7 +193,7 @@ function SuggestionTab() {
                 className={`text-left p-4 rounded-xl border-2 transition-all ${
                   suggestionType === type.value
                     ? "border-blue-500 bg-blue-50"
-                    ? "border-gray-200 hover:border-blue-300 hover:bg-gray-50"
+                    : "border-gray-200 hover:border-blue-300 hover:bg-gray-50"
                 }`}
               >
                 <p className="font-semibold text-gray-900">{type.label}</p>

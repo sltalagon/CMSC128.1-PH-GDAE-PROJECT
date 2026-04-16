@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { X, Check, Activity, AlertTriangle } from "lucide-react";
 import { apiPost } from "../../api/api"; 
 
-export function AddDiseaseForm({ onClose, onCancel, mode = "admin", suggestionMeta = null }) {
+export function AddDiseaseForm({ onClose, onCancel, onSuccess, mode = "admin", suggestionMeta = null }) {
   const [formData, setFormData] = useState({
     diseaseName: "",
     diseaseCategory: "",
@@ -42,7 +42,11 @@ export function AddDiseaseForm({ onClose, onCancel, mode = "admin", suggestionMe
         });
       }
 
-      onClose();
+      if (onSuccess) {
+        onSuccess();
+      } else {
+        onClose();
+      }
     } catch (err) {
       if (err.message.includes("409")) {
         setDuplicate(true);
