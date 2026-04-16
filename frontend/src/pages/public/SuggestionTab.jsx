@@ -7,7 +7,7 @@ import { AddFunctionalCategoryForm } from "../admin/AddFunctionalCategoryForm";
 import { AddGeneCategoryForm } from "../admin/AddGeneCategoryForm";
 
 function SuggestionTab() {
-  const [step, setStep] = useState("info"); // "info" | "form" | "done"
+  const [step, setStep] = useState("info"); 
   const [suggestionType, setSuggestionType] = useState("");
   const [submitterInfo, setSubmitterInfo] = useState({
     submitterName: "",
@@ -39,7 +39,9 @@ function SuggestionTab() {
     if (validateInfo()) setStep("form");
   };
 
-  const handleFormClose = () => setStep("done");
+  const handleFormSuccess = () => setStep("done");
+  
+  const handleFormCancel = () => setStep("info");
 
   const resetForm = () => {
     setStep("info");
@@ -69,8 +71,9 @@ function SuggestionTab() {
 
   if (step === "form") {
     const formProps = {
-      onClose: handleFormClose,
-      onCancel: () => setStep("info"),
+      onClose: handleFormCancel,   
+      onCancel: handleFormCancel, 
+      onSuccess: handleFormSuccess, 
       mode: "suggestion",
       suggestionMeta: submitterInfo,
     };
@@ -99,7 +102,6 @@ function SuggestionTab() {
     );
   }
 
-  // step === "info"
   return (
     <div className="max-w-3xl mx-auto py-8 px-4">
       <div className="mb-8">
@@ -191,7 +193,7 @@ function SuggestionTab() {
                 className={`text-left p-4 rounded-xl border-2 transition-all ${
                   suggestionType === type.value
                     ? "border-blue-500 bg-blue-50"
-                    : "border-gray-200 hover:border-blue-300 hover:bg-gray-50"
+                    ? "border-gray-200 hover:border-blue-300 hover:bg-gray-50"
                 }`}
               >
                 <p className="font-semibold text-gray-900">{type.label}</p>
