@@ -25,4 +25,9 @@ public class GeneService {
 
         return geneRepository.save(gene);
     }
+
+    public Gene getGeneById(String id) {
+        return geneRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Gene not found with ID: " + id));
+    }
 }
