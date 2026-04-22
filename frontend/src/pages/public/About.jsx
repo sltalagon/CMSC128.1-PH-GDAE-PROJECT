@@ -4,12 +4,8 @@ const About = () => {
   return (
     <div className="max-w-4xl mx-auto py-8 px-4">
       <div className="mb-8">
-        <h2 className="text-2xl font-bold text-slate-900 mb-2">
-          About PH-GDAE
-        </h2>
-        <p className="text-slate-600">
-          Philippine Gene–Disease Association Explorer
-        </p>
+        <h2 className="text-2xl font-bold text-slate-900">About GANDA</h2>
+        <p className="text-slate-600">Gene and Disease Association</p>
       </div>
 
       {/* Mission Card */}
@@ -27,7 +23,7 @@ const About = () => {
         <div className="relative z-10 flex items-start gap-4">
           <Target size={32} className="mt-1 flex-shrink-0" />
           <div>
-            <h3 className="text-xl font-bold mb-2">Our Mission</h3>
+            <h3 className="text-3xl font-bold mb-2">Our Mission</h3>
             <p className="leading-relaxed opacity-90">
               To provide a centralized, accessible platform for exploring
               gene-disease relationships relevant to the Philippines population,
@@ -51,12 +47,11 @@ const About = () => {
         ></div>
         {/* Content */}
         <div className="relative z-10 flex items-start gap-4">
-          <AlertCircle
-            size={32}
-            className="text-orange-500 mt-1 flex-shrink-0"
-          />
+          <AlertCircle size={32} className="text-white mt-1 flex-shrink-0" />
           <div>
-            <h3 className="text-xl font-bold text-white mb-2">The Challenge</h3>
+            <h3 className="text-3xl font-bold text-white mb-2">
+              The Challenge
+            </h3>
             <p className="text-white leading-relaxed">
               In the Philippines, genetic and disease-related data are often
               fragmented across international databases, research publications,

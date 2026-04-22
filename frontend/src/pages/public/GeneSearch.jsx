@@ -9,7 +9,7 @@ const GeneSearch = () => {
   const [geneCategories, setGeneCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  
+
   // Search & Filter State
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedGeneTypes, setSelectedGeneTypes] = useState([]);
@@ -18,11 +18,12 @@ const GeneSearch = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [genesData, geneDiseaseData, geneCategoryData] = await Promise.all([
-          apiGet("/genes"),
-          apiGet("/genedisease"),
-          apiGet("/gene-categories"),
-        ]);
+        const [genesData, geneDiseaseData, geneCategoryData] =
+          await Promise.all([
+            apiGet("/genes"),
+            apiGet("/genedisease"),
+            apiGet("/gene-categories"),
+          ]);
 
         setGenes(genesData);
         setGeneDiseases(geneDiseaseData);
@@ -42,17 +43,18 @@ const GeneSearch = () => {
     geneDiseases.forEach((gd) => {
       const gId = gd.gene?.geneId;
       const disease = gd.disease;
-      
+
       if (gId && disease) {
         if (!map[gId]) map[gId] = [];
-        
+
         map[gId].push({
           name: disease.diseaseName,
           type: disease.diseaseCategory || "Unknown Category",
-          description: disease.diseaseDescription || "No description available.",
-          associationType: "Associated", 
+          description:
+            disease.diseaseDescription || "No description available.",
+          associationType: "Associated",
           confidence: "Verified",
-          references: [] 
+          references: [],
         });
       }
     });
@@ -70,9 +72,7 @@ const GeneSearch = () => {
   };
 
   // Extract unique gene types for the filter sidebar
-  const geneTypes = [
-    ...new Set(genes.map((g) => g.geneType).filter(Boolean)),
-  ];
+  const geneTypes = [...new Set(genes.map((g) => g.geneType).filter(Boolean))];
 
   const filteredGenes = useMemo(() => {
     const query = searchQuery.toLowerCase();
@@ -118,7 +118,10 @@ const GeneSearch = () => {
                 <span className="text-sm text-slate-700">All</span>
               </label>
               {geneTypes.map((type) => (
-                <label key={type} className="flex items-center gap-2 cursor-pointer">
+                <label
+                  key={type}
+                  className="flex items-center gap-2 cursor-pointer"
+                >
                   <input
                     type="radio"
                     name="geneType"
@@ -139,25 +142,32 @@ const GeneSearch = () => {
       {/* Main Content */}
       <div className="flex-1">
         <div className="mb-6">
-          <h2 className="text-2xl font-bold text-slate-900 mb-2">Gene Search</h2>
+          <h2 className="text-2xl font-bold text-slate-900">Gene Search</h2>
           <p className="text-slate-600">
-            Search for genes and explore their associated diseases relevant to the Philippines population.
+            Search for genes and explore their associated diseases relevant to
+            the Philippines population.
           </p>
         </div>
 
         <div className="bg-blue-50 border-l-4 border-blue-500 p-4 rounded-r-lg mb-6 flex gap-4">
           <Info className="text-blue-600 flex-shrink-0 mt-0.5" size={20} />
           <div>
-            <h4 className="font-semibold text-blue-900 text-sm">About Gene Search</h4>
+            <h4 className="font-semibold text-blue-900 text-sm">
+              About Gene Search
+            </h4>
             <p className="text-sm text-blue-800 mt-1">
-              Click on any gene card to view detailed information including gene type,
-              function, and associated diseases with prevalence data for the Philippines.
+              Click on any gene card to view detailed information including gene
+              type, function, and associated diseases with prevalence data for
+              the Philippines.
             </p>
           </div>
         </div>
 
         <div className="relative mb-6">
-          <Search className="absolute left-4 top-3.5 text-slate-400" size={20} />
+          <Search
+            className="absolute left-4 top-3.5 text-slate-400"
+            size={20}
+          />
           <input
             type="text"
             placeholder="Search by gene symbol, name, or description..."
@@ -174,14 +184,18 @@ const GeneSearch = () => {
         )}
 
         {loading ? (
-          <div className="text-center py-16 text-slate-500">Loading genes...</div>
+          <div className="text-center py-16 text-slate-500">
+            Loading genes...
+          </div>
         ) : filteredGenes.length === 0 ? (
-          <div className="text-center py-16 text-slate-500">No genes found.</div>
+          <div className="text-center py-16 text-slate-500">
+            No genes found.
+          </div>
         ) : (
           <div className="space-y-4">
             {filteredGenes.map((gene) => {
               const associatedDiseases = geneToDiseasesMap[gene.geneId] || [];
-              
+
               return (
                 <div
                   key={gene.geneId}
@@ -203,10 +217,14 @@ const GeneSearch = () => {
                         </span>
                       </div>
 
-                      <h4 className="font-semibold text-slate-900 mb-1">{gene.fullGeneName}</h4>
+                      <h4 className="font-semibold text-slate-900 mb-1">
+                        {gene.fullGeneName}
+                      </h4>
 
                       {gene.description && (
-                        <p className="text-slate-600 text-sm mb-3 line-clamp-2">{gene.description}</p>
+                        <p className="text-slate-600 text-sm mb-3 line-clamp-2">
+                          {gene.description}
+                        </p>
                       )}
 
                       {associatedDiseases.length > 0 && (
@@ -215,7 +233,10 @@ const GeneSearch = () => {
                             Associated Diseases:
                           </span>
                           {associatedDiseases.map((disease, idx) => (
-                            <span key={idx} className="bg-red-50 text-red-700 px-2 py-1 rounded text-xs font-medium border border-red-100">
+                            <span
+                              key={idx}
+                              className="bg-red-50 text-red-700 px-2 py-1 rounded text-xs font-medium border border-red-100"
+                            >
                               {disease.name}
                             </span>
                           ))}
@@ -231,19 +252,25 @@ const GeneSearch = () => {
         )}
       </div>
 
-      <GeneModal 
-        isOpen={!!selectedGene} 
-        onClose={() => setSelectedGene(null)} 
-        geneData={selectedGene ? {
-          symbol: selectedGene.geneSymbol,
-          name: selectedGene.fullGeneName,
-          chromosome: selectedGene.chromosomeLocation || "Location N/A",
-          ncbiId: selectedGene.ncbiId || "N/A",
-          omimId: selectedGene.omimId || "N/A",
-          description: selectedGene.description || "No description provided.",
-          associatedDiseases: geneToDiseasesMap[selectedGene.geneId] || [],
-          functionalCategories: getCategoriesForGene(selectedGene.geneId)
-        } : null} 
+      <GeneModal
+        isOpen={!!selectedGene}
+        onClose={() => setSelectedGene(null)}
+        geneData={
+          selectedGene
+            ? {
+                symbol: selectedGene.geneSymbol,
+                name: selectedGene.fullGeneName,
+                chromosome: selectedGene.chromosomeLocation || "Location N/A",
+                ncbiId: selectedGene.ncbiId || "N/A",
+                omimId: selectedGene.omimId || "N/A",
+                description:
+                  selectedGene.description || "No description provided.",
+                associatedDiseases:
+                  geneToDiseasesMap[selectedGene.geneId] || [],
+                functionalCategories: getCategoriesForGene(selectedGene.geneId),
+              }
+            : null
+        }
       />
     </div>
   );

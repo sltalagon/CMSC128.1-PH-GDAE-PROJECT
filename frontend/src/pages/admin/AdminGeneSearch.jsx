@@ -15,11 +15,12 @@ const AdminGeneSearch = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [genesData, geneDiseaseData, geneCategoriesData] = await Promise.all([
-          apiGet("/genes"),
-          apiGet("/genedisease"),
-          apiGet("/gene-categories"),
-        ]);
+        const [genesData, geneDiseaseData, geneCategoriesData] =
+          await Promise.all([
+            apiGet("/genes"),
+            apiGet("/genedisease"),
+            apiGet("/gene-categories"),
+          ]);
         setGenes(genesData);
         setGeneDiseases(geneDiseaseData);
         setGeneCategories(geneCategoriesData);
@@ -37,10 +38,10 @@ const AdminGeneSearch = () => {
     geneDiseases.forEach((gd) => {
       const gId = gd.gene?.geneId;
       const disease = gd.disease;
-      
+
       if (gId && disease) {
         if (!map[gId]) map[gId] = [];
-        
+
         map[gId].push({
           diseaseId: disease.diseaseId,
           name: disease.diseaseName,
@@ -48,10 +49,11 @@ const AdminGeneSearch = () => {
           category: disease.diseaseCategory || "N/A",
           prevalence: disease.phPrevalence || "NONE",
           inheritance: disease.inheritancePattern || "N/A",
-          description: disease.diseaseDescription || "No description available.",
-          associationType: gd.associationType || "Associated", 
+          description:
+            disease.diseaseDescription || "No description available.",
+          associationType: gd.associationType || "Associated",
           confidence: "Verified",
-          references: [] 
+          references: [],
         });
       }
     });
@@ -74,7 +76,7 @@ const AdminGeneSearch = () => {
       (gene) =>
         gene.geneSymbol?.toLowerCase().includes(query) ||
         gene.fullGeneName?.toLowerCase().includes(query) ||
-        gene.description?.toLowerCase().includes(query)
+        gene.description?.toLowerCase().includes(query),
     );
   }, [genes, searchQuery]);
 
@@ -89,14 +91,14 @@ const AdminGeneSearch = () => {
       description: gene.description || "No description provided.",
       biologicalFunction: gene.function || "Function details not available.",
       associatedDiseases: geneToDiseasesMap[gene.geneId] || [],
-      functionalCategories: getCategoriesForGene(gene.geneId)
+      functionalCategories: getCategoriesForGene(gene.geneId),
     });
   };
 
   return (
     <div className="max-w-5xl mx-auto py-8 px-4 relative">
       <div className="mb-8">
-        <h2 className="text-2xl font-bold text-slate-900 mb-2">Gene Search</h2>
+        <h2 className="text-2xl font-bold text-slate-900">Gene Search</h2>
         <p className="text-slate-600">
           Search for genes and explore their associated diseases relevant to the
           Philippines population.
@@ -163,7 +165,7 @@ const AdminGeneSearch = () => {
                     <h4 className="font-semibold text-slate-900 mb-1">
                       {gene.fullGeneName}
                     </h4>
-                    
+
                     {gene.description && (
                       <p className="text-slate-600 text-sm mb-3 line-clamp-2">
                         {gene.description}
@@ -176,7 +178,10 @@ const AdminGeneSearch = () => {
                           Associated Diseases:
                         </span>
                         {associatedDiseases.map((disease, idx) => (
-                          <span key={idx} className="bg-red-50 text-red-700 px-2 py-1 rounded text-xs font-medium border border-red-100">
+                          <span
+                            key={idx}
+                            className="bg-red-50 text-red-700 px-2 py-1 rounded text-xs font-medium border border-red-100"
+                          >
                             {disease.name}
                           </span>
                         ))}
