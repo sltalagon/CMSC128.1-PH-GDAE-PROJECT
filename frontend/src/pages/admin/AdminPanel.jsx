@@ -1,14 +1,8 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import {
-  Database,
-  Activity,
-  Link,
-  Plus,
-  Tag,
-} from "lucide-react";
+import { Database, Activity, Link, Plus, Tag } from "lucide-react";
 
-import { apiGet } from "../../api/api"; 
+import { apiGet } from "../../api/api";
 
 import { AddGeneForm } from "./AddGeneForm";
 import { AddDiseaseForm } from "./AddDiseaseForm";
@@ -107,9 +101,7 @@ const AdminPanel = () => {
     <div className="max-w-7xl mx-auto py-8 px-4 relative">
       <div className="mb-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
-          <h2 className="text-2xl font-bold text-slate-900 mb-2">
-            Admin Panel
-          </h2>
+          <h2 className="text-2xl font-bold text-slate-900">Admin Panel</h2>
           <p className="text-slate-600">
             Manage and explore genes, diseases, associations, and research
             references.

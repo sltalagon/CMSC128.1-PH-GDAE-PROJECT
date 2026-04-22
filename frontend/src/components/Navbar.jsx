@@ -1,9 +1,11 @@
-import React from "react";
+import React, { useState } from "react";
 import { NavLink } from "react-router-dom";
-import { Search, Shield, Lightbulb, BookOpen } from "lucide-react";
-import logo from "../assets/logot.png"; // Make sure this path is correct!
+import { Search, Shield, Lightbulb, BookOpen, Menu, X } from "lucide-react";
+import logo from "../assets/FinalLogo.png";
 
 const Navbar = () => {
+  const [isOpen, setIsOpen] = useState(false);
+
   const navItems = [
     { name: "Gene Search", path: "/", icon: <Search size={18} /> },
     { name: "Disease Search", path: "/diseases", icon: <Search size={18} /> },
@@ -11,19 +13,16 @@ const Navbar = () => {
     { name: "About", path: "/about", icon: <BookOpen size={18} /> },
   ];
 
-  // Consistent pill styling for all nav links
   const getLinkClassName = ({ isActive }) =>
-    `flex items-center gap-2 px-6 py-3 rounded-full text-sm font-bold transition-all duration-200 ${
+    `flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-semibold transition-all duration-300 ${
       isActive
-        ? "bg-blue-600 text-white shadow-lg shadow-blue-200 ring-2 ring-blue-100"
-        : "bg-gray-100 text-slate-600 hover:bg-gray-200 hover:text-slate-900"
+        ? "bg-blue-600 text-white shadow-md shadow-blue-200"
+        : "bg-white/60 backdrop-blur-md text-slate-700 hover:bg-blue-100 hover:shadow-sm"
     }`;
 
   return (
     <div className="w-full font-sans">
-      {/* Top Banner: Purple/Blue Gradient with Pattern */}
       <div className="relative bg-gradient-to-r from-blue-600 to-purple-600 text-white overflow-hidden">
-        {/* Background Pattern */}
         <div
           className="absolute inset-0 opacity-10 pointer-events-none"
           style={{
@@ -32,67 +31,93 @@ const Navbar = () => {
         ></div>
 
         <div className="max-w-7xl mx-auto px-6 py-10 relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
-          
-          {/* Logo and Title */}
-          <div className="flex items-center gap-4">
-            <div className="bg-white rounded-full p-2 flex items-center justify-center shadow-md">
+          <div className="flex items-center gap-4 -mt-5">
+            <div className="bg-white rounded-full p-2 shadow-md">
               <img
                 src={logo}
                 className="h-24 w-24 object-contain rounded-full"
-                alt="PH-GDAE Logo"
+                alt="Logo"
               />
             </div>
             <div>
-              <h1 className="text-4xl font-extrabold tracking-tight">
-                PH-GDAE
+              <h1 className="text-3xl md:text-5xl font-extrabold tracking-tight">
+                GANDA
               </h1>
-              <p className="text-blue-100 font-medium opacity-90 mt-1">
-                Philippine Gene–Disease Association Explorer
+              <p className="text-blue-100 opacity-90">
+                Gene and Disease Association
               </p>
             </div>
           </div>
 
-          {/* Location Badge (Email removed from here) */}
-          <div className="flex items-center gap-3">
+          <div
+            className="flex items-center gap-3 
+                order-[-1] md:order-none 
+                mb-2 md:mb-0"
+          >
             <div className="flex items-center gap-2 bg-white/20 backdrop-blur-md px-4 py-2 rounded-full border border-white/30 text-sm font-semibold shadow-sm">
-              <span>🇵🇭</span> Philippine Focus
+              🇵🇭 Philippine Focus
             </div>
           </div>
         </div>
 
-        {/* The White Bottom Curve */}
         <div
           className="absolute bottom-0 left-0 right-0 h-8 bg-white"
           style={{ borderRadius: "100% 100% 0 0 / 100% 100% 0 0" }}
         ></div>
       </div>
 
-      {/* Navigation: Pill Buttons */}
-      <nav className="bg-white pb-6 pt-2 border-b border-gray-100 shadow-sm">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="flex flex-wrap items-center justify-between gap-4">
-            
-            {/* Left Side: Main Links */}
-            <div className="flex flex-wrap gap-3">
-              {navItems.map((item) => (
-                <NavLink
-                  key={item.name}
-                  to={item.path}
-                  end={item.path === "/"} // Prevents Home from staying active on sub-pages
-                  className={getLinkClassName}
-                >
-                  {item.icon}
-                  {item.name}
-                </NavLink>
-              ))}
-            </div>
+      <nav className="bg-white/80 backdrop-blur-md border-b border-gray-100 shadow-sm sticky top-0 z-50">
+        <div className="max-w-7xl mx-auto px-6 py-3">
+          <div className="flex justify-between items-center md:hidden">
+            <span className="text-lg font-semibold text-slate-700">Menu</span>
 
-            {/* Right Side: Admin Access Link */}
-            <NavLink to="/admin/login" className={getLinkClassName}>
-              <Shield size={18} className="text-slate-500" />
-              Admin Access
-            </NavLink>
-            
+            <button
+              onClick={() => setIsOpen(!isOpen)}
+              className="p-2 rounded-xl bg-white shadow hover:scale-105 transition"
+            >
+              {isOpen ? <X size={20} /> : <Menu size={20} />}
+            </button>
+          </div>
+
+          <div
+            className={`transform transition-all duration-300 ease-in-out origin-top
+            ${
+              isOpen
+                ? "opacity-100 scale-100 mt-4"
+                : "opacity-0 scale-95 h-0 overflow-hidden"
+            }
+            md:opacity-100 md:scale-100 md:h-auto md:overflow-visible md:mt-0
+          `}
+          >
+            <div
+              className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 
+                            bg-white/70 backdrop-blur-xl md:bg-transparent 
+                            rounded-2xl md:rounded-none p-4 md:p-0 shadow-lg md:shadow-none"
+            >
+              <div className="flex flex-col md:flex-row gap-3">
+                {navItems.map((item) => (
+                  <NavLink
+                    key={item.name}
+                    to={item.path}
+                    end={item.path === "/"}
+                    className={getLinkClassName}
+                    onClick={() => setIsOpen(false)}
+                  >
+                    {item.icon}
+                    {item.name}
+                  </NavLink>
+                ))}
+              </div>
+
+              <NavLink
+                to="/admin/login"
+                className={getLinkClassName}
+                onClick={() => setIsOpen(false)}
+              >
+                <Shield size={18} />
+                Admin Access
+              </NavLink>
+            </div>
           </div>
         </div>
       </nav>

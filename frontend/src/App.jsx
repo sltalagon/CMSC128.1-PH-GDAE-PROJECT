@@ -19,7 +19,7 @@ import AdminGeneSearch from "./pages/admin/AdminGeneSearch";
 import AdminDiseaseSearch from "./pages/admin/AdminDiseaseSearch";
 import { Outlet } from "react-router-dom";
 
-import { checkAuthStatus } from "./api/api"; 
+import { checkAuthStatus } from "./api/api";
 
 const PublicLayout = () => (
   <div className="min-h-screen bg-slate-50">
@@ -64,7 +64,11 @@ const ProtectedRoute = ({ children }) => {
     );
   }
 
-  return authState === "auth" ? children : <Navigate replace to="/admin/login" />;
+  return authState === "auth" ? (
+    children
+  ) : (
+    <Navigate replace to="/admin/login" />
+  );
 };
 
 function App() {
