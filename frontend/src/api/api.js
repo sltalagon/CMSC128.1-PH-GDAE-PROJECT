@@ -1,28 +1,13 @@
 // src/api/api.js
-// Central API utility — uses JWT from localStorage instead of session cookies
+// Central API utility — uses session cookie from Google OAuth2 login
 
 const API_BASE = `${import.meta.env.VITE_API_URL || "http://localhost:8080"}/api`;
-
-// Helper to build headers and attach the JWT
-const getHeaders = (isJson = false) => {
-  const token = localStorage.getItem("jwt");
-  const headers = {};
-  
-  if (token) {
-    headers["Authorization"] = `Bearer ${token}`;
-  }
-  if (isJson) {
-    headers["Content-Type"] = "application/json";
-  }
-  
-  return headers;
-};
 
 // GET request
 export const apiGet = async (endpoint) => {
   const response = await fetch(`${API_BASE}${endpoint}`, {
     method: "GET",
-    headers: getHeaders(), // Attached here
+    credentials: "include",
   });
   if (!response.ok) {
     throw new Error(`GET ${endpoint} failed: ${response.status}`);
@@ -34,7 +19,8 @@ export const apiGet = async (endpoint) => {
 export const apiPost = async (endpoint, body) => {
   const response = await fetch(`${API_BASE}${endpoint}`, {
     method: "POST",
-    headers: getHeaders(true), // JSON + Token
+    headers: { "Content-Type": "application/json" },
+    credentials: "include",
     body: JSON.stringify(body),
   });
   if (!response.ok) {
@@ -53,7 +39,8 @@ export const apiPost = async (endpoint, body) => {
 export const apiPut = async (endpoint, body) => {
   const response = await fetch(`${API_BASE}${endpoint}`, {
     method: "PUT",
-    headers: getHeaders(true),
+    headers: { "Content-Type": "application/json" },
+    credentials: "include",
     body: JSON.stringify(body),
   });
   if (!response.ok) {
@@ -72,7 +59,8 @@ export const apiPut = async (endpoint, body) => {
 export const apiPatch = async (endpoint, body) => {
   const response = await fetch(`${API_BASE}${endpoint}`, {
     method: "PATCH",
-    headers: getHeaders(true),
+    headers: { "Content-Type": "application/json" },
+    credentials: "include",
     body: JSON.stringify(body),
   });
   if (!response.ok) {
@@ -91,12 +79,14 @@ export const apiPatch = async (endpoint, body) => {
 export const apiDelete = async (endpoint) => {
   const response = await fetch(`${API_BASE}${endpoint}`, {
     method: "DELETE",
-    headers: getHeaders(true),
+    headers: { "Content-Type": "application/json" },
+    credentials: "include",
   });
   if (!response.ok) {
     throw new Error(`DELETE ${endpoint} failed: ${response.status}`);
   }
   
+  // Some DELETE endpoints return no content (204)
   if (response.status === 204) return null;
   
   const contentType = response.headers.get("content-type");
@@ -113,23 +103,12 @@ export const loginWithGoogle = () => {
   window.location.href = `${baseUrl}/oauth2/authorization/google`;
 };
 
-// Helper to log out
-export const logout = () => {
-  localStorage.removeItem("jwt");
-  window.location.href = "/admin/login"; 
-};
-
 // Helper to check if user is logged in
 export const checkAuthStatus = async () => {
-  if (!localStorage.getItem("jwt")) {
-    return false;
-  }
-
   try {
     await apiGet("/admin/me");
     return true;
   } catch {
-    localStorage.removeItem("jwt"); 
     return false;
   }
 };
