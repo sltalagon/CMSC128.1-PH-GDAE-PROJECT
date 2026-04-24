@@ -4,47 +4,50 @@ import com.phgdae.backend.Disease.Disease;
 import com.phgdae.backend.Genes.Gene;
 import com.phgdae.backend.enums.AssociationType;
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
 
 @Entity
 @Table(name = "gene_disease_associations")
-@Getter @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 public class GeneDisease {
 
     @Id
-    @Column(name = "gene_disease_id", length = 10) // Format: GDAXXX
+    @Column(name = "gene_disease_id", length = 10)
     private String geneDiseaseId;
 
     @ManyToOne
-    @JoinColumn(name = "gene_id", nullable = false) // FK to Gene
+    @JoinColumn(name = "gene_id", nullable = false)
     private Gene gene;
 
     @ManyToOne
-    @JoinColumn(name = "disease_id", nullable = false) // FK to Disease
+    @JoinColumn(name = "disease_id", nullable = false)
     private Disease disease;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "association_type", nullable = false) // ENUM: predisposition, driver, etc.
+    @Column(name = "association_type", nullable = false)
     private AssociationType associationType;
 
-    @Column(name = "citation_description", columnDefinition = "TEXT") //
+    @Column(name = "citation_description", columnDefinition = "TEXT")
     private String citationDescription;
 
-    @Column(name = "citation_url", nullable = false) //
+    @Column(name = "citation_url", nullable = false)
     private String citationUrl;
 
-    public void setGene(Gene gene) {
-        this.gene = gene;
-    }
+    // Getters
+    public String getGeneDiseaseId() { return geneDiseaseId; }
+    public Gene getGene() { return gene; }
+    public Disease getDisease() { return disease; }
+    public AssociationType getAssociationType() { return associationType; }
+    public String getCitationDescription() { return citationDescription; }
+    public String getCitationUrl() { return citationUrl; }
 
-    public void setCitationUrl(String citationUrl) {
-        this.citationUrl = citationUrl;
-    }
-
-    public void setCitationDescription(String citationDescription) {
-        this.citationDescription = citationDescription;
-    }
-
+    // Setters
+    public void setGeneDiseaseId(String geneDiseaseId) { this.geneDiseaseId = geneDiseaseId; }
+    public void setGene(Gene gene) { this.gene = gene; }
+    public void setDisease(Disease disease) { this.disease = disease; }
+    public void setAssociationType(AssociationType associationType) { this.associationType = associationType; }
+    public void setCitationDescription(String citationDescription) { this.citationDescription = citationDescription; }
+    public void setCitationUrl(String citationUrl) { this.citationUrl = citationUrl; }
 }

@@ -3,12 +3,12 @@ package com.phgdae.backend.Disease;
 import com.phgdae.backend.enums.DiseaseCategory;
 import com.phgdae.backend.enums.Prevalence;
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
 import java.math.BigDecimal;
 
 @Entity
 @Table(name = "diseases")
-@Getter @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 public class Disease {
@@ -31,22 +31,27 @@ public class Disease {
     private BigDecimal omimId;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "ph_prevalence") // ENUM: High, Medium, Low, None
+    @Column(name = "ph_prevalence")
     private Prevalence phPrevalence;
 
     @Column(columnDefinition = "TEXT", nullable = false)
     private String description;
 
-    public void setPhPrevalence(com.phgdae.backend.enums.Prevalence phPrevalence) {
-        this.phPrevalence = phPrevalence;
-    }
+    // Getters
+    public String getDiseaseId() { return diseaseId; }
+    public String getDiseaseName() { return diseaseName; }
+    public DiseaseCategory getDiseaseCategory() { return diseaseCategory; }
+    public String getInheritancePattern() { return inheritancePattern; }
+    public BigDecimal getOmimId() { return omimId; }
+    public Prevalence getPhPrevalence() { return phPrevalence; }
+    public String getDescription() { return description; }
 
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
-    public void setOmimId(java.math.BigDecimal omimId) {
-        this.omimId = omimId;
-    }
-
+    // Setters
+    public void setDiseaseId(String diseaseId) { this.diseaseId = diseaseId; }
+    public void setDiseaseName(String diseaseName) { this.diseaseName = diseaseName; }
+    public void setDiseaseCategory(DiseaseCategory diseaseCategory) { this.diseaseCategory = diseaseCategory; }
+    public void setInheritancePattern(String inheritancePattern) { this.inheritancePattern = inheritancePattern; }
+    public void setOmimId(BigDecimal omimId) { this.omimId = omimId; }
+    public void setPhPrevalence(Prevalence phPrevalence) { this.phPrevalence = phPrevalence; }
+    public void setDescription(String description) { this.description = description; }
 }
