@@ -37,4 +37,16 @@ public class Disease {
     @Column(columnDefinition = "TEXT", nullable = false)
     private String description;
 
+    public void setPhPrevalence(com.phgdae.backend.enums.Prevalence phPrevalence) {
+        this.phPrevalence = phPrevalence;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public void setOmimId(java.math.BigDecimal omimId) {
+        this.omimId = omimId;
+    }
+
 }

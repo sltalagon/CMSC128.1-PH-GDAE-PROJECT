@@ -41,4 +41,27 @@ public class Gene {
     // Constraint: Can be null
     private String description;
 
+    public void setGeneSymbol(String geneSymbol) {
+        this.geneSymbol = geneSymbol;
+    }
+
+    public void setFullGeneName(String fullGeneName) {
+        this.fullGeneName = fullGeneName;
+    }
+
+    public void setGeneType(GeneType geneType) {
+        this.geneType = geneType;
+    }
+
+    public void setOmimId(java.math.BigDecimal omimId) {
+        this.omimId = omimId;
+    }
+
+    public void setNcbiId(String ncbiId) {
+        this.ncbiId = ncbiId;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
 }
