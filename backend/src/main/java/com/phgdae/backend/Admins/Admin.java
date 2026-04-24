@@ -2,14 +2,10 @@ package com.phgdae.backend.Admins;
 
 import com.phgdae.backend.enums.AdminRole;
 import jakarta.persistence.*;
-import lombok.*;
 import java.util.UUID;
 
 @Entity
 @Table(name = "admins")
-@Getter @Setter
-@NoArgsConstructor
-@AllArgsConstructor
 public class Admin {
 
     @Id
@@ -27,4 +23,25 @@ public class Admin {
     @Column(nullable = false, unique = true)
     private String username;
 
-}       
+    // Constructors
+    public Admin() {}
+
+    public Admin(UUID adminId, AdminRole role, String email, String username) {
+        this.adminId = adminId;
+        this.role = role;
+        this.email = email;
+        this.username = username;
+    }
+
+    // Getters
+    public UUID getAdminId() { return adminId; }
+    public AdminRole getRole() { return role; }
+    public String getEmail() { return email; }
+    public String getUsername() { return username; }
+
+    // Setters
+    public void setAdminId(UUID adminId) { this.adminId = adminId; }
+    public void setRole(AdminRole role) { this.role = role; }
+    public void setEmail(String email) { this.email = email; }
+    public void setUsername(String username) { this.username = username; }
+}
