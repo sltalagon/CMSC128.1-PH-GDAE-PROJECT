@@ -19,4 +19,12 @@ public class FunctionalCategory {
 
     @Column(columnDefinition = "TEXT")
     private String description;
+
+    public void setCitationUrl(String citationUrl) {
+        this.citationUrl = citationUrl;
+    }
+
+    public void setCitationDescription(String citationDescription) {
+        this.citationDescription = citationDescription;
+    }
 }

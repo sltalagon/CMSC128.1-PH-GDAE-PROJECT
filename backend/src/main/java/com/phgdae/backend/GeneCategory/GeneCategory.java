@@ -23,4 +23,12 @@ public class GeneCategory {
     @ManyToOne
     @JoinColumn(name = "category_id", nullable = false) // FK to FunctionalCategory
     private FunctionalCategory functionalCategory;
+
+    public void setCitationUrl(String citationUrl) {
+        this.citationUrl = citationUrl;
+    }
+
+    public void setCitationDescription(String citationDescription) {
+        this.citationDescription = citationDescription;
+    }
 }
