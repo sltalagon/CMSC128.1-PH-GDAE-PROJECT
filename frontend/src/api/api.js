@@ -5,7 +5,10 @@ const API_BASE = `${import.meta.env.VITE_API_URL || "http://localhost:8080"}/api
 
 // Token storage
 export const getToken = () => localStorage.getItem("jwt");
-export const setToken = (token) => localStorage.setItem("jwt", token);
+export const setToken = (token) => {
+  removeToken(); 
+  localStorage.setItem("jwt", token);
+};
 export const removeToken = () => localStorage.removeItem("jwt");
 
 // Helper to build auth headers
@@ -87,10 +90,17 @@ export const apiDelete = async (endpoint) => {
   return parseResponse(response);
 };
 
-// Helper to trigger Google login
+// Helper to trigger Google login — clears old session first
 export const loginWithGoogle = () => {
+  removeToken(); 
   const baseUrl = API_BASE.replace(/\/api$/, "");
-  window.location.href = `${baseUrl}/oauth2/authorization/google`;
+  window.location.href = `${baseUrl}/oauth2/authorization/google?prompt=select_account`;
+};
+
+// Helper to log out — clears token and redirects
+export const logout = () => {
+  removeToken();
+  window.location.href = "/admin/login";
 };
 
 // Helper to check if user is logged in
