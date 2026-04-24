@@ -96,12 +96,14 @@ public class SecurityConfig {
 
                 OidcUser oidcUser = (OidcUser) authentication.getPrincipal();
                 String email = oidcUser.getEmail();
+                String name = oidcUser.getFullName();
+                String picture = oidcUser.getAttribute("picture");
 
                 boolean isSuperAdmin = authentication.getAuthorities().stream()
                         .anyMatch(a -> a.getAuthority().equals("ROLE_SUPER_ADMIN"));
 
                 String role = isSuperAdmin ? "ROLE_SUPER_ADMIN" : "ROLE_MANAGER";
-                String token = jwtUtil.generateToken(email, role);
+                String token = jwtUtil.generateToken(email, role, name, picture != null ? picture : "");
 
                 return isSuperAdmin
                         ? frontendUrl + "/superadmin?token=" + token
