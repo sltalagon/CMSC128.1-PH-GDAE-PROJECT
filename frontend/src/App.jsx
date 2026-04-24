@@ -3,8 +3,11 @@ import {
   Routes,
   Route,
   Navigate,
+  Outlet
 } from "react-router-dom";
 import { useState, useEffect } from "react";
+import { jwtDecode } from "jwt-decode"; // Ensure you run: npm install jwt-decode
+
 import Navbar from "./components/Navbar";
 import AdminNavbar from "./components/AdminNavbar";
 import GeneSearch from "./pages/public/GeneSearch";
@@ -17,7 +20,6 @@ import SuggestionTab from "./pages/public/SuggestionTab";
 import SuperAdminPanel from "./pages/admin/SuperAdminPanel";
 import AdminGeneSearch from "./pages/admin/AdminGeneSearch";
 import AdminDiseaseSearch from "./pages/admin/AdminDiseaseSearch";
-import { Outlet } from "react-router-dom";
 
 import { checkAuthStatus } from "./api/api";
 
@@ -39,25 +41,43 @@ const AdminLayout = () => (
   </div>
 );
 
-const ProtectedRoute = ({ children }) => {
-  const [authState, setAuthState] = useState("loading");
+// MODIFIED: ProtectedRoute now accepts an 'allowedRole'
+const ProtectedRoute = ({ children, allowedRole }) => {
+  const [authState, setAuthState] = useState({
+    status: "loading",
+    role: null
+  });
 
   useEffect(() => {
     const queryParams = new URLSearchParams(window.location.search);
-    const token = queryParams.get("token");
-    if (token) {
-      localStorage.setItem("jwt", token);
+    const tokenFromUrl = queryParams.get("token");
+    
+    if (tokenFromUrl) {
+      localStorage.setItem("jwt", tokenFromUrl);
+      // Clean URL without refreshing
       window.history.replaceState({}, document.title, window.location.pathname);
     }
 
+    const token = localStorage.getItem("jwt");
+
     checkAuthStatus()
       .then((isAuthenticated) => {
-        setAuthState(isAuthenticated ? "auth" : "unauth");
+        if (isAuthenticated && token) {
+          try {
+            const decoded = jwtDecode(token);
+            // Ensure "role" matches the key you used in Java: jwtUtil.generateToken(..., role, ...)
+            setAuthState({ status: "auth", role: decoded.role });
+          } catch (error) {
+            setAuthState({ status: "unauth", role: null });
+          }
+        } else {
+          setAuthState({ status: "unauth", role: null });
+        }
       })
-      .catch(() => setAuthState("unauth"));
+      .catch(() => setAuthState({ status: "unauth", role: null }));
   }, []);
 
-  if (authState === "loading") {
+  if (authState.status === "loading") {
     return (
       <div className="min-h-screen flex items-center justify-center bg-slate-50">
         <div className="text-lg font-medium text-slate-500 animate-pulse">
@@ -67,11 +87,16 @@ const ProtectedRoute = ({ children }) => {
     );
   }
 
-  return authState === "auth" ? (
-    children
-  ) : (
-    <Navigate replace to="/admin/login" />
-  );
+  if (authState.status === "unauth") {
+    return <Navigate replace to="/admin/login" />;
+  }
+
+  if (allowedRole && authState.role !== allowedRole) {
+    const redirectPath = authState.role === "ROLE_SUPER_ADMIN" ? "/superadmin" : "/admin";
+    return <Navigate replace to={redirectPath} />;
+  }
+
+  return children;
 };
 
 function App() {
@@ -88,15 +113,29 @@ function App() {
 
         {/* --- ADMIN ROUTES --- */}
         <Route path="/admin/login" element={<AdminLogin />} />
+        
         <Route element={<AdminLayout />}>
+          {/* Dashboard for Managers only */}
           <Route
             path="/admin"
             element={
-              <ProtectedRoute>
+              <ProtectedRoute allowedRole="ROLE_MANAGER">
                 <AdminPanel />
               </ProtectedRoute>
             }
           />
+
+          {/* Panel for Super Admins only */}
+          <Route
+            path="/superadmin"
+            element={
+              <ProtectedRoute allowedRole="ROLE_SUPER_ADMIN">
+                <SuperAdminPanel />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Shared Admin Routes - Any authenticated admin can access these */}
           <Route
             path="/admin/gene-search"
             element={
@@ -114,14 +153,6 @@ function App() {
             }
           />
           <Route
-            path="/superadmin"
-            element={
-              <ProtectedRoute>
-                <SuperAdminPanel />
-              </ProtectedRoute>
-            }
-          />
-          <Route
             path="/admin/suggestions"
             element={
               <ProtectedRoute>
@@ -131,6 +162,7 @@ function App() {
           />
         </Route>
 
+        {/* Catch-all redirect */}
         <Route path="*" element={<Navigate to="/" />} />
       </Routes>
     </Router>
