@@ -43,13 +43,16 @@ const ProtectedRoute = ({ children }) => {
   const [authState, setAuthState] = useState("loading");
 
   useEffect(() => {
+    const queryParams = new URLSearchParams(window.location.search);
+    const token = queryParams.get("token");
+    if (token) {
+      localStorage.setItem("jwt", token);
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
+
     checkAuthStatus()
       .then((isAuthenticated) => {
-        if (isAuthenticated) {
-          setAuthState("auth");
-        } else {
-          setAuthState("unauth");
-        }
+        setAuthState(isAuthenticated ? "auth" : "unauth");
       })
       .catch(() => setAuthState("unauth"));
   }, []);
