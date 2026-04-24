@@ -3,8 +3,7 @@ package com.phgdae.backend.Admins;
 import com.phgdae.backend.Service.AdminService;
 import com.phgdae.backend.enums.AdminRole;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.oauth2.core.user.OAuth2User;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
@@ -53,18 +52,20 @@ public class AdminController {
     }
 
     @GetMapping("/me")
-    public ResponseEntity<Map<String, Object>> getCurrentAdmin(@AuthenticationPrincipal OAuth2User principal) {
-        if (principal == null) {
+    public ResponseEntity<Map<String, Object>> getCurrentAdmin(Authentication authentication) {
+        if (authentication == null || !authentication.isAuthenticated()) {
             return ResponseEntity.status(401).build();
         }
 
-        Map<String, Object> attributes = new HashMap<>(principal.getAttributes());
+        String email = authentication.getName();
+        Map<String, Object> response = new HashMap<>();
+        response.put("email", email);
 
-        String email = (String) attributes.get("email");
         adminService.findByEmail(email).ifPresent(admin -> {
-            attributes.put("role", admin.getRole().name());
+            response.put("role", admin.getRole().name());
+            response.put("username", admin.getUsername()); 
         });
 
-        return ResponseEntity.ok(attributes);
+        return ResponseEntity.ok(response);
     }
 }
