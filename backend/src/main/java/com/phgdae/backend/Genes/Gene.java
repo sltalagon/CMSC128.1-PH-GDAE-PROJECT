@@ -2,14 +2,12 @@ package com.phgdae.backend.Genes;
 
 import com.phgdae.backend.enums.GeneType;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 import java.math.BigDecimal;
 
 @Entity
 @Table(name = "genes")
 @NoArgsConstructor
-@AllArgsConstructor
 public class Gene {
 
     @Id
@@ -34,6 +32,16 @@ public class Gene {
 
     @Column(name = "description", columnDefinition = "TEXT")
     private String description;
+
+    public Gene(String geneId, String geneSymbol, String fullGeneName, GeneType geneType, BigDecimal omimId, String ncbiId, String description) {
+        this.geneId = geneId;
+        this.geneSymbol = geneSymbol;
+        this.fullGeneName = fullGeneName;
+        this.geneType = geneType;
+        this.omimId = omimId;
+        this.ncbiId = ncbiId;
+        this.description = description;
+    }
 
     // Getters
     public String getGeneId() { return geneId; }

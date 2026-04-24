@@ -4,13 +4,11 @@ import com.phgdae.backend.Disease.Disease;
 import com.phgdae.backend.Genes.Gene;
 import com.phgdae.backend.enums.AssociationType;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 
 @Entity
 @Table(name = "gene_disease_associations")
 @NoArgsConstructor
-@AllArgsConstructor
 public class GeneDisease {
 
     @Id
@@ -34,6 +32,16 @@ public class GeneDisease {
 
     @Column(name = "citation_url", nullable = false)
     private String citationUrl;
+
+    // All-args constructor used by seeder
+    public GeneDisease(String geneDiseaseId, Gene gene, Disease disease, AssociationType associationType, String citationDescription, String citationUrl) {
+        this.geneDiseaseId = geneDiseaseId;
+        this.gene = gene;
+        this.disease = disease;
+        this.associationType = associationType;
+        this.citationDescription = citationDescription;
+        this.citationUrl = citationUrl;
+    }
 
     // Getters
     public String getGeneDiseaseId() { return geneDiseaseId; }

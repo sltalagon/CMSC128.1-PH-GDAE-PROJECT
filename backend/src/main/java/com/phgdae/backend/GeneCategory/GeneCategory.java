@@ -3,34 +3,38 @@ package com.phgdae.backend.GeneCategory;
 import com.phgdae.backend.Genes.Gene;
 import com.phgdae.backend.Functional.FunctionalCategory;
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.NoArgsConstructor;
 
 @Entity
 @Table(name = "gene_categories")
-@Getter @Setter
 @NoArgsConstructor
-@AllArgsConstructor
 public class GeneCategory {
 
     @Id
-    @Column(name = "gene_category_id", length = 10) // Format: GCXXX
+    @Column(name = "gene_category_id", length = 10)
     private String geneCategoryId;
 
     @ManyToOne
-    @JoinColumn(name = "gene_id", nullable = false) // FK to Gene
+    @JoinColumn(name = "gene_id", nullable = false)
     private Gene gene;
 
     @ManyToOne
-    @JoinColumn(name = "category_id", nullable = false) // FK to FunctionalCategory
+    @JoinColumn(name = "category_id", nullable = false)
     private FunctionalCategory functionalCategory;
 
-    public void setGene(Gene gene) {
+    public GeneCategory(String geneCategoryId, Gene gene, FunctionalCategory functionalCategory) {
+        this.geneCategoryId = geneCategoryId;
         this.gene = gene;
-    }
-
-    public void setFunctionalCategory(FunctionalCategory functionalCategory) {
         this.functionalCategory = functionalCategory;
     }
 
+    // Getters
+    public String getGeneCategoryId() { return geneCategoryId; }
+    public Gene getGene() { return gene; }
+    public FunctionalCategory getFunctionalCategory() { return functionalCategory; }
 
+    // Setters
+    public void setGeneCategoryId(String geneCategoryId) { this.geneCategoryId = geneCategoryId; }
+    public void setGene(Gene gene) { this.gene = gene; }
+    public void setFunctionalCategory(FunctionalCategory functionalCategory) { this.functionalCategory = functionalCategory; }
 }

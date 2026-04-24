@@ -3,14 +3,12 @@ package com.phgdae.backend.Disease;
 import com.phgdae.backend.enums.DiseaseCategory;
 import com.phgdae.backend.enums.Prevalence;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 import java.math.BigDecimal;
 
 @Entity
 @Table(name = "diseases")
 @NoArgsConstructor
-@AllArgsConstructor
 public class Disease {
 
     @Id
@@ -36,6 +34,17 @@ public class Disease {
 
     @Column(columnDefinition = "TEXT", nullable = false)
     private String description;
+
+    public Disease(String diseaseId, String diseaseName, DiseaseCategory diseaseCategory,
+                   String inheritancePattern, BigDecimal omimId, Prevalence phPrevalence, String description) {
+        this.diseaseId = diseaseId;
+        this.diseaseName = diseaseName;
+        this.diseaseCategory = diseaseCategory;
+        this.inheritancePattern = inheritancePattern;
+        this.omimId = omimId;
+        this.phPrevalence = phPrevalence;
+        this.description = description;
+    }
 
     // Getters
     public String getDiseaseId() { return diseaseId; }

@@ -3,7 +3,6 @@ package com.phgdae.backend.Suggestion;
 import com.phgdae.backend.enums.SuggestionStatus;
 import com.phgdae.backend.enums.SuggestionType;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
@@ -11,7 +10,6 @@ import java.time.LocalDateTime;
 @Entity
 @Table(name = "suggestions")
 @NoArgsConstructor
-@AllArgsConstructor
 public class Suggestion {
 
     @Id
@@ -46,6 +44,22 @@ public class Suggestion {
 
     @Column(name = "reviewed_at")
     private LocalDateTime reviewedAt;
+
+    public Suggestion(String suggestionId, String submitterEmail, String submitterName,
+                      SuggestionType suggestionType, String content, String referenceUrl,
+                      SuggestionStatus status, String adminNotes,
+                      LocalDateTime submittedAt, LocalDateTime reviewedAt) {
+        this.suggestionId = suggestionId;
+        this.submitterEmail = submitterEmail;
+        this.submitterName = submitterName;
+        this.suggestionType = suggestionType;
+        this.content = content;
+        this.referenceUrl = referenceUrl;
+        this.status = status;
+        this.adminNotes = adminNotes;
+        this.submittedAt = submittedAt;
+        this.reviewedAt = reviewedAt;
+    }
 
     // Getters
     public String getSuggestionId() { return suggestionId; }
