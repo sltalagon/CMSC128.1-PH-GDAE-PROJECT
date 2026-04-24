@@ -35,12 +35,12 @@ public class GeneDisease {
     @Column(name = "citation_url", nullable = false) //
     private String citationUrl;
 
-    public void setCitationUrl(String citationUrl) {
-        this.citationUrl = citationUrl;
+    public void setDisease(Disease disease) {
+        this.disease = disease;
     }
 
-    public void setCitationDescription(String citationDescription) {
-        this.citationDescription = citationDescription;
+    public void setAssociationType(AssociationType associationType) {
+        this.associationType = associationType;
     }
-
+    
 }
