@@ -20,6 +20,17 @@ const SuperAdminPanel = () => {
   const [confirmDelete, setConfirmDelete] = useState(null);
 
   useEffect(() => {
+    // 1. Catch the token from the URL if it exists
+    const queryParams = new URLSearchParams(window.location.search);
+    const token = queryParams.get("token");
+
+    if (token) {
+      localStorage.setItem("jwt", token);
+      // Clean the URL
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
+
+    // 2. Fetch user data
     apiGet("/admin/me")
       .then(async (data) => {
         setAdminData(data);

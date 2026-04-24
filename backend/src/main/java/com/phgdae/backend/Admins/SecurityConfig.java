@@ -1,6 +1,8 @@
 package com.phgdae.backend.Admins;
 
 import com.phgdae.backend.enums.AdminRole;
+import com.phgdae.backend.security.JwtAuthenticationFilter;
+import com.phgdae.backend.security.JwtUtil;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -8,6 +10,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -21,6 +24,7 @@ import org.springframework.security.oauth2.core.oidc.user.OidcUser;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationFailureHandler;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -33,6 +37,8 @@ import java.util.List;
 public class SecurityConfig {
 
     private final AdminRepository adminRepository;
+    private final JwtUtil jwtUtil;
+    private final JwtAuthenticationFilter jwtAuthenticationFilter;
 
     @Value("${FRONTEND_URL:http://localhost:5173}")
     private String frontendUrl;
@@ -40,8 +46,10 @@ public class SecurityConfig {
     @Value("${BACKEND_URL:http://localhost:8080}")
     private String backendUrl;
 
-    public SecurityConfig(AdminRepository adminRepository) {
+    public SecurityConfig(AdminRepository adminRepository, JwtUtil jwtUtil, JwtAuthenticationFilter jwtAuthenticationFilter) {
         this.adminRepository = adminRepository;
+        this.jwtUtil = jwtUtil;
+        this.jwtAuthenticationFilter = jwtAuthenticationFilter;
     }
 
     @Bean
@@ -54,6 +62,8 @@ public class SecurityConfig {
         http
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .csrf(AbstractHttpConfigurer::disable)
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/**").permitAll()
@@ -84,12 +94,20 @@ public class SecurityConfig {
             protected String determineTargetUrl(jakarta.servlet.http.HttpServletRequest request,
                                                 jakarta.servlet.http.HttpServletResponse response,
                                                 org.springframework.security.core.Authentication authentication) {
+
+                OidcUser oidcUser = (OidcUser) authentication.getPrincipal();
+                String email = oidcUser.getEmail();
+
                 boolean isSuperAdmin = authentication.getAuthorities().stream()
                         .anyMatch(a -> a.getAuthority().equals("ROLE_SUPER_ADMIN"));
 
+                String role = isSuperAdmin ? "ROLE_SUPER_ADMIN" : "ROLE_MANAGER";
+
+                String token = jwtUtil.generateToken(email, role);
+
                 return isSuperAdmin
-                        ? frontendUrl + "/superadmin"
-                        : frontendUrl + "/admin";
+                        ? frontendUrl + "/superadmin?token=" + token
+                        : frontendUrl + "/admin?token=" + token;
             }
         };
     }
