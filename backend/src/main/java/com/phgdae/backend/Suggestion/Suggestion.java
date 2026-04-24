@@ -3,14 +3,14 @@ package com.phgdae.backend.Suggestion;
 import com.phgdae.backend.enums.SuggestionStatus;
 import com.phgdae.backend.enums.SuggestionType;
 import jakarta.persistence.*;
-import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "suggestions")
-@NoArgsConstructor
 public class Suggestion {
+
+    public Suggestion() {}
 
     @Id
     @Column(name = "suggestion_id", length = 10)

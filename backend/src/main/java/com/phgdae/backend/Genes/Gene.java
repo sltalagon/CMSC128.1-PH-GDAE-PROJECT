@@ -2,13 +2,13 @@ package com.phgdae.backend.Genes;
 
 import com.phgdae.backend.enums.GeneType;
 import jakarta.persistence.*;
-import lombok.NoArgsConstructor;
 import java.math.BigDecimal;
 
 @Entity
 @Table(name = "genes")
-@NoArgsConstructor
 public class Gene {
+
+    public Gene() {}
 
     @Id
     @Column(name = "gene_id", length = 10)

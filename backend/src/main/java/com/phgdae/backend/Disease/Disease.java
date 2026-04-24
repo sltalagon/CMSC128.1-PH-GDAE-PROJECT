@@ -3,13 +3,13 @@ package com.phgdae.backend.Disease;
 import com.phgdae.backend.enums.DiseaseCategory;
 import com.phgdae.backend.enums.Prevalence;
 import jakarta.persistence.*;
-import lombok.NoArgsConstructor;
 import java.math.BigDecimal;
 
 @Entity
 @Table(name = "diseases")
-@NoArgsConstructor
 public class Disease {
+
+    public Disease() {}
 
     @Id
     @Column(name = "disease_id", length = 10)

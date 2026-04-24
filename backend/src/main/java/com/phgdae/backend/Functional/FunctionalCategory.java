@@ -1,12 +1,12 @@
 package com.phgdae.backend.Functional;
 
 import jakarta.persistence.*;
-import lombok.NoArgsConstructor;
 
 @Entity
 @Table(name = "functional_categories")
-@NoArgsConstructor
 public class FunctionalCategory {
+
+    public FunctionalCategory() {}
 
     @Id
     @Column(name = "category_id", length = 10)

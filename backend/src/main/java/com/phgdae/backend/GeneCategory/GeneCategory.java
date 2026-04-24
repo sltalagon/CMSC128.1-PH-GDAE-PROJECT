@@ -3,12 +3,12 @@ package com.phgdae.backend.GeneCategory;
 import com.phgdae.backend.Genes.Gene;
 import com.phgdae.backend.Functional.FunctionalCategory;
 import jakarta.persistence.*;
-import lombok.NoArgsConstructor;
 
 @Entity
 @Table(name = "gene_categories")
-@NoArgsConstructor
 public class GeneCategory {
+
+    public GeneCategory() {}
 
     @Id
     @Column(name = "gene_category_id", length = 10)
