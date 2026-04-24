@@ -20,6 +20,10 @@ const SuperAdminPanel = () => {
   const [confirmDelete, setConfirmDelete] = useState(null);
 
   useEffect(() => {
+    setAdminData(null); 
+    setAdmins([]);
+    setIsLoading(true);
+
     apiGet("/admin/me")
       .then(async (data) => {
         setAdminData(data);
@@ -107,6 +111,10 @@ const SuperAdminPanel = () => {
               alt="Profile"
               className="w-10 h-10 rounded-full"
               referrerPolicy="no-referrer"
+              onError={(e) => {
+                e.target.onerror = null;
+                e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(adminData.name)}&background=dc2626&color=fff`;
+              }}
             />
             <div className="hidden sm:block">
               <p className="text-sm font-bold text-slate-900">{adminData.name}</p>

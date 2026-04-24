@@ -98,16 +98,24 @@ public class SecurityConfig {
                 String email = oidcUser.getEmail();
                 String name = oidcUser.getFullName();
                 String picture = oidcUser.getAttribute("picture");
-
+                
                 boolean isSuperAdmin = authentication.getAuthorities().stream()
                         .anyMatch(a -> a.getAuthority().equals("ROLE_SUPER_ADMIN"));
 
-                String role = isSuperAdmin ? "ROLE_SUPER_ADMIN" : "ROLE_MANAGER";
+                String role;
+                String targetPath;
+
+                if (isSuperAdmin) {
+                    role = "ROLE_SUPER_ADMIN";
+                    targetPath = "/superadmin";
+                } else {
+                    role = "ROLE_MANAGER";
+                    targetPath = "/admin";
+                }
+
                 String token = jwtUtil.generateToken(email, role, name, picture != null ? picture : "");
 
-                return isSuperAdmin
-                        ? frontendUrl + "/superadmin?token=" + token
-                        : frontendUrl + "/admin?token=" + token;
+                return frontendUrl + targetPath + "?token=" + token;
             }
         };
     }
@@ -144,7 +152,8 @@ public class SecurityConfig {
             Admin admin = adminRepository.findByEmail(email)
                     .orElseThrow(() -> new OAuth2AuthenticationException("Access Denied: Admin email not registered."));
 
-            String springRole = admin.getRole() == AdminRole.SUPER_ADMIN ? "ROLE_SUPER_ADMIN" : "ROLE_MANAGER";
+            String springRole = (admin.getRole() == AdminRole.SUPER_ADMIN) ? "ROLE_SUPER_ADMIN" : "ROLE_MANAGER";
+            
             List<GrantedAuthority> authorities = AuthorityUtils.createAuthorityList("ROLE_ADMIN", springRole);
 
             return new DefaultOidcUser(authorities, user.getIdToken(), user.getUserInfo());
