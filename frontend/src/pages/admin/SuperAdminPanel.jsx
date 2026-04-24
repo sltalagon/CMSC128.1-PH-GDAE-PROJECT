@@ -20,23 +20,6 @@ const SuperAdminPanel = () => {
   const [confirmDelete, setConfirmDelete] = useState(null);
 
   useEffect(() => {
-    const queryParams = new URLSearchParams(window.location.search);
-    const token = queryParams.get("token");
-
-    // 1. Set token FIRST before any API call
-    if (token) {
-      localStorage.setItem("jwt", token);
-      window.history.replaceState({}, document.title, window.location.pathname);
-    }
-
-    // 2. Guard — if no token exists at all, redirect immediately
-    const existingToken = localStorage.getItem("jwt");
-    if (!existingToken) {
-      navigate("/admin/login");
-      return;
-    }
-
-    // 3. Now safe to fetch
     apiGet("/admin/me")
       .then(async (data) => {
         setAdminData(data);

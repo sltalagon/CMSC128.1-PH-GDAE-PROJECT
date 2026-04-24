@@ -17,17 +17,6 @@ const AdminPanel = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // 1. Catch the token from the URL if it exists
-    const queryParams = new URLSearchParams(window.location.search);
-    const token = queryParams.get("token");
-
-    if (token) {
-      localStorage.setItem("jwt", token);
-      // Clean the URL
-      window.history.replaceState({}, document.title, window.location.pathname);
-    }
-
-    // 2. Fetch user data
     apiGet("/admin/me")
       .then((data) => {
         setAdminData(data);
@@ -163,9 +152,6 @@ const AdminPanel = () => {
         ))}
       </div>
 
-      {/* =========================================
-          POPUP MODALS (ONLY FOR THE ADD FORMS) 
-          ========================================= */}
       {activeView && activeView.startsWith("add") && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4 sm:p-6 overflow-y-auto">
           <div className="bg-white rounded-2xl shadow-2xl w-full max-w-3xl max-h-[90vh] overflow-y-auto relative animate-in fade-in zoom-in-95 duration-200">
