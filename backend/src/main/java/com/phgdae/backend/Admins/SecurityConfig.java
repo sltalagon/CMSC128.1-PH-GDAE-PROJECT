@@ -69,7 +69,6 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/suggestions").permitAll()
                         .requestMatchers("/login/**", "/oauth2/**").permitAll()
-                        .requestMatchers("/superadmin/**").hasRole("SUPER_ADMIN")
                         .requestMatchers("/api/admin/add", "/api/admin/remove/**", "/api/admin/all").hasRole("SUPER_ADMIN")
                         .anyRequest().hasRole("ADMIN")
                 )
@@ -102,7 +101,6 @@ public class SecurityConfig {
                         .anyMatch(a -> a.getAuthority().equals("ROLE_SUPER_ADMIN"));
 
                 String role = isSuperAdmin ? "ROLE_SUPER_ADMIN" : "ROLE_MANAGER";
-
                 String token = jwtUtil.generateToken(email, role);
 
                 return isSuperAdmin

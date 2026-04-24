@@ -33,9 +33,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
             if (jwtUtil.validateToken(token)) {
                 String email = jwtUtil.getEmailFromToken(token);
-                // Note: In a real app, you might extract the role directly from the token claims instead of hardcoding
+                String role = jwtUtil.getRoleFromToken(token);
+
                 UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
-                        email, null, AuthorityUtils.createAuthorityList("ROLE_ADMIN"));
+                        email, null, AuthorityUtils.createAuthorityList("ROLE_ADMIN", role));
                 auth.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                 SecurityContextHolder.getContext().setAuthentication(auth);
             }
