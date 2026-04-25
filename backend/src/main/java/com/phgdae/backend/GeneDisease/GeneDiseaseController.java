@@ -23,10 +23,33 @@ public class GeneDiseaseController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<GeneDisease> getGeneDiseaseById(@PathVariable String id) {
+    public ResponseEntity<GeneDisease> getGeneDiseaseById(@PathVariable("id") String id) {
         return geneDiseaseRepository.findById(id)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteGeneDisease(@PathVariable("id") String id) {
+        if (geneDiseaseRepository.existsById(id)) {
+            geneDiseaseRepository.deleteById(id);
+            return ResponseEntity.ok().build();
+        }
+        return ResponseEntity.notFound().build();
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<GeneDisease> updateGeneDisease(@PathVariable("id") String id, @RequestBody GeneDisease associationDetails) {
+        return geneDiseaseRepository.findById(id).map(existingAssociation -> {
+            existingAssociation.setGene(associationDetails.getGene());
+            existingAssociation.setDisease(associationDetails.getDisease());
+            existingAssociation.setAssociationType(associationDetails.getAssociationType());
+            existingAssociation.setCitationUrl(associationDetails.getCitationUrl());
+            existingAssociation.setCitationDescription(associationDetails.getCitationDescription());
+
+            geneDiseaseRepository.save(existingAssociation);
+            return ResponseEntity.ok(existingAssociation);
+        }).orElse(ResponseEntity.notFound().build());
     }
 
     @PostMapping

@@ -1,4 +1,4 @@
-package com.phgdae.backend.security;
+package com.phgdae.backend.Security;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;

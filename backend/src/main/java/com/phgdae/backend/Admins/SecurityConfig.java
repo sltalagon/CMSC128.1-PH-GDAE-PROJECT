@@ -1,12 +1,13 @@
 package com.phgdae.backend.Admins;
 
 import com.phgdae.backend.enums.AdminRole;
-import com.phgdae.backend.security.JwtAuthenticationFilter;
-import com.phgdae.backend.security.JwtUtil;
+import com.phgdae.backend.Security.JwtAuthenticationFilter;
+import com.phgdae.backend.Security.JwtUtil;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -22,6 +23,7 @@ import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.oauth2.core.oidc.user.DefaultOidcUser;
 import org.springframework.security.oauth2.core.oidc.user.OidcUser;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.HttpStatusEntryPoint;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationFailureHandler;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
@@ -64,13 +66,18 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+
+                // 1. UPDATED AUTHORIZATION ROLES
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/suggestions").permitAll()
                         .requestMatchers("/login/**", "/oauth2/**").permitAll()
                         .requestMatchers("/api/admin/add", "/api/admin/remove/**", "/api/admin/all").hasRole("SUPER_ADMIN")
-                        .anyRequest().hasRole("ADMIN")
+
+                        // Fix: Allow both MANAGER and SUPER_ADMIN for standard API modifications
+                        .requestMatchers("/api/**").hasAnyRole("ADMIN", "MANAGER", "SUPER_ADMIN")
+                        .anyRequest().authenticated()
                 )
                 .oauth2Login(oauth2 -> oauth2
                         .userInfoEndpoint(userInfo -> userInfo
@@ -81,6 +88,14 @@ public class SecurityConfig {
                         )
                         .successHandler(customSuccessHandler())
                         .failureHandler(customFailureHandler())
+                )
+
+                // 2. STOP THE REDIRECT LOOP FOR API ENDPOINTS
+                .exceptionHandling(exceptions -> exceptions
+                        .defaultAuthenticationEntryPointFor(
+                                new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED),
+                                request -> request.getServletPath().startsWith("/api/")
+                        )
                 );
 
         return http.build();
@@ -98,7 +113,7 @@ public class SecurityConfig {
                 String email = oidcUser.getEmail();
                 String name = oidcUser.getFullName();
                 String picture = oidcUser.getAttribute("picture");
-                
+
                 boolean isSuperAdmin = authentication.getAuthorities().stream()
                         .anyMatch(a -> a.getAuthority().equals("ROLE_SUPER_ADMIN"));
 
@@ -153,7 +168,7 @@ public class SecurityConfig {
                     .orElseThrow(() -> new OAuth2AuthenticationException("Access Denied: Admin email not registered."));
 
             String springRole = (admin.getRole() == AdminRole.SUPER_ADMIN) ? "ROLE_SUPER_ADMIN" : "ROLE_MANAGER";
-            
+
             List<GrantedAuthority> authorities = AuthorityUtils.createAuthorityList("ROLE_ADMIN", springRole);
 
             return new DefaultOidcUser(authorities, user.getIdToken(), user.getUserInfo());

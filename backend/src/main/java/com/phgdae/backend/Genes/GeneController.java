@@ -26,10 +26,43 @@ public class GeneController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Gene> getGeneById(@PathVariable String id) {
+    public ResponseEntity<Gene> getGeneById(@PathVariable("id") String id) {
         return geneRepository.findById(id)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteGene(@PathVariable("id") String id) {
+        if (geneRepository.existsById(id)) {
+            geneRepository.deleteById(id);
+            return ResponseEntity.ok().build();
+        }
+        return ResponseEntity.notFound().build();
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<?> updateGene(@PathVariable("id") String id, @RequestBody Gene geneDetails) {
+        return geneRepository.findById(id).map(existingGene -> {
+            existingGene.setGeneSymbol(geneDetails.getGeneSymbol());
+            existingGene.setFullGeneName(geneDetails.getFullGeneName());
+            existingGene.setGeneType(geneDetails.getGeneType());
+            existingGene.setOmimId(geneDetails.getOmimId());
+            existingGene.setNcbiId(geneDetails.getNcbiId());
+            existingGene.setDescription(geneDetails.getDescription());
+
+            // Re-run OMIM ID validation
+            if (existingGene.getOmimId() != null) {
+                long omim = existingGene.getOmimId().longValue();
+                if (omim < 100000 || omim > 999999) {
+                    return ResponseEntity.badRequest()
+                            .body(Map.of("message", "OMIM ID must be a 6-digit number."));
+                }
+            }
+
+            geneRepository.save(existingGene);
+            return ResponseEntity.ok(existingGene);
+        }).orElse(ResponseEntity.notFound().build());
     }
 
     @PostMapping

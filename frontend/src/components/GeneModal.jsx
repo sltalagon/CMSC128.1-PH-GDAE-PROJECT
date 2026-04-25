@@ -1,7 +1,7 @@
 import React, { useState } from "react";
-import { X, FileText, Activity, ExternalLink, Dna, Tag } from "lucide-react";
+import { X, FileText, Activity, ExternalLink, Dna, Tag, Pencil, Trash2 } from "lucide-react";
 
-export default function GeneModal({ isOpen, onClose, geneData }) {
+export default function GeneModal({ isOpen, onClose, geneData, onEdit, onDelete }) {
   const [activeCat, setActiveCat] = useState(null);
 
   if (!isOpen || !geneData) return null;
@@ -147,8 +147,20 @@ export default function GeneModal({ isOpen, onClose, geneData }) {
           </div>
         </div>
 
-        {/* Footer */}
-        <div className="p-4 border-t border-gray-100 bg-gray-50 flex justify-end flex-shrink-0">
+        {/* Footer with Edit/Delete Buttons */}
+        <div className="p-4 border-t border-gray-100 bg-gray-50 flex justify-between items-center flex-shrink-0">
+          <div className="flex gap-2">
+            {onEdit && (
+              <button onClick={() => onEdit(geneData)} className="px-4 py-2 bg-blue-100 text-blue-700 font-semibold rounded-lg hover:bg-blue-200 transition-colors flex items-center gap-2">
+                <Pencil size={16} /> Edit
+              </button>
+            )}
+            {onDelete && (
+              <button onClick={() => onDelete(geneData)} className="px-4 py-2 bg-red-100 text-red-700 font-semibold rounded-lg hover:bg-red-200 transition-colors flex items-center gap-2">
+                <Trash2 size={16} /> Delete
+              </button>
+            )}
+          </div>
           <button onClick={onClose} className="px-6 py-2 bg-slate-900 text-white rounded-lg hover:bg-slate-800 transition-colors">
             Close
           </button>

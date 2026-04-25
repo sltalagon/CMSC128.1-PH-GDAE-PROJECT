@@ -23,10 +23,30 @@ public class FunctionalCategoryController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<FunctionalCategory> getFunctionalCategoryById(@PathVariable String id) {
+    public ResponseEntity<FunctionalCategory> getFunctionalCategoryById(@PathVariable("id") String id) {
         return functionalRepository.findById(id)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteFunctionalCategory(@PathVariable("id") String id) {
+        if (functionalRepository.existsById(id)) {
+            functionalRepository.deleteById(id);
+            return ResponseEntity.ok().build();
+        }
+        return ResponseEntity.notFound().build();
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<FunctionalCategory> updateFunctionalCategory(@PathVariable("id") String id, @RequestBody FunctionalCategory categoryDetails) {
+        return functionalRepository.findById(id).map(existingCategory -> {
+            existingCategory.setCategoryName(categoryDetails.getCategoryName());
+            existingCategory.setDescription(categoryDetails.getDescription());
+
+            functionalRepository.save(existingCategory);
+            return ResponseEntity.ok(existingCategory);
+        }).orElse(ResponseEntity.notFound().build());
     }
 
     @PostMapping

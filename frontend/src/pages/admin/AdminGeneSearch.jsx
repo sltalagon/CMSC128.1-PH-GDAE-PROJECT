@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
+import { useNavigate } from "react-router-dom";
 import { apiGet } from "../../api/api";
 import { Search, Info, Dna, ChevronRight } from "lucide-react";
 import GeneModal from "../../components/GeneModal";
@@ -11,6 +12,8 @@ const AdminGeneSearch = () => {
   const [error, setError] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedGene, setSelectedGene] = useState(null);
+  
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -93,6 +96,14 @@ const AdminGeneSearch = () => {
       associatedDiseases: geneToDiseasesMap[gene.geneId] || [],
       functionalCategories: getCategoriesForGene(gene.geneId),
     });
+  };
+
+  const handleEdit = (gene) => {
+    navigate("/admin", { state: { activeView: "edit-gene", entityId: gene.geneId } });
+  };
+
+  const handleDelete = (gene) => {
+    navigate("/admin", { state: { activeView: "delete-gene", entityId: gene.geneId } });
   };
 
   return (
@@ -201,6 +212,8 @@ const AdminGeneSearch = () => {
           isOpen={!!selectedGene}
           onClose={() => setSelectedGene(null)}
           geneData={selectedGene}
+          onEdit={handleEdit}
+          onDelete={handleDelete}
         />
       )}
     </div>

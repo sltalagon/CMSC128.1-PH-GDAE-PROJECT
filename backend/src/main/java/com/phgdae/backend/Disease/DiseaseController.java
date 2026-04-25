@@ -26,10 +26,34 @@ public class DiseaseController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Disease> getDiseaseById(@PathVariable String id) {
+    public ResponseEntity<Disease> getDiseaseById(@PathVariable("id") String id) {
         return diseaseRepository.findById(id)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteDisease(@PathVariable("id") String id) {
+        if (diseaseRepository.existsById(id)) {
+            diseaseRepository.deleteById(id);
+            return ResponseEntity.ok().build();
+        }
+        return ResponseEntity.notFound().build();
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<?> updateDisease(@PathVariable("id") String id, @RequestBody Disease diseaseDetails) {
+        return diseaseRepository.findById(id).map(existingDisease -> {
+            existingDisease.setDiseaseName(diseaseDetails.getDiseaseName());
+            existingDisease.setDiseaseCategory(diseaseDetails.getDiseaseCategory());
+            existingDisease.setInheritancePattern(diseaseDetails.getInheritancePattern());
+            existingDisease.setOmimId(diseaseDetails.getOmimId());
+            existingDisease.setPhPrevalence(diseaseDetails.getPhPrevalence());
+            existingDisease.setDescription(diseaseDetails.getDescription());
+
+            diseaseRepository.save(existingDisease);
+            return ResponseEntity.ok(existingDisease);
+        }).orElse(ResponseEntity.notFound().build());
     }
 
     @PostMapping

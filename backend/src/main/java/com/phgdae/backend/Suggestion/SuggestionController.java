@@ -36,7 +36,7 @@ public class SuggestionController {
 
     @PatchMapping("/{id}/review")
     public ResponseEntity<Suggestion> reviewSuggestion(
-            @PathVariable String id,
+            @PathVariable("id") String id,
             @RequestBody Map<String, String> payload) {
         try {
             SuggestionStatus status = SuggestionStatus.valueOf(payload.get("status").toUpperCase());

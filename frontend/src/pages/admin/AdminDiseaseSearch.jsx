@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
+import { useNavigate } from "react-router-dom";
 import { apiGet } from "../../api/api";
 import { Search, Filter, Activity, ChevronRight } from "lucide-react";
 import DiseaseModal from "../../components/DiseaseModal";
@@ -12,6 +13,8 @@ const AdminDiseaseSearch = () => {
   const [selectedCategories, setSelectedCategories] = useState([]);
   const [selectedPrevalences, setSelectedPrevalences] = useState([]);
   const [selectedDisease, setSelectedDisease] = useState(null);
+
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -71,6 +74,14 @@ const AdminDiseaseSearch = () => {
       symptoms: disease.symptoms || ["Data on symptoms currently unavailable."],
       associatedGenes: getDetailedGenesForModal(disease.diseaseId)
     });
+  };
+
+const handleEdit = (disease) => {
+    navigate("/admin", { state: { activeView: "edit-disease", entityId: disease.diseaseId } });
+  };
+
+  const handleDelete = (disease) => {
+    navigate("/admin", { state: { activeView: "delete-disease", entityId: disease.diseaseId } });
   };
 
   const categories = [...new Set(diseases.map((d) => d.diseaseCategory).filter(Boolean))];
@@ -236,6 +247,8 @@ const AdminDiseaseSearch = () => {
         isOpen={!!selectedDisease} 
         onClose={() => setSelectedDisease(null)} 
         diseaseData={selectedDisease} 
+        onEdit={handleEdit}
+        onDelete={handleDelete}
       />
     </div>
   );

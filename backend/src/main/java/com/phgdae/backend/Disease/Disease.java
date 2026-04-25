@@ -1,9 +1,12 @@
 package com.phgdae.backend.Disease;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.phgdae.backend.GeneDisease.GeneDisease;
 import com.phgdae.backend.enums.DiseaseCategory;
 import com.phgdae.backend.enums.Prevalence;
 import jakarta.persistence.*;
 import java.math.BigDecimal;
+import java.util.List;
 
 @Entity
 @Table(name = "diseases")
@@ -35,6 +38,12 @@ public class Disease {
     @Column(columnDefinition = "TEXT", nullable = false)
     private String description;
 
+    // --- ADDED FOR CASCADING DELETES ---
+    @OneToMany(mappedBy = "disease", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
+    private List<GeneDisease> geneDiseases;
+    // -----------------------------------
+
     public Disease(String diseaseId, String diseaseName, DiseaseCategory diseaseCategory,
                    String inheritancePattern, BigDecimal omimId, Prevalence phPrevalence, String description) {
         this.diseaseId = diseaseId;
@@ -54,6 +63,7 @@ public class Disease {
     public BigDecimal getOmimId() { return omimId; }
     public Prevalence getPhPrevalence() { return phPrevalence; }
     public String getDescription() { return description; }
+    public List<GeneDisease> getGeneDiseases() { return geneDiseases; }
 
     // Setters
     public void setDiseaseId(String diseaseId) { this.diseaseId = diseaseId; }
@@ -63,4 +73,5 @@ public class Disease {
     public void setOmimId(BigDecimal omimId) { this.omimId = omimId; }
     public void setPhPrevalence(Prevalence phPrevalence) { this.phPrevalence = phPrevalence; }
     public void setDescription(String description) { this.description = description; }
+    public void setGeneDiseases(List<GeneDisease> geneDiseases) { this.geneDiseases = geneDiseases; }
 }

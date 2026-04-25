@@ -1,4 +1,4 @@
-package com.phgdae.backend.security;
+package com.phgdae.backend.Security;
 
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.AuthorityUtils;

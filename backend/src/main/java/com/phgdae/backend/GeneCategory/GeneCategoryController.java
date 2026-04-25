@@ -23,10 +23,30 @@ public class GeneCategoryController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<GeneCategory> getGeneCategoryById(@PathVariable String id) {
+    public ResponseEntity<GeneCategory> getGeneCategoryById(@PathVariable("id") String id) {
         return geneCategoryRepository.findById(id)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteGeneCategory(@PathVariable("id") String id) {
+        if (geneCategoryRepository.existsById(id)) {
+            geneCategoryRepository.deleteById(id);
+            return ResponseEntity.ok().build();
+        }
+        return ResponseEntity.notFound().build();
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<GeneCategory> updateGeneCategory(@PathVariable("id") String id, @RequestBody GeneCategory linkDetails) {
+        return geneCategoryRepository.findById(id).map(existingLink -> {
+            existingLink.setGene(linkDetails.getGene());
+            existingLink.setFunctionalCategory(linkDetails.getFunctionalCategory());
+
+            geneCategoryRepository.save(existingLink);
+            return ResponseEntity.ok(existingLink);
+        }).orElse(ResponseEntity.notFound().build());
     }
 
     @PostMapping
