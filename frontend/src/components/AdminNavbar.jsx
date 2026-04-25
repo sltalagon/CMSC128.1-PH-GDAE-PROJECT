@@ -37,10 +37,11 @@ const Navbar = () => {
   const navItems = [
     { name: "Gene Search", path: "/admin/gene-search", icon: <Search size={18} /> },
     { name: "Disease Search", path: "/admin/disease-search", icon: <Search size={18} /> },
-    isSuperAdmin
-      ? { name: "Manage Accounts", path: "/superadmin", icon: <Users size={18} />, danger: true }
-      : { name: "Admin Panel", path: "/admin", icon: <Shield size={18} /> },
+    { name: "Admin Panel", path: "/admin", icon: <Shield size={18} /> },
     { name: "Admin Suggestions", path: "/admin/suggestions", icon: <ClipboardCheck size={18} /> },
+    ...(isSuperAdmin
+      ? [{ name: "Manage Accounts", path: "/superadmin", icon: <Users size={18} />, danger: true }]
+      : []),
   ];
 
   const getLinkClass = (isActive, danger = false) =>
