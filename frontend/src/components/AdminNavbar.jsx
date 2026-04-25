@@ -22,7 +22,7 @@ const Navbar = () => {
   useEffect(() => {
     apiGet("/admin/me")
       .then((data) => {
-        if (data.role === "ROLE_SUPER_ADMIN") setIsSuperAdmin(true);
+        if (data.role === "SUPER_ADMIN") setIsSuperAdmin(true);
         if (data.email) setUserEmail(data.email);
         if (data.picture) setUserPicture(data.picture);
       })
