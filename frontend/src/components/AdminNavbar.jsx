@@ -11,6 +11,7 @@ import {
   X,
 } from "lucide-react";
 import { apiGet, removeToken } from "../api/api";
+import { jwtDecode } from "jwt-decode";
 
 const Navbar = () => {
   const navigate = useNavigate();
@@ -20,11 +21,19 @@ const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
 
   useEffect(() => {
+    const token = localStorage.getItem("jwt");
+    if (token) {
+      try {
+        const decoded = jwtDecode(token);
+        if (decoded.picture) setUserPicture(decoded.picture);
+        if (decoded.sub) setUserEmail(decoded.sub);
+      } catch {}
+    }
+
     apiGet("/admin/me")
       .then((data) => {
         if (data.role === "SUPER_ADMIN") setIsSuperAdmin(true);
         if (data.email) setUserEmail(data.email);
-        if (data.picture) setUserPicture(data.picture);
       })
       .catch(() => {});
   }, []);
@@ -67,7 +76,6 @@ const Navbar = () => {
         ></div>
 
         <div className="max-w-7xl mx-auto px-6 pt-6 pb-10 relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
-          {/* Left */}
           <div className="flex items-center gap-4 -mt-2 md:mt-0">
             <div className="bg-white rounded-full p-2 shadow-md">
               <img src={logo} className="h-24 w-24 object-contain rounded-full" alt="Logo" />
@@ -78,7 +86,6 @@ const Navbar = () => {
             </div>
           </div>
 
-          {/* Right */}
           <div className="flex items-center gap-3 self-start md:self-auto md:ml-auto">
             <div className="flex items-center gap-2 bg-white/20 backdrop-blur-md px-4 py-2 rounded-full border border-white/30 text-sm font-semibold">
               🇵🇭 Philippine Focus
@@ -88,10 +95,13 @@ const Navbar = () => {
               {userPicture && (
                 <img
                   src={userPicture}
-                  referrerPolicy="no-referrer"
                   alt="Profile"
                   className="w-7 h-7 rounded-full object-cover"
                   referrerPolicy="no-referrer"
+                  onError={(e) => {
+                    e.target.onerror = null;
+                    e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(userEmail)}&background=4f46e5&color=fff&size=32`;
+                  }}
                 />
               )}
               {userEmail}
@@ -108,7 +118,6 @@ const Navbar = () => {
       {/* NAVBAR */}
       <nav className="bg-white/80 backdrop-blur-md border-b border-gray-100 shadow-sm sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-6 py-3">
-          {/* Mobile Header */}
           <div className="flex justify-between items-center md:hidden">
             <span className="text-lg font-semibold text-slate-700">Admin Menu</span>
             <button
@@ -119,7 +128,6 @@ const Navbar = () => {
             </button>
           </div>
 
-          {/* Animated Menu */}
           <div
             className={`transform transition-all duration-300 ease-in-out origin-top
             ${isOpen ? "opacity-100 scale-100 mt-4" : "opacity-0 scale-95 h-0 overflow-hidden"}
@@ -128,7 +136,6 @@ const Navbar = () => {
             <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 
                             bg-white/70 backdrop-blur-xl md:bg-transparent 
                             rounded-2xl md:rounded-none p-4 md:p-0 shadow-lg md:shadow-none">
-              {/* Left Links */}
               <div className="flex flex-col md:flex-row gap-3">
                 {navItems.map((item) => (
                   <NavLink
@@ -144,7 +151,6 @@ const Navbar = () => {
                 ))}
               </div>
 
-              {/* Right */}
               <button
                 onClick={handleSignOut}
                 className="flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-semibold 

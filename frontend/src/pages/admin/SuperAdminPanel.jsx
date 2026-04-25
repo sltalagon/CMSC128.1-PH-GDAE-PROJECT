@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { jwtDecode } from "jwt-decode";
 import { apiGet, apiPost, apiDelete } from "../../api/api";
 import { Shield, UserPlus, Trash2, X, Check, AlertCircle, Users } from "lucide-react";
 
@@ -18,6 +19,9 @@ const SuperAdminPanel = () => {
   const [submitting, setSubmitting] = useState(false);
 
   const [confirmDelete, setConfirmDelete] = useState(null);
+
+  const token = localStorage.getItem("jwt");
+  const tokenData = token ? jwtDecode(token) : {};
 
   useEffect(() => {
     setAdminData(null);
@@ -107,8 +111,7 @@ const SuperAdminPanel = () => {
         {adminData && (
           <div className="flex items-center gap-3 bg-white p-2.5 rounded-xl shadow-sm border border-slate-200">
             <img
-              referrerPolicy="no-referrer"
-              src={adminData.picture}
+              src={tokenData.picture}
               alt="Profile"
               className="w-10 h-10 rounded-full"
               referrerPolicy="no-referrer"

@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { jwtDecode } from "jwt-decode";
 import { Database, Activity, Link, Plus, Tag } from "lucide-react";
 
 import { apiGet } from "../../api/api";
@@ -16,8 +17,11 @@ const AdminPanel = () => {
   const [adminData, setAdminData] = useState(null);
   const navigate = useNavigate();
 
+  const token = localStorage.getItem("jwt");
+  const tokenData = token ? jwtDecode(token) : {};
+
   useEffect(() => {
-    setAdminData(null); 
+    setAdminData(null);
     setIsLoading(true);
 
     apiGet("/admin/me")
@@ -114,8 +118,7 @@ const AdminPanel = () => {
         {adminData && (
           <div className="flex items-center gap-3 bg-white p-2.5 rounded-xl shadow-sm border border-slate-200">
             <img
-              src={adminData.picture}
-              referrerPolicy="no-referrer"
+              src={tokenData.picture}
               alt="Profile"
               className="w-10 h-10 rounded-full"
               referrerPolicy="no-referrer"
