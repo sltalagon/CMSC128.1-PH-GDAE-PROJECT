@@ -22,7 +22,7 @@ const Navbar = () => {
   useEffect(() => {
     apiGet("/admin/me")
       .then((data) => {
-        if (data.role === "ROLE_SUPER_ADMIN") setIsSuperAdmin(true); // fix
+        if (data.role === "ROLE_SUPER_ADMIN") setIsSuperAdmin(true);
         if (data.email) setUserEmail(data.email);
         if (data.picture) setUserPicture(data.picture);
       })
@@ -30,14 +30,16 @@ const Navbar = () => {
   }, []);
 
   const handleSignOut = () => {
-    removeToken(); // fix — clears JWT properly
+    removeToken();
     navigate("/admin/login");
   };
 
   const navItems = [
     { name: "Gene Search", path: "/admin/gene-search", icon: <Search size={18} /> },
     { name: "Disease Search", path: "/admin/disease-search", icon: <Search size={18} /> },
-    { name: "Admin Panel", path: "/admin", icon: <Shield size={18} /> },
+    isSuperAdmin
+      ? { name: "Manage Accounts", path: "/superadmin", icon: <Users size={18} />, danger: true }
+      : { name: "Admin Panel", path: "/admin", icon: <Shield size={18} /> },
     { name: "Admin Suggestions", path: "/admin/suggestions", icon: <ClipboardCheck size={18} /> },
   ];
 
@@ -131,24 +133,13 @@ const Navbar = () => {
                     key={item.name}
                     to={item.path}
                     end={item.path === "/admin"}
-                    className={({ isActive }) => getLinkClass(isActive)}
+                    className={({ isActive }) => getLinkClass(isActive, item.danger)}
                     onClick={() => setIsOpen(false)}
                   >
                     {item.icon}
                     {item.name}
                   </NavLink>
                 ))}
-
-                {isSuperAdmin && (
-                  <NavLink
-                    to="/superadmin"
-                    className={({ isActive }) => getLinkClass(isActive, true)}
-                    onClick={() => setIsOpen(false)}
-                  >
-                    <Users size={18} />
-                    Manage Accounts
-                  </NavLink>
-                )}
               </div>
 
               {/* Right */}
