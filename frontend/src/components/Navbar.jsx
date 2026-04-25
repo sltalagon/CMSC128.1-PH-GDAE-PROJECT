@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { NavLink } from "react-router-dom";
 import { Search, Shield, Lightbulb, BookOpen, Menu, X } from "lucide-react";
 import logo from "../assets/FinalLogo.png";
@@ -33,27 +33,15 @@ const Navbar = () => {
         <div className="max-w-7xl mx-auto px-6 py-10 relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div className="flex items-center gap-4 -mt-5">
             <div className="bg-white rounded-full p-2 shadow-md">
-              <img
-                src={logo}
-                className="h-24 w-24 object-contain rounded-full"
-                alt="Logo"
-              />
+              <img src={logo} className="h-24 w-24 object-contain rounded-full" alt="Logo" />
             </div>
             <div>
-              <h1 className="text-3xl md:text-5xl font-extrabold tracking-tight">
-                GANDA
-              </h1>
-              <p className="text-blue-100 opacity-90">
-                Gene and Disease Association
-              </p>
+              <h1 className="text-3xl md:text-5xl font-extrabold tracking-tight">GANDA</h1>
+              <p className="text-blue-100 opacity-90">Gene and Disease Association</p>
             </div>
           </div>
 
-          <div
-            className="flex items-center gap-3 
-                order-[-1] md:order-none 
-                mb-2 md:mb-0"
-          >
+          <div className="flex items-center gap-3 order-[-1] md:order-none mb-2 md:mb-0">
             <div className="flex items-center gap-2 bg-white/20 backdrop-blur-md px-4 py-2 rounded-full border border-white/30 text-sm font-semibold shadow-sm">
               🇵🇭 Philippine Focus
             </div>
@@ -63,14 +51,13 @@ const Navbar = () => {
         <div
           className="absolute bottom-0 left-0 right-0 h-8 bg-white"
           style={{ borderRadius: "100% 100% 0 0 / 100% 100% 0 0" }}
-        ></div>
+        />
       </div>
 
       <nav className="bg-white/80 backdrop-blur-md border-b border-gray-100 shadow-sm sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-6 py-3">
           <div className="flex justify-between items-center md:hidden">
             <span className="text-lg font-semibold text-slate-700">Menu</span>
-
             <button
               onClick={() => setIsOpen(!isOpen)}
               className="p-2 rounded-xl bg-white shadow hover:scale-105 transition"
@@ -81,19 +68,12 @@ const Navbar = () => {
 
           <div
             className={`transform transition-all duration-300 ease-in-out origin-top
-            ${
-              isOpen
-                ? "opacity-100 scale-100 mt-4"
-                : "opacity-0 scale-95 h-0 overflow-hidden"
-            }
-            md:opacity-100 md:scale-100 md:h-auto md:overflow-visible md:mt-0
-          `}
+            ${isOpen ? "opacity-100 scale-100 mt-4" : "opacity-0 scale-95 h-0 overflow-hidden"}
+            md:opacity-100 md:scale-100 md:h-auto md:overflow-visible md:mt-0`}
           >
-            <div
-              className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 
                             bg-white/70 backdrop-blur-xl md:bg-transparent 
-                            rounded-2xl md:rounded-none p-4 md:p-0 shadow-lg md:shadow-none"
-            >
+                            rounded-2xl md:rounded-none p-4 md:p-0 shadow-lg md:shadow-none">
               <div className="flex flex-col md:flex-row gap-3">
                 {navItems.map((item) => (
                   <NavLink

@@ -20,7 +20,14 @@ const SuperAdminPanel = () => {
   const [confirmDelete, setConfirmDelete] = useState(null);
 
   useEffect(() => {
-    setAdminData(null); 
+    const queryParams = new URLSearchParams(window.location.search);
+    const token = queryParams.get("token");
+    if (token) {
+      localStorage.setItem("jwt", token);
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
+
+    setAdminData(null);
     setAdmins([]);
     setIsLoading(true);
 
