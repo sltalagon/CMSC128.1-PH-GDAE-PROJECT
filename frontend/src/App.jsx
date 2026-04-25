@@ -6,7 +6,7 @@ import {
   Outlet
 } from "react-router-dom";
 import { useState, useEffect } from "react";
-import { jwtDecode } from "jwt-decode"; // Ensure you run: npm install jwt-decode
+import { jwtDecode } from "jwt-decode";
 
 import Navbar from "./components/Navbar";
 import AdminNavbar from "./components/AdminNavbar";
@@ -41,23 +41,20 @@ const AdminLayout = () => (
   </div>
 );
 
-// MODIFIED: ProtectedRoute now accepts an 'allowedRole'
 const ProtectedRoute = ({ children, allowedRole }) => {
+  const queryParams = new URLSearchParams(window.location.search);
+  const tokenFromUrl = queryParams.get("token");
+  if (tokenFromUrl) {
+    localStorage.setItem("jwt", tokenFromUrl);
+    window.history.replaceState({}, document.title, window.location.pathname);
+  }
+
   const [authState, setAuthState] = useState({
     status: "loading",
     role: null
   });
 
   useEffect(() => {
-    const queryParams = new URLSearchParams(window.location.search);
-    const tokenFromUrl = queryParams.get("token");
-    
-    if (tokenFromUrl) {
-      localStorage.setItem("jwt", tokenFromUrl);
-      // Clean URL without refreshing
-      window.history.replaceState({}, document.title, window.location.pathname);
-    }
-
     const token = localStorage.getItem("jwt");
 
     checkAuthStatus()
@@ -65,7 +62,6 @@ const ProtectedRoute = ({ children, allowedRole }) => {
         if (isAuthenticated && token) {
           try {
             const decoded = jwtDecode(token);
-            // Ensure "role" matches the key you used in Java: jwtUtil.generateToken(..., role, ...)
             setAuthState({ status: "auth", role: decoded.role });
           } catch (error) {
             setAuthState({ status: "unauth", role: null });
@@ -113,9 +109,8 @@ function App() {
 
         {/* --- ADMIN ROUTES --- */}
         <Route path="/admin/login" element={<AdminLogin />} />
-        
+
         <Route element={<AdminLayout />}>
-          {/* Dashboard for Managers only */}
           <Route
             path="/admin"
             element={
@@ -125,7 +120,6 @@ function App() {
             }
           />
 
-          {/* Panel for Super Admins only */}
           <Route
             path="/superadmin"
             element={
@@ -135,7 +129,6 @@ function App() {
             }
           />
 
-          {/* Shared Admin Routes - Any authenticated admin can access these */}
           <Route
             path="/admin/gene-search"
             element={
