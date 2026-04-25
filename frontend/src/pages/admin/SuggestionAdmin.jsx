@@ -1,187 +1,305 @@
-import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import { Database, Activity, Link, Plus, Tag } from "lucide-react";
+import React, { useState, useEffect } from "react";
+// IMPORT your central api helpers
+import { apiGet, apiPatch } from "../../api/api"; 
+import {
+  CheckCircle,
+  XCircle,
+  Eye,
+  Filter,
+  Search,
+  Calendar,
+  User,
+  Lightbulb,
+  ExternalLink,
+  AlertCircle,
+} from "lucide-react";
 
-import { apiGet } from "../../api/api";
+const SuggestionAdmin = () => {
+  const [suggestions, setSuggestions] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [filterStatus, setFilterStatus] = useState("all");
+  const [searchQuery, setSearchQuery] = useState("");
 
-import { AddGeneForm } from "./AddGeneForm";
-import { AddDiseaseForm } from "./AddDiseaseForm";
-import { AddAssociationForm } from "./AddAssociationForm";
-import { AddFunctionalCategoryForm } from "./AddFunctionalCategoryForm";
-import { AddGeneCategoryForm } from "./AddGeneCategoryForm";
-
-const AdminPanel = () => {
-  const [activeView, setActiveView] = useState(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [adminData, setAdminData] = useState(null);
-  const navigate = useNavigate();
+  // For the review modal
+  const [reviewing, setReviewing] = useState(null);
+  const [adminNotes, setAdminNotes] = useState("");
+  const [submittingAction, setSubmittingAction] = useState(null); // "APPROVED" | "REJECTED" | null
 
   useEffect(() => {
-    const queryParams = new URLSearchParams(window.location.search);
-    const token = queryParams.get("token");
+    fetchSuggestions();
+  }, []);
 
-    if (token) {
-      localStorage.setItem("jwt", token);
-      window.history.replaceState({}, document.title, window.location.pathname);
+  const fetchSuggestions = async () => {
+    try {
+      const data = await apiGet("/suggestions");
+      setSuggestions(data);
+    } catch (err) {
+      setError(err.message || "Failed to fetch suggestions.");
+    } finally {
+      setLoading(false);
     }
+  };
 
-    apiGet("/admin/me")
-      .then((data) => {
-        setAdminData(data);
-        setIsLoading(false);
-      })
-      .catch(() => {
-        navigate("/admin/login");
+  const handleReview = async (status) => {
+    setSubmittingAction(status);
+    try {
+      await apiPatch(`/suggestions/${reviewing.suggestionId}/review`, { 
+        status, 
+        adminNotes 
       });
-  }, [navigate]);
+      
+      setReviewing(null);
+      setAdminNotes("");
+      fetchSuggestions();
+    } catch (err) {
+      setError(err.message || "Failed to update suggestion.");
+    } finally {
+      setSubmittingAction(null);
+    }
+  };
 
-  const cards = [
-    {
-      title: "Add Gene",
-      icon: Database,
-      colors: {
-        bg: "bg-blue-50",
-        border: "border-blue-100",
-        text: "text-blue-600",
-      },
-      view: "add-gene",
-      desc: "Register a new gene with its information",
-    },
-    {
-      title: "Add Disease",
-      icon: Activity,
-      colors: {
-        bg: "bg-green-50",
-        border: "border-green-100",
-        text: "text-green-600",
-      },
-      view: "add-disease",
-      desc: "Register a new disease with Philippine prevalence data",
-    },
-    {
-      title: "Add Gene-Disease Association",
-      icon: Link,
-      colors: {
-        bg: "bg-purple-50",
-        border: "border-purple-100",
-        text: "text-purple-600",
-      },
-      view: "add-association",
-      desc: "Link genes to diseases with association type",
-    },
-    {
-      title: "Add Functional Category",
-      icon: Tag,
-      colors: {
-        bg: "bg-orange-50",
-        border: "border-orange-100",
-        text: "text-orange-600",
-      },
-      view: "add-functional-category",
-      desc: "Register a new gene functional category",
-    },
-    {
-      title: "Add Gene–Category",
-      icon: Tag,
-      colors: {
-        bg: "bg-yellow-50",
-        border: "border-yellow-100",
-        text: "text-yellow-600",
-      },
-      view: "add-gene-category",
-      desc: "Link a gene to a functional category",
-    },
-  ];
+  const Spinner = () => (
+    <svg className="animate-spin w-4 h-4" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
+    </svg>
+  );
 
-  if (isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-50">
-        <div className="text-lg font-medium text-slate-500 animate-pulse">
-          Verifying secure session...
-        </div>
-      </div>
+  const filteredSuggestions = suggestions
+    .filter((s) => filterStatus === "all" || s.status?.toLowerCase() === filterStatus)
+    .filter((s) =>
+        searchQuery === "" ||
+        s.content?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        s.submitterEmail?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        s.submitterName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        s.suggestionType?.toLowerCase().includes(searchQuery.toLowerCase())
     );
-  }
 
-  const handleCloseView = () => setActiveView(null);
+  const statusCounts = {
+    all: suggestions.length,
+    pending: suggestions.filter((s) => s.status === "PENDING").length,
+    approved: suggestions.filter((s) => s.status === "APPROVED").length,
+    rejected: suggestions.filter((s) => s.status === "REJECTED").length,
+  };
+
+  const statusStyle = (status) => {
+    switch (status) {
+      case "PENDING": return "bg-yellow-100 text-yellow-800";
+      case "APPROVED": return "bg-green-100 text-green-800";
+      case "REJECTED": return "bg-red-100 text-red-800";
+      default: return "bg-gray-100 text-gray-800";
+    }
+  };
+
+  const renderContent = (content) => {
+    try {
+      const parsed = JSON.parse(content);
+      return (
+        <div className="bg-gray-50 rounded-lg p-4 space-y-2 text-sm">
+          {Object.entries(parsed).map(([key, value]) => {
+            if (!value) return null;
+            const label = key.replace(/([A-Z])/g, " $1").replace(/^./, (s) => s.toUpperCase());
+            return (
+              <div key={key} className="flex gap-2">
+                <span className="font-semibold text-gray-600 min-w-[160px]">{label}:</span>
+                <span className="text-gray-800">{value}</span>
+              </div>
+            );
+          })}
+        </div>
+      );
+    } catch {
+      return <p className="text-gray-700 bg-gray-50 p-3 rounded-lg text-sm">{content}</p>;
+    }
+  };
 
   return (
-    <div className="max-w-7xl mx-auto py-8 px-4 relative">
-      <div className="mb-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-        <div>
-          <h2 className="text-2xl font-bold text-slate-900">Admin Panel</h2>
-          <p className="text-slate-600">
-            Manage and explore genes, diseases, associations, and research
-            references.
-          </p>
-        </div>
-
-        {adminData && (
-          <div className="flex items-center gap-3 bg-white p-2.5 rounded-xl shadow-sm border border-slate-200">
-            <img
-              src={adminData.picture}
-              alt="Profile"
-              className="w-10 h-10 rounded-full"
-              referrerPolicy="no-referrer"
-            />
-            <div className="hidden sm:block">
-              <p className="text-sm font-bold text-slate-900">
-                {adminData.name}
-              </p>
-              <p className="text-xs text-slate-500">{adminData.email}</p>
-            </div>
-          </div>
-        )}
+    <div className="container mx-auto px-6 py-6">
+      <div className="mb-8">
+        <h2 className="text-2xl font-bold text-gray-900 mb-2">Suggestion Management</h2>
+        <p className="text-gray-600">Review and manage gene-disease association suggestions.</p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-        {cards.map(({ title, icon: Icon, colors, view, desc }) => (
-          <div
-            key={view}
-            className={`${colors.bg} p-6 rounded-xl border ${colors.border} hover:shadow-md transition-shadow cursor-pointer flex items-start gap-4 group ${activeView === view ? "ring-2 ring-offset-2 ring-blue-500" : ""}`}
-            onClick={() => setActiveView(activeView === view ? null : view)}
-            role="button"
-          >
-            <div
-              className={`bg-white p-3 rounded-lg shadow-sm ${colors.text} group-hover:scale-110 transition-transform`}
-            >
-              <Icon size={24} />
-            </div>
-            <div>
-              <h3 className="text-lg font-bold text-slate-900 flex items-center gap-2">
-                {title}
-                {view.startsWith("add") && (
-                  <Plus size={16} className="text-slate-400" />
-                )}
-              </h3>
-              <p className="text-slate-600 text-sm mt-1">{desc}</p>
+      {error && (
+        <div className="mb-4 p-4 bg-red-50 border border-red-200 text-red-700 rounded-lg flex items-center gap-2">
+          <AlertCircle size={18} />
+          <span>{error}</span>
+        </div>
+      )}
+
+      {/* Status Summary Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+        {[
+          { label: "Total", key: "all", icon: <Lightbulb className="w-8 h-8 text-blue-600" />, text: "text-blue-600" },
+          { label: "Pending Review", key: "pending", icon: <Eye className="w-8 h-8 text-yellow-600" />, text: "text-yellow-600" },
+          { label: "Approved", key: "approved", icon: <CheckCircle className="w-8 h-8 text-green-600" />, text: "text-green-600" },
+          { label: "Rejected", key: "rejected", icon: <XCircle className="w-8 h-8 text-red-600" />, text: "text-red-600" },
+        ].map(({ label, key, icon, text }) => (
+          <div key={key} className="bg-white border-2 border-gray-200 rounded-lg p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className={`text-sm mb-1 ${text}`}>{label}</p>
+                <p className={`text-2xl font-bold ${text}`}>{statusCounts[key]}</p>
+              </div>
+              <div className="w-8 h-8 flex items-center justify-center">{icon}</div>
             </div>
           </div>
         ))}
       </div>
 
-      {/* =========================================
-          POPUP MODALS (ONLY FOR THE ADD FORMS) 
-          ========================================= */}
-      {activeView && activeView.startsWith("add") && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4 sm:p-6 overflow-y-auto">
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-3xl max-h-[90vh] overflow-y-auto relative animate-in fade-in zoom-in-95 duration-200">
-            <div className="p-6">
-              {activeView === "add-gene" && (
-                <AddGeneForm onClose={handleCloseView} />
+      {/* Filters */}
+      <div className="bg-white border-2 border-gray-200 rounded-lg p-4 mb-6">
+        <div className="flex flex-col md:flex-row gap-4">
+          <div className="flex items-center gap-2 flex-1">
+            <Filter className="w-5 h-5 text-gray-600" />
+            <select
+              value={filterStatus}
+              onChange={(e) => setFilterStatus(e.target.value)}
+              className="flex-1 px-4 py-2 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:outline-none"
+            >
+              <option value="all">All Suggestions</option>
+              <option value="pending">Pending Review</option>
+              <option value="approved">Approved</option>
+              <option value="rejected">Rejected</option>
+            </select>
+          </div>
+          <div className="flex items-center gap-2 flex-1">
+            <Search className="w-5 h-5 text-gray-600" />
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search by content, name, or email..."
+              className="flex-1 px-4 py-2 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:outline-none"
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* Suggestions List */}
+      {loading ? (
+        <div className="text-center py-16 text-slate-500">Loading suggestions...</div>
+      ) : filteredSuggestions.length === 0 ? (
+        <div className="bg-white border-2 border-gray-200 rounded-lg p-12 text-center">
+          <Lightbulb className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+          <p className="text-gray-600">No suggestions found.</p>
+        </div>
+      ) : (
+        <div className="space-y-4">
+          {filteredSuggestions.map((suggestion) => (
+            <div key={suggestion.suggestionId} className="bg-white border-2 border-gray-200 rounded-lg p-6">
+              <div className="flex items-start justify-between mb-4">
+                <div>
+                  <div className="flex items-center gap-3 mb-2">
+                    <h3 className="text-lg font-bold text-gray-900">
+                      {suggestion.suggestionType?.replace("_", " ")} Suggestion
+                    </h3>
+                    <span className={`px-3 py-1 rounded-full text-xs font-semibold ${statusStyle(suggestion.status)}`}>
+                      {suggestion.status?.charAt(0) + suggestion.status?.slice(1).toLowerCase()}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-4 text-sm text-gray-600">
+                    <div className="flex items-center gap-1">
+                      <User className="w-4 h-4" />
+                      <span>{suggestion.submitterName} ({suggestion.submitterEmail})</span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <Calendar className="w-4 h-4" />
+                      <span>{new Date(suggestion.submittedAt).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="space-y-3">
+                <div>
+                  <p className="text-sm font-semibold text-gray-700 mb-1">Description</p>
+                  {renderContent(suggestion.content)}
+                </div>
+
+                {suggestion.referenceUrl && (
+                  <div>
+                    <p className="text-sm font-semibold text-gray-700 mb-1">Reference</p>
+                    <a href={suggestion.referenceUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 text-blue-600 hover:underline text-sm">
+                      <ExternalLink className="w-4 h-4" />
+                      {suggestion.referenceUrl}
+                    </a>
+                  </div>
+                )}
+
+                {suggestion.adminNotes && (
+                  <div>
+                    <p className="text-sm font-semibold text-gray-700 mb-1">Admin Notes</p>
+                    <p className="text-gray-700 bg-blue-50 border border-blue-100 p-3 rounded-lg text-sm">{suggestion.adminNotes}</p>
+                  </div>
+                )}
+              </div>
+
+              {suggestion.status === "PENDING" && (
+                <div className="flex items-center gap-3 mt-6 pt-6 border-t border-gray-200">
+                  <button
+                    onClick={() => { setReviewing(suggestion); setAdminNotes(""); }}
+                    className="flex items-center gap-2 px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-semibold"
+                  >
+                    <Eye className="w-5 h-5" />
+                    Review
+                  </button>
+                </div>
               )}
-              {activeView === "add-disease" && (
-                <AddDiseaseForm onClose={handleCloseView} />
-              )}
-              {activeView === "add-association" && (
-                <AddAssociationForm onClose={handleCloseView} />
-              )}
-              {activeView === "add-functional-category" && (
-                <AddFunctionalCategoryForm onClose={handleCloseView} />
-              )}
-              {activeView === "add-gene-category" && (
-                <AddGeneCategoryForm onClose={handleCloseView} />
-              )}
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Review Modal */}
+      {reviewing && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg p-6">
+            <h3 className="text-lg font-bold text-slate-900 mb-1">Review Suggestion</h3>
+            <p className="text-sm text-slate-500 mb-4">From {reviewing.submitterName} — {reviewing.suggestionType?.replace("_", " ")}</p>
+
+            <div className="mb-4">{renderContent(reviewing.content)}</div>
+
+            <div className="mb-4">
+              <label className="block text-sm font-semibold text-gray-700 mb-2">
+                Admin Notes <span className="text-gray-400 font-normal">(Optional)</span>
+              </label>
+              <textarea
+                rows={3}
+                value={adminNotes}
+                onChange={(e) => setAdminNotes(e.target.value)}
+                placeholder="Add a note explaining your decision..."
+                className="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:outline-none resize-none"
+              />
+            </div>
+
+            <div className="flex gap-3">
+              <button
+                onClick={() => handleReview("APPROVED")}
+                disabled={submittingAction !== null}
+                className="flex-1 flex items-center justify-center gap-2 bg-green-600 text-white py-2.5 rounded-lg hover:bg-green-700 font-semibold disabled:opacity-50 transition-colors"
+              >
+                {submittingAction === "APPROVED" ? <Spinner /> : <CheckCircle size={18} />}
+                {submittingAction === "APPROVED" ? "Approving..." : "Approve"}
+              </button>
+
+              <button
+                onClick={() => handleReview("REJECTED")}
+                disabled={submittingAction !== null}
+                className="flex-1 flex items-center justify-center gap-2 bg-red-600 text-white py-2.5 rounded-lg hover:bg-red-700 font-semibold disabled:opacity-50 transition-colors"
+              >
+                {submittingAction === "REJECTED" ? <Spinner /> : <XCircle size={18} />}
+                {submittingAction === "REJECTED" ? "Rejecting..." : "Reject"}
+              </button>
+
+              <button
+                onClick={() => setReviewing(null)}
+                disabled={submittingAction !== null}
+                className="px-4 py-2.5 border-2 border-gray-200 text-gray-700 rounded-lg hover:bg-gray-50 font-semibold disabled:opacity-50 transition-colors"
+              >
+                Cancel
+              </button>
             </div>
           </div>
         </div>
@@ -190,4 +308,4 @@ const AdminPanel = () => {
   );
 };
 
-export default AdminPanel;
+export default SuggestionAdmin;
