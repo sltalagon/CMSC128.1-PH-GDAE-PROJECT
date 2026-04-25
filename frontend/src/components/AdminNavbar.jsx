@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import logo from "../assets/FinalLogo.png";
 import { NavLink, useNavigate } from "react-router-dom";
 import {
@@ -10,45 +10,35 @@ import {
   Menu,
   X,
 } from "lucide-react";
-import { apiGet } from "../api/api";
+import { apiGet, removeToken } from "../api/api";
 
 const Navbar = () => {
   const navigate = useNavigate();
   const [isSuperAdmin, setIsSuperAdmin] = useState(false);
   const [userEmail, setUserEmail] = useState("");
-  const [isOpen, setIsOpen] = useState(false); // ✅ mobile toggle
+  const [userPicture, setUserPicture] = useState("");
+  const [isOpen, setIsOpen] = useState(false);
 
   useEffect(() => {
     apiGet("/admin/me")
       .then((data) => {
-        if (data.role === "SUPER_ADMIN") setIsSuperAdmin(true);
+        if (data.role === "ROLE_SUPER_ADMIN") setIsSuperAdmin(true); // fix
         if (data.email) setUserEmail(data.email);
+        if (data.picture) setUserPicture(data.picture);
       })
       .catch(() => {});
   }, []);
 
   const handleSignOut = () => {
-    localStorage.removeItem("isAdmin");
+    removeToken(); // fix — clears JWT properly
     navigate("/admin/login");
   };
 
   const navItems = [
-    {
-      name: "Gene Search",
-      path: "/admin/gene-search",
-      icon: <Search size={18} />,
-    },
-    {
-      name: "Disease Search",
-      path: "/admin/disease-search",
-      icon: <Search size={18} />,
-    },
+    { name: "Gene Search", path: "/admin/gene-search", icon: <Search size={18} /> },
+    { name: "Disease Search", path: "/admin/disease-search", icon: <Search size={18} /> },
     { name: "Admin Panel", path: "/admin", icon: <Shield size={18} /> },
-    {
-      name: "Admin Suggestions",
-      path: "/admin/suggestions",
-      icon: <ClipboardCheck size={18} />,
-    },
+    { name: "Admin Suggestions", path: "/admin/suggestions", icon: <ClipboardCheck size={18} /> },
   ];
 
   const getLinkClass = (isActive, danger = false) =>
@@ -64,7 +54,7 @@ const Navbar = () => {
 
   return (
     <div className="w-full font-sans">
-      {/* ===== TOP BANNER (UNCHANGED) ===== */}
+      {/* TOP BANNER */}
       <div className="relative bg-gradient-to-r from-blue-600 to-purple-600 text-white overflow-hidden">
         <div
           className="absolute inset-0 opacity-10 pointer-events-none"
@@ -77,19 +67,11 @@ const Navbar = () => {
           {/* Left */}
           <div className="flex items-center gap-4 -mt-2 md:mt-0">
             <div className="bg-white rounded-full p-2 shadow-md">
-              <img
-                src={logo}
-                className="h-24 w-24 object-contain rounded-full"
-                alt="Logo"
-              />
+              <img src={logo} className="h-24 w-24 object-contain rounded-full" alt="Logo" />
             </div>
             <div>
-              <h1 className="text-3xl md:text-5xl font-extrabold tracking-tight">
-                GANDA
-              </h1>
-              <p className="text-blue-100 opacity-90">
-                Gene and Disease Association
-              </p>
+              <h1 className="text-3xl md:text-5xl font-extrabold tracking-tight">GANDA</h1>
+              <p className="text-blue-100 opacity-90">Gene and Disease Association</p>
             </div>
           </div>
 
@@ -99,7 +81,15 @@ const Navbar = () => {
               🇵🇭 Philippine Focus
             </div>
 
-            <div className="bg-white/10 backdrop-blur-md px-4 py-2 rounded-full border border-white/20 text-sm opacity-80">
+            <div className="flex items-center gap-2 bg-white/10 backdrop-blur-md px-3 py-2 rounded-full border border-white/20 text-sm opacity-80">
+              {userPicture && (
+                <img
+                  src={userPicture}
+                  alt="Profile"
+                  className="w-7 h-7 rounded-full object-cover"
+                  referrerPolicy="no-referrer"
+                />
+              )}
               {userEmail}
             </div>
           </div>
@@ -111,15 +101,12 @@ const Navbar = () => {
         />
       </div>
 
-      {/* ===== NAVBAR ===== */}
+      {/* NAVBAR */}
       <nav className="bg-white/80 backdrop-blur-md border-b border-gray-100 shadow-sm sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-6 py-3">
-          {/* 🔥 Mobile Header */}
+          {/* Mobile Header */}
           <div className="flex justify-between items-center md:hidden">
-            <span className="text-lg font-semibold text-slate-700">
-              Admin Menu
-            </span>
-
+            <span className="text-lg font-semibold text-slate-700">Admin Menu</span>
             <button
               onClick={() => setIsOpen(!isOpen)}
               className="p-2 rounded-xl bg-white shadow hover:scale-105 transition"
@@ -128,21 +115,15 @@ const Navbar = () => {
             </button>
           </div>
 
-          {/* 🔥 Animated Menu */}
+          {/* Animated Menu */}
           <div
             className={`transform transition-all duration-300 ease-in-out origin-top
-            ${
-              isOpen
-                ? "opacity-100 scale-100 mt-4"
-                : "opacity-0 scale-95 h-0 overflow-hidden"
-            }
+            ${isOpen ? "opacity-100 scale-100 mt-4" : "opacity-0 scale-95 h-0 overflow-hidden"}
             md:opacity-100 md:scale-100 md:h-auto md:overflow-visible md:mt-0`}
           >
-            <div
-              className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 
                             bg-white/70 backdrop-blur-xl md:bg-transparent 
-                            rounded-2xl md:rounded-none p-4 md:p-0 shadow-lg md:shadow-none"
-            >
+                            rounded-2xl md:rounded-none p-4 md:p-0 shadow-lg md:shadow-none">
               {/* Left Links */}
               <div className="flex flex-col md:flex-row gap-3">
                 {navItems.map((item) => (
