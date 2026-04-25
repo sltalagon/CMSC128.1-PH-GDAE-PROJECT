@@ -42,6 +42,7 @@ const AdminLayout = () => (
 );
 
 const ProtectedRoute = ({ children, allowedRole }) => {
+  // ✅ FIXED: Extract and save token synchronously before any render or API call
   const queryParams = new URLSearchParams(window.location.search);
   const tokenFromUrl = queryParams.get("token");
   if (tokenFromUrl) {
@@ -111,10 +112,11 @@ function App() {
         <Route path="/admin/login" element={<AdminLogin />} />
 
         <Route element={<AdminLayout />}>
+          {/* Admin Panel — accessible by both Managers and Super Admins */}
           <Route
             path="/admin"
             element={
-              <ProtectedRoute allowedRole="ROLE_MANAGER">
+              <ProtectedRoute>
                 <AdminPanel />
               </ProtectedRoute>
             }
