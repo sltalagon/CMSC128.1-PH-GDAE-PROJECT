@@ -107,6 +107,7 @@ const SuperAdminPanel = () => {
         {adminData && (
           <div className="flex items-center gap-3 bg-white p-2.5 rounded-xl shadow-sm border border-slate-200">
             <img
+              referrerPolicy="no-referrer"
               src={adminData.picture}
               alt="Profile"
               className="w-10 h-10 rounded-full"

@@ -88,6 +88,7 @@ const Navbar = () => {
               {userPicture && (
                 <img
                   src={userPicture}
+                  referrerPolicy="no-referrer"
                   alt="Profile"
                   className="w-7 h-7 rounded-full object-cover"
                   referrerPolicy="no-referrer"
