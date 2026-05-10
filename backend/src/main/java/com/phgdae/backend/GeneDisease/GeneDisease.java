@@ -1,9 +1,13 @@
 package com.phgdae.backend.GeneDisease;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.phgdae.backend.Disease.Disease;
 import com.phgdae.backend.Genes.Gene;
 import com.phgdae.backend.enums.AssociationType;
+import com.phgdae.backend.GeneDiseaseReference.GeneDiseaseReference;
 import jakarta.persistence.*;
+
+import java.util.List;
 
 @Entity
 @Table(name = "gene_disease_associations")
@@ -33,6 +37,11 @@ public class GeneDisease {
     @Column(name = "citation_url", nullable = false)
     private String citationUrl;
 
+    // --- ADDED: References ---
+    @OneToMany(mappedBy = "geneDisease", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
+    private List<GeneDiseaseReference> geneDiseaseReferences;
+
     public GeneDisease(String geneDiseaseId, Gene gene, Disease disease, AssociationType associationType, String citationDescription, String citationUrl) {
         this.geneDiseaseId = geneDiseaseId;
         this.gene = gene;
@@ -49,6 +58,7 @@ public class GeneDisease {
     public AssociationType getAssociationType() { return associationType; }
     public String getCitationDescription() { return citationDescription; }
     public String getCitationUrl() { return citationUrl; }
+    public List<GeneDiseaseReference> getGeneDiseaseReferences() { return geneDiseaseReferences; }
 
     // Setters
     public void setGeneDiseaseId(String geneDiseaseId) { this.geneDiseaseId = geneDiseaseId; }
@@ -57,4 +67,5 @@ public class GeneDisease {
     public void setAssociationType(AssociationType associationType) { this.associationType = associationType; }
     public void setCitationDescription(String citationDescription) { this.citationDescription = citationDescription; }
     public void setCitationUrl(String citationUrl) { this.citationUrl = citationUrl; }
+    public void setGeneDiseaseReferences(List<GeneDiseaseReference> geneDiseaseReferences) { this.geneDiseaseReferences = geneDiseaseReferences; }
 }

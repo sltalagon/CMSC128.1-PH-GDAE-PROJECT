@@ -46,17 +46,17 @@ const AdminGeneSearch = () => {
         if (!map[gId]) map[gId] = [];
 
         map[gId].push({
+          geneDiseaseId: gd.geneDiseaseId,
           diseaseId: disease.diseaseId,
           name: disease.diseaseName,
           type: disease.diseaseCategory || "Unknown Category",
           category: disease.diseaseCategory || "N/A",
           prevalence: disease.phPrevalence || "NONE",
           inheritance: disease.inheritancePattern || "N/A",
-          description:
-            disease.diseaseDescription || "No description available.",
+          description: disease.description || "No description available.",
           associationType: gd.associationType || "Associated",
           confidence: "Verified",
-          references: [],
+          references: [] 
         });
       }
     });
@@ -83,7 +83,22 @@ const AdminGeneSearch = () => {
     );
   }, [genes, searchQuery]);
 
-  const handleGeneClick = (gene) => {
+  const handleGeneClick = async (gene) => {
+    const diseases = geneToDiseasesMap[gene.geneId] || [];
+
+    // Fetch references for each associated disease
+    const diseasesWithRefs = await Promise.all(
+      diseases.map(async (d) => {
+        try {
+          const refs = await apiGet(`/references/genedisease/${d.geneDiseaseId}`);
+          return { ...d, references: refs.map(r => r.reference) }; 
+        } catch (e) {
+          console.error("Failed to load references for", d.name, e);
+          return d;
+        }
+      })
+    );
+
     setSelectedGene({
       ...gene,
       symbol: gene.geneSymbol,
@@ -93,7 +108,7 @@ const AdminGeneSearch = () => {
       omimId: gene.omimId || "N/A",
       description: gene.description || "No description provided.",
       biologicalFunction: gene.function || "Function details not available.",
-      associatedDiseases: geneToDiseasesMap[gene.geneId] || [],
+      associatedDiseases: diseasesWithRefs || [],
       functionalCategories: getCategoriesForGene(gene.geneId),
     });
   };

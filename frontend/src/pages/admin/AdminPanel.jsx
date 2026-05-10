@@ -3,10 +3,11 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
 import {
   Database, Activity, Link, Plus, Tag,
-  Pencil, Trash2, X, AlertTriangle, Loader2, Check,
+  Pencil, Trash2, X, AlertTriangle, Loader2, Check, BookOpen
 } from "lucide-react";
 
-import { apiGet, apiPut, apiDelete } from "../../api/api";
+// FIXED: Added apiPost to the imports here!
+import { apiGet, apiPut, apiDelete, apiPost } from "../../api/api";
 
 import { AddGeneForm } from "./AddGeneForm";
 import { AddDiseaseForm } from "./AddDiseaseForm";
@@ -130,6 +131,117 @@ const SaveCancelBar = ({ onSave, saving, onClose, saveColor = "bg-blue-600 hover
     </button>
   </div>
 );
+
+// ---------------------------------------------------------------------------
+// ADD: Reference
+// ---------------------------------------------------------------------------
+const AddReferenceForm = ({ onClose }) => {
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState(null);
+  
+  // Added geneDiseaseId to the state
+  const [data, setData] = useState({ title: "", url: "", description: "", geneDiseaseId: "" });
+  
+  // State for fetching the dropdown list
+  const [associations, setAssociations] = useState([]);
+  const [loadingLists, setLoadingLists] = useState(true);
+
+  // Fetch associations when the modal opens
+  useEffect(() => {
+    apiGet("/genedisease")
+      .then(data => setAssociations(data))
+      .catch(err => console.error("Failed to fetch associations", err))
+      .finally(() => setLoadingLists(false));
+  }, []);
+
+  const set = (field) => (e) => setData((d) => ({ ...d, [field]: e.target.value }));
+
+  const handleSave = async () => {
+    setSaving(true); setError(null);
+    try {
+      let referenceIdToLink = null;
+
+      // 1. Create or find the reference
+      try {
+        const savedRef = await apiPost("/references", {
+          title: data.title,
+          url: data.url,
+          description: data.description,
+        });
+        referenceIdToLink = savedRef.referenceId;
+      } catch (refErr) {
+        // If the URL already exists, gracefully grab its ID instead of crashing
+        if (refErr.message?.includes("exists") || refErr.message?.includes("409")) {
+          const allRefs = await apiGet("/references");
+          const existingRef = allRefs.find((r) => r.url === data.url);
+          if (existingRef) {
+            referenceIdToLink = existingRef.referenceId;
+          } else {
+            throw new Error("Reference URL exists, but couldn't retrieve it.");
+          }
+        } else {
+          throw refErr;
+        }
+      }
+
+      // 2. Link it to the selected Gene-Disease Association (if one was picked)
+      if (data.geneDiseaseId && referenceIdToLink) {
+        try {
+          await apiPost(`/references/genedisease/${data.geneDiseaseId}/${referenceIdToLink}`);
+        } catch (linkErr) {
+          // If they try to link it but it's already linked, that's fine, ignore the error
+          if (!linkErr.message?.includes("already linked")) {
+            throw new Error("Reference saved, but failed to link to the association.");
+          }
+        }
+      }
+
+      onClose();
+    } catch (err) {
+      setError(err.message || "Failed to create reference. Please try again.");
+    } finally { setSaving(false); }
+  };
+
+  return (
+    <div className="bg-white border-2 border-teal-200 rounded-xl p-6">
+      <FormHeader title="Add Reference" icon={BookOpen} colorClass={{ iconBg: "bg-teal-100", iconText: "text-teal-600" }} onClose={onClose} />
+      <ErrorBanner message={error} />
+      <div className="space-y-4">
+        <Field label="Reference Title" required>
+          <input type="text" value={data.title} onChange={set("title")} placeholder="e.g., Study on BRCA1 Mutations" className={inputCls("focus:border-teal-500")} />
+        </Field>
+        <Field label="URL" required>
+          <input type="url" value={data.url} onChange={set("url")} placeholder="https://pubmed.ncbi.nlm.nih.gov/..." className={inputCls("focus:border-teal-500")} />
+        </Field>
+        <Field label="Description">
+          <textarea rows={3} value={data.description} onChange={set("description")} placeholder="Briefly describe the findings of this paper..." className={`${inputCls("focus:border-teal-500")} resize-none`} />
+        </Field>
+
+        {/* --- NEW DROPDOWN SECTION --- */}
+        <div className="border-t border-teal-100 pt-4 mt-4">
+          <Field label="Link to Association (Optional)">
+            <select
+              value={data.geneDiseaseId}
+              onChange={set("geneDiseaseId")}
+              disabled={loadingLists}
+              className={inputCls("focus:border-teal-500 disabled:bg-gray-50")}
+            >
+              <option value="">-- No Association (Save as Standalone) --</option>
+              {associations.map((a) => (
+                <option key={a.geneDiseaseId} value={a.geneDiseaseId}>
+                  {a.gene?.geneSymbol} - {a.disease?.diseaseName}
+                </option>
+              ))}
+            </select>
+            <p className="text-xs text-slate-500 mt-1">Select an association to instantly attach this reference to it.</p>
+          </Field>
+        </div>
+
+        <SaveCancelBar onSave={handleSave} saving={saving} onClose={onClose} saveColor="bg-teal-600 hover:bg-teal-700" />
+      </div>
+    </div>
+  );
+};
 
 // ---------------------------------------------------------------------------
 // EDIT: Gene
@@ -580,9 +692,77 @@ const EditGeneCategoryForm = ({ onClose, initialId }) => {
 };
 
 // ---------------------------------------------------------------------------
+// EDIT: Reference
+// ---------------------------------------------------------------------------
+const EditReferenceForm = ({ onClose, initialId }) => {
+  const [loading, setLoading] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [data, setData] = useState(null);
+  const [error, setError] = useState(null);
+  const [success, setSuccess] = useState(null);
+
+  const handleLoad = async (id) => {
+    setLoading(true); setError(null); setSuccess(null); setData(null);
+    try {
+      setData(await apiGet(`/references/${id}`));
+    } catch {
+      setError(`No reference found with ID "${id}".`);
+    } finally { setLoading(false); }
+  };
+
+  const set = (field) => (e) => setData((d) => ({ ...d, [field]: e.target.value }));
+
+  const handleSave = async () => {
+    setSaving(true); setError(null); setSuccess(null);
+    try {
+      await apiPut(`/references/${data.referenceId}`, {
+        title: data.title,
+        url: data.url,
+        description: data.description,
+      });
+      setSuccess("Reference updated successfully.");
+    } catch {
+      setError("Failed to update reference. Please try again.");
+    } finally { setSaving(false); }
+  };
+
+  return (
+    <div className="bg-white border-2 border-teal-200 rounded-xl p-6">
+      <FormHeader title="Edit Reference" icon={BookOpen} colorClass={{ iconBg: "bg-teal-100", iconText: "text-teal-600" }} onClose={onClose} />
+      <EntityLookupDropdown 
+        endpoint="/references" 
+        idField="referenceId" 
+        labelFn={(r) => `${r.referenceId} - ${r.title}`} 
+        placeholder="Select a Reference to edit..." 
+        onLoad={handleLoad} 
+        isLoading={loading} 
+        initialId={initialId}
+      />
+      <ErrorBanner message={error} />
+      <SuccessBanner message={success} />
+      {data && (
+        <div className="space-y-4">
+          <Field label="Reference Title" required>
+            <input type="text" value={data.title ?? ""} onChange={set("title")} className={inputCls("focus:border-teal-500")} />
+          </Field>
+          <Field label="URL" required>
+            <input type="url" value={data.url ?? ""} onChange={set("url")} className={inputCls("focus:border-teal-500")} />
+          </Field>
+          <Field label="Description">
+            <textarea rows={3} value={data.description ?? ""} onChange={set("description")} className={`${inputCls("focus:border-teal-500")} resize-none`} />
+          </Field>
+          <SaveCancelBar onSave={handleSave} saving={saving} onClose={onClose} saveColor="bg-teal-600 hover:bg-teal-700" />
+        </div>
+      )}
+    </div>
+  );
+};
+
+
+// ---------------------------------------------------------------------------
 // DELETE — generic component, driven by per-entity config
 // ---------------------------------------------------------------------------
-const DeleteForm = ({ title, icon: Icon, colorClass, borderColor, endpoint, idField, entityLabel, labelFn, renderSummary, onClose, initialId }) => {
+const DeleteForm = ({ title, icon: Icon, colorClass, borderColor, endpoint, idField, entityLabel, labelFn, renderSummary, onClose, initialId, customDelete }) => {
   const [loading, setLoading] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [record, setRecord] = useState(null);
@@ -602,12 +782,16 @@ const DeleteForm = ({ title, icon: Icon, colorClass, borderColor, endpoint, idFi
   const handleDelete = async () => {
     setDeleting(true); setError(null);
     try {
-      await apiDelete(`${endpoint}/${record[idField]}`);
+      if (customDelete) {
+        await customDelete(record);
+      } else {
+        await apiDelete(`${endpoint}/${record[idField]}`);
+      }
       setSuccess(`${entityLabel} deleted successfully.`);
       setRecord(null);
       setConfirmed(false);
-    } catch {
-      setError(`Failed to delete ${entityLabel}. Please try again.`);
+    } catch (err) {
+      setError(`Failed to delete ${entityLabel}. ` + (err?.message || "Please try again."));
     } finally { setDeleting(false); }
   };
 
@@ -680,13 +864,49 @@ const DeleteDiseaseForm = ({ onClose, initialId }) => (
     onClose={onClose} />
 );
 
-const DeleteAssociationForm = ({ onClose, initialId }) => (
-  <DeleteForm title="Delete Gene-Disease Association" icon={Link} colorClass={{ iconBg: "bg-purple-100", iconText: "text-purple-600" }} borderColor="border-red-200"
-    endpoint="/genedisease" idField="geneDiseaseId" entityLabel="Association" initialId={initialId}
-    labelFn={(a) => `${a.geneDiseaseId} - Gene: ${a.gene?.geneSymbol || 'Unknown'} | Disease: ${a.disease?.diseaseName || 'Unknown'}`}
-    renderSummary={(r) => (<><p><span className="font-semibold">ID:</span> {r.geneDiseaseId}</p><p><span className="font-semibold">Gene ID:</span> {r.gene?.geneId || r.geneId}</p><p><span className="font-semibold">Disease ID:</span> {r.disease?.diseaseId || r.diseaseId}</p><p><span className="font-semibold">Type:</span> {r.associationType}</p><p><span className="font-semibold">Citation:</span> <span className="truncate block">{r.citationUrl}</span></p></>)}
-    onClose={onClose} />
-);
+const DeleteAssociationForm = ({ onClose, initialId }) => {
+  const handleCustomDelete = async (record) => {
+    const gdId = record.geneDiseaseId;
+    
+    let linkedRefs = [];
+    try {
+      linkedRefs = await apiGet(`/references/genedisease/${gdId}`);
+    } catch (e) {
+      console.warn("No references found or failed to fetch references for cleanup.", e);
+    }
+
+    for (const link of linkedRefs) {
+      const refId = link.reference?.referenceId;
+      if (refId) {
+        try {
+          await apiDelete(`/references/genedisease/${gdId}/${refId}`);
+          await apiDelete(`/references/${refId}`);
+        } catch (err) {
+          console.warn(`Failed to delete reference ${refId}. It might be tied to another association.`, err);
+        }
+      }
+    }
+
+    await apiDelete(`/genedisease/${gdId}`);
+  };
+
+  return (
+    <DeleteForm 
+      title="Delete Gene-Disease Association" 
+      icon={Link} 
+      colorClass={{ iconBg: "bg-purple-100", iconText: "text-purple-600" }} 
+      borderColor="border-red-200"
+      endpoint="/genedisease" 
+      idField="geneDiseaseId" 
+      entityLabel="Association" 
+      initialId={initialId}
+      labelFn={(a) => `${a.geneDiseaseId} - Gene: ${a.gene?.geneSymbol || 'Unknown'} | Disease: ${a.disease?.diseaseName || 'Unknown'}`}
+      renderSummary={(r) => (<><p><span className="font-semibold">ID:</span> {r.geneDiseaseId}</p><p><span className="font-semibold">Gene ID:</span> {r.gene?.geneId || r.geneId}</p><p><span className="font-semibold">Disease ID:</span> {r.disease?.diseaseId || r.diseaseId}</p><p><span className="font-semibold">Type:</span> {r.associationType}</p></>)}
+      onClose={onClose}
+      customDelete={handleCustomDelete} 
+    />
+  );
+};
 
 const DeleteFunctionalCategoryForm = ({ onClose, initialId }) => (
   <DeleteForm title="Delete Functional Category" icon={Tag} colorClass={{ iconBg: "bg-orange-100", iconText: "text-orange-600" }} borderColor="border-red-200"
@@ -703,6 +923,52 @@ const DeleteGeneCategoryForm = ({ onClose, initialId }) => (
     renderSummary={(r) => (<><p><span className="font-semibold">ID:</span> {r.geneCategoryId}</p><p><span className="font-semibold">Gene ID:</span> {r.geneId}</p><p><span className="font-semibold">Category ID:</span> {r.categoryId}</p></>)}
     onClose={onClose} />
 );
+
+// ---------------------------------------------------------------------------
+// DELETE: Reference
+// ---------------------------------------------------------------------------
+const DeleteReferenceForm = ({ onClose, initialId }) => {
+  const handleCustomDelete = async (record) => {
+    const refId = record.referenceId;
+    
+    let linkedAssocs = [];
+    try {
+      linkedAssocs = await apiGet(`/references/${refId}/genedisease`);
+    } catch (e) {
+      console.warn("No linked associations found or failed to fetch them.", e);
+    }
+
+    for (const link of linkedAssocs) {
+      const gdId = link.geneDisease?.geneDiseaseId || link.geneDisease?.id; 
+      if (gdId) {
+        try {
+          await apiDelete(`/references/genedisease/${gdId}/${refId}`);
+        } catch (err) {
+          console.warn(`Failed to unlink association ${gdId}.`, err);
+        }
+      }
+    }
+    await apiDelete(`/references/${refId}`);
+  };
+
+  return (
+    <DeleteForm 
+      title="Delete Reference" 
+      icon={BookOpen} 
+      colorClass={{ iconBg: "bg-teal-100", iconText: "text-teal-600" }} 
+      borderColor="border-red-200"
+      endpoint="/references" 
+      idField="referenceId" 
+      entityLabel="Reference" 
+      initialId={initialId}
+      labelFn={(r) => `${r.referenceId} - ${r.title}`}
+      renderSummary={(r) => (<><p><span className="font-semibold">ID:</span> {r.referenceId}</p><p><span className="font-semibold">Title:</span> {r.title}</p><p><span className="font-semibold">URL:</span> <span className="truncate block text-blue-500">{r.url}</span></p></>)}
+      onClose={onClose}
+      customDelete={handleCustomDelete} 
+    />
+  );
+};
+
 
 // ---------------------------------------------------------------------------
 // Section divider
@@ -738,13 +1004,11 @@ const AdminPanel = () => {
       .catch(() => navigate("/admin/login"));
   }, [navigate]);
 
-  // Check for incoming route state (e.g., from search page edits)
+  // Check for incoming route state
   useEffect(() => {
     if (location.state?.activeView) {
       setActiveView(location.state.activeView);
       setInitialEntityId(location.state.entityId || null);
-      
-      // Clear the history state so refreshing doesn't re-trigger the auto-load
       window.history.replaceState({}, document.title);
     }
   }, [location.state]);
@@ -755,6 +1019,7 @@ const AdminPanel = () => {
     { title: "Add Gene-Disease Association", icon: Link, colors: { bg: "bg-purple-50", border: "border-purple-100", text: "text-purple-600" }, view: "add-association", desc: "Link genes to diseases with association type" },
     { title: "Add Functional Category", icon: Tag, colors: { bg: "bg-orange-50", border: "border-orange-100", text: "text-orange-600" }, view: "add-functional-category", desc: "Register a new gene functional category" },
     { title: "Add Gene–Category", icon: Tag, colors: { bg: "bg-yellow-50", border: "border-yellow-100", text: "text-yellow-600" }, view: "add-gene-category", desc: "Link a gene to a functional category" },
+    { title: "Add Reference", icon: BookOpen, colors: { bg: "bg-teal-50", border: "border-teal-100", text: "text-teal-600" }, view: "add-reference", desc: "Add a standalone research reference" },
   ];
 
   const editCards = [
@@ -763,6 +1028,7 @@ const AdminPanel = () => {
     { title: "Edit Association", icon: Link, colors: { bg: "bg-purple-50", border: "border-purple-100", text: "text-purple-600" }, view: "edit-association", desc: "Change association type, citation, or linked records" },
     { title: "Edit Functional Category", icon: Tag, colors: { bg: "bg-orange-50", border: "border-orange-100", text: "text-orange-600" }, view: "edit-functional-category", desc: "Update a functional category's name or description" },
     { title: "Edit Gene–Category", icon: Tag, colors: { bg: "bg-yellow-50", border: "border-yellow-100", text: "text-yellow-600" }, view: "edit-gene-category", desc: "Re-link a gene to a different functional category" },
+    { title: "Edit Reference", icon: BookOpen, colors: { bg: "bg-teal-50", border: "border-teal-100", text: "text-teal-600" }, view: "edit-reference", desc: "Update a reference's title, URL, or description" },
   ];
 
   const deleteCards = [
@@ -771,6 +1037,7 @@ const AdminPanel = () => {
     { title: "Delete Association", icon: Link, colors: { bg: "bg-red-50", border: "border-red-100", text: "text-red-500" }, view: "delete-association", desc: "Permanently remove a gene-disease association" },
     { title: "Delete Functional Category", icon: Tag, colors: { bg: "bg-red-50", border: "border-red-100", text: "text-red-500" }, view: "delete-functional-category", desc: "Permanently remove a functional category" },
     { title: "Delete Gene–Category", icon: Tag, colors: { bg: "bg-red-50", border: "border-red-100", text: "text-red-500" }, view: "delete-gene-category", desc: "Permanently remove a gene-category link" },
+    { title: "Delete Reference", icon: BookOpen, colors: { bg: "bg-red-50", border: "border-red-100", text: "text-red-500" }, view: "delete-reference", desc: "Permanently remove a reference record" },
   ];
 
   if (isLoading) {
@@ -794,7 +1061,7 @@ const AdminPanel = () => {
           className={`${colors.bg} p-6 rounded-xl border ${colors.border} hover:shadow-md transition-shadow cursor-pointer flex items-start gap-4 group ${activeView === view ? "ring-2 ring-offset-2 ring-blue-500" : ""}`}
           onClick={() => {
             setActiveView(activeView === view ? null : view);
-            setInitialEntityId(null); // Clear auto-load if clicking manually
+            setInitialEntityId(null); 
           }}
           role="button"
         >
@@ -815,7 +1082,6 @@ const AdminPanel = () => {
 
   return (
     <div className="max-w-7xl mx-auto py-8 px-4 relative">
-      {/* Header */}
       <div className="mb-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
           <h2 className="text-2xl font-bold text-slate-900">Admin Panel</h2>
@@ -841,7 +1107,6 @@ const AdminPanel = () => {
         )}
       </div>
 
-      {/* Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
         <SectionLabel label="Add" />
         <CardGrid cards={addCards} ActionIcon={Plus} />
@@ -851,7 +1116,6 @@ const AdminPanel = () => {
         <CardGrid cards={deleteCards} ActionIcon={Trash2} />
       </div>
 
-      {/* Modal */}
       {activeView && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4 sm:p-6 overflow-y-auto">
           <div className="bg-white rounded-2xl shadow-2xl w-full max-w-3xl max-h-[90vh] overflow-y-auto relative">
@@ -862,18 +1126,23 @@ const AdminPanel = () => {
               {activeView === "add-association" && <AddAssociationForm onClose={handleCloseView} />}
               {activeView === "add-functional-category" && <AddFunctionalCategoryForm onClose={handleCloseView} />}
               {activeView === "add-gene-category" && <AddGeneCategoryForm onClose={handleCloseView} />}
+              {activeView === "add-reference" && <AddReferenceForm onClose={handleCloseView} />}
+              
               {/* EDIT */}
               {activeView === "edit-gene" && <EditGeneForm onClose={handleCloseView} initialId={initialEntityId} />}
               {activeView === "edit-disease" && <EditDiseaseForm onClose={handleCloseView} initialId={initialEntityId} />}
               {activeView === "edit-association" && <EditAssociationForm onClose={handleCloseView} initialId={initialEntityId} />}
               {activeView === "edit-functional-category" && <EditFunctionalCategoryForm onClose={handleCloseView} initialId={initialEntityId} />}
               {activeView === "edit-gene-category" && <EditGeneCategoryForm onClose={handleCloseView} initialId={initialEntityId} />}
+              {activeView === "edit-reference" && <EditReferenceForm onClose={handleCloseView} initialId={initialEntityId} />}
+              
               {/* DELETE */}
               {activeView === "delete-gene" && <DeleteGeneForm onClose={handleCloseView} initialId={initialEntityId} />}
               {activeView === "delete-disease" && <DeleteDiseaseForm onClose={handleCloseView} initialId={initialEntityId} />}
               {activeView === "delete-association" && <DeleteAssociationForm onClose={handleCloseView} initialId={initialEntityId} />}
               {activeView === "delete-functional-category" && <DeleteFunctionalCategoryForm onClose={handleCloseView} initialId={initialEntityId} />}
               {activeView === "delete-gene-category" && <DeleteGeneCategoryForm onClose={handleCloseView} initialId={initialEntityId} />}
+              {activeView === "delete-reference" && <DeleteReferenceForm onClose={handleCloseView} initialId={initialEntityId} />}
             </div>
           </div>
         </div>

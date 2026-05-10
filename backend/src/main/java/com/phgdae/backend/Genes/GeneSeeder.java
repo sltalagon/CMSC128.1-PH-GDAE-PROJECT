@@ -55,10 +55,10 @@ public class GeneSeeder implements CommandLineRunner {
     }
 
     private GeneType mapGeneType(String value) {
-        return switch (value.toLowerCase()) {
-            case "protein-coding" -> GeneType.PROTEIN_CODING;
-            case "non-coding"     -> GeneType.NON_CODING;
-            default               -> GeneType.PROTEIN_CODING;
-        };
+        switch (value.toLowerCase()) {
+            case "protein-coding": return GeneType.PROTEIN_CODING;
+            case "non-coding":     return GeneType.NON_CODING;
+            default:               return GeneType.PROTEIN_CODING;
+        }
     }
 }

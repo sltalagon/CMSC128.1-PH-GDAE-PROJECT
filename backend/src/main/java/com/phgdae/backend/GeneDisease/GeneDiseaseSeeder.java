@@ -24,8 +24,8 @@ public class GeneDiseaseSeeder implements CommandLineRunner {
     private final DiseaseRepository diseaseRepository;
 
     public GeneDiseaseSeeder(GeneDiseaseRepository geneDiseaseRepository,
-                              GeneRepository geneRepository,
-                              DiseaseRepository diseaseRepository) {
+                             GeneRepository geneRepository,
+                             DiseaseRepository diseaseRepository) {
         this.geneDiseaseRepository = geneDiseaseRepository;
         this.geneRepository = geneRepository;
         this.diseaseRepository = diseaseRepository;
@@ -75,12 +75,12 @@ public class GeneDiseaseSeeder implements CommandLineRunner {
     }
 
     private AssociationType mapAssociationType(String value) {
-        return switch (value.toLowerCase()) {
-            case "predisposition" -> AssociationType.PREDISPOSITION;
-            case "driver"         -> AssociationType.DRIVER;
-            case "somatic"        -> AssociationType.SOMATIC;
-            case "germline"       -> AssociationType.GERMLINE;
-            default               -> AssociationType.GERMLINE;
-        };
+        switch (value.toLowerCase()) {
+            case "predisposition": return AssociationType.PREDISPOSITION;
+            case "driver":         return AssociationType.DRIVER;
+            case "somatic":        return AssociationType.SOMATIC;
+            case "germline":       return AssociationType.GERMLINE;
+            default:               return AssociationType.GERMLINE;
+        }
     }
 }

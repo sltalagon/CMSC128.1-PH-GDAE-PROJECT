@@ -45,6 +45,7 @@ public class Gene {
     @OneToMany(mappedBy = "gene", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonIgnore
     private List<GeneDisease> geneDiseases;
+
     // -----------------------------------
 
     public Gene(String geneId, String geneSymbol, String fullGeneName, GeneType geneType, BigDecimal omimId, String ncbiId, String description) {

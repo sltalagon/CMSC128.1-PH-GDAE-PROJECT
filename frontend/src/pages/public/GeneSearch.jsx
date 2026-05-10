@@ -48,11 +48,13 @@ const GeneSearch = () => {
         if (!map[gId]) map[gId] = [];
 
         map[gId].push({
+          geneDiseaseId: gd.geneDiseaseId,
+          diseaseId: disease.diseaseId,
           name: disease.diseaseName,
           type: disease.diseaseCategory || "Unknown Category",
-          description:
-            disease.diseaseDescription || "No description available.",
-          associationType: "Associated",
+          prevalence: disease.phPrevalence || "NONE",
+          description: disease.diseaseDescription || "No description available.",
+          associationType: gd.associationType || "Associated",
           confidence: "Verified",
           references: [],
         });
@@ -91,6 +93,37 @@ const GeneSearch = () => {
       return matchesSearch && matchesType;
     });
   }, [genes, searchQuery, selectedGeneTypes]);
+
+  // Async function to fetch references when a gene is clicked
+  const handleGeneClick = async (gene) => {
+    const diseases = geneToDiseasesMap[gene.geneId] || [];
+
+    // Fetch references for each associated disease
+    const diseasesWithRefs = await Promise.all(
+      diseases.map(async (d) => {
+        try {
+          const refs = await apiGet(`/references/genedisease/${d.geneDiseaseId}`);
+          return { ...d, references: refs.map(r => r.reference) }; 
+        } catch (e) {
+          console.error("Failed to load references for", d.name, e);
+          return d;
+        }
+      })
+    );
+
+    setSelectedGene({
+      ...gene,
+      symbol: gene.geneSymbol,
+      name: gene.fullGeneName,
+      chromosome: gene.chromosomeLocation || gene.chromosome || "Location N/A",
+      ncbiId: gene.ncbiId || "N/A",
+      omimId: gene.omimId || "N/A",
+      description: gene.description || "No description provided.",
+      biologicalFunction: gene.function || "Function details not available.",
+      associatedDiseases: diseasesWithRefs, // Includes fetched references
+      functionalCategories: getCategoriesForGene(gene.geneId),
+    });
+  };
 
   return (
     <div className="max-w-6xl mx-auto py-8 px-4 flex gap-8">
@@ -199,7 +232,7 @@ const GeneSearch = () => {
               return (
                 <div
                   key={gene.geneId}
-                  onClick={() => setSelectedGene(gene)}
+                  onClick={() => handleGeneClick(gene)}
                   className="bg-white rounded-xl border border-slate-200 shadow-sm hover:shadow-md transition-shadow cursor-pointer p-6 flex justify-between items-start group"
                 >
                   <div className="flex gap-4">
@@ -252,26 +285,14 @@ const GeneSearch = () => {
         )}
       </div>
 
-      <GeneModal
-        isOpen={!!selectedGene}
-        onClose={() => setSelectedGene(null)}
-        geneData={
-          selectedGene
-            ? {
-                symbol: selectedGene.geneSymbol,
-                name: selectedGene.fullGeneName,
-                chromosome: selectedGene.chromosomeLocation || "Location N/A",
-                ncbiId: selectedGene.ncbiId || "N/A",
-                omimId: selectedGene.omimId || "N/A",
-                description:
-                  selectedGene.description || "No description provided.",
-                associatedDiseases:
-                  geneToDiseasesMap[selectedGene.geneId] || [],
-                functionalCategories: getCategoriesForGene(selectedGene.geneId),
-              }
-            : null
-        }
-      />
+      {/* Gene Modal handles the display of selectedGene */}
+      {selectedGene && (
+        <GeneModal
+          isOpen={!!selectedGene}
+          onClose={() => setSelectedGene(null)}
+          geneData={selectedGene}
+        />
+      )}
     </div>
   );
 };

@@ -34,6 +34,7 @@ export default function GeneModal({ isOpen, onClose, geneData, onEdit, onDelete 
             <FileText className="text-blue-600" size={20} />
             <h3 className="text-xl font-bold text-slate-800">Gene Information</h3>
           </div>
+          <p className="text-slate-700 mb-4">{geneData.description}</p>
           <div className="bg-slate-50 p-4 rounded-xl border border-slate-100 flex items-center gap-6 mb-6">
             <div className="flex items-center gap-2 text-slate-600">
               <span className="text-sm font-medium text-slate-500">NCBI Gene ID:</span>
@@ -53,17 +54,17 @@ export default function GeneModal({ isOpen, onClose, geneData, onEdit, onDelete 
             </div>
           </div>
 
-          {/* Description & Biological Function */}
+          {/* Functional Categories */}
           <div className="mb-8 space-y-4">
             {geneData.functionalCategories?.length > 0 && (
               <div className="mt-2">
-              <div>
-                <div className="flex items-center gap-2 mb-2">
-                <Tag className="text-purple-600" size={20} />
-                <h3 className="text-xl font-bold text-slate-800">Functional Categories</h3>
-              </div>
-              <p className="text-xs text-slate-400 mb-3">Click a category to see its description.</p>
-              </div>
+                <div>
+                  <div className="flex items-center gap-2 mb-2">
+                    <Tag className="text-purple-600" size={20} />
+                    <h3 className="text-xl font-bold text-slate-800">Functional Categories</h3>
+                  </div>
+                  <p className="text-xs text-slate-400 mb-3">Click a category to see its description.</p>
+                </div>
                 <div className="flex flex-wrap gap-2">
                   {geneData.functionalCategories.map((cat, idx) => (
                     <button
@@ -118,34 +119,48 @@ export default function GeneModal({ isOpen, onClose, geneData, onEdit, onDelete 
                   </div>
                 </div>
 
-                {disease.references && (
-                  <div className="bg-slate-50 p-4 border-t border-slate-200">
-                    <div className="flex items-center justify-between mb-3">
-                      <span className="text-red-600 font-semibold text-sm flex items-center gap-1">
-                        <span className="bg-red-100 text-red-700 text-[10px] px-1.5 py-0.5 rounded font-bold">PH</span>
-                        High Prevalence in Philippines
-                      </span>
-                      <span className="text-slate-400 text-xs">{disease.references.length} reference(s)</span>
-                    </div>
-                    <div>
-                      <p className="text-xs font-semibold text-slate-500 mb-2 uppercase">References:</p>
-                      {disease.references.map((ref, rIdx) => (
-                        <div key={rIdx} className="text-sm">
-                          <p className="font-medium text-slate-800">{ref.title}</p>
-                          <p className="text-slate-500 text-xs mb-1">
-                            {ref.authors} ({ref.year}). <span className="italic">{ref.journal}</span>
-                            <span className="ml-2 px-2 py-0.5 bg-green-100 text-green-700 rounded text-[10px] font-bold">PH Local Study</span>
-                          </p>
-                          <p className="text-slate-400 text-xs">PMID: {ref.pmid}</p>
-                        </div>
-                      ))}
-                    </div>
+                {/* References & Prevalence Section (Always visible) */}
+                <div className="bg-slate-50 p-4 border-t border-slate-200">
+                  <div className="flex items-center justify-between mb-3">
+                    {/* Conditionally showing this if you have real prevalence data, otherwise defaults to the hardcoded UI */}
+                    <span className="text-red-600 font-semibold text-sm flex items-center gap-1">
+                      <span className="bg-red-100 text-red-700 text-[10px] px-1.5 py-0.5 rounded font-bold">PH</span>
+                      {disease.prevalence !== "NONE" ? `PH Prevalence: ${disease.prevalence}` : "High Prevalence in Philippines"}
+                    </span>
+                    <span className="text-slate-400 text-xs">{disease.references?.length || 0} reference(s)</span>
                   </div>
-                )}
+                  
+                  <div>
+                    <p className="text-xs font-semibold text-slate-500 mb-2 uppercase">References:</p>
+                    
+                    {/* Conditionally render the reference list OR the empty state */}
+                    {disease.references && disease.references.length > 0 ? (
+                      <div className="space-y-3">
+                        {disease.references.map((ref, rIdx) => (
+                          <div key={rIdx} className="text-sm border-l-2 border-blue-200 pl-3">
+                            <p className="font-medium text-slate-800">{ref.title}</p>
+                            {ref.description && (
+                              <p className="text-slate-600 text-xs mt-1">{ref.description}</p>
+                            )}
+                            <a 
+                              href={ref.url} 
+                              target="_blank" 
+                              rel="noopener noreferrer" 
+                              className="text-blue-600 hover:underline text-xs flex items-center gap-1 mt-1 break-all"
+                            >
+                              {ref.url} <ExternalLink size={12} />
+                            </a>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="text-xs text-slate-400 italic">No references available for this association.</p>
+                    )}
+                  </div>
+                </div>
               </div>
             ))}
           </div>
-        </div>
 
         {/* Footer with Edit/Delete Buttons */}
         <div className="p-4 border-t border-gray-100 bg-gray-50 flex justify-between items-center flex-shrink-0">
@@ -167,5 +182,5 @@ export default function GeneModal({ isOpen, onClose, geneData, onEdit, onDelete 
         </div>
       </div>
     </div>
-  );
-}
+  </div>
+  )}

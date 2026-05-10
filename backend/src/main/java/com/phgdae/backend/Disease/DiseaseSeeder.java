@@ -54,13 +54,13 @@ public class DiseaseSeeder implements CommandLineRunner {
                 Prevalence prevalence = derivePrevalence(diseaseName);
 
                 diseases.add(new Disease(
-                    diseaseId,
-                    diseaseName,
-                    category,
-                    inheritancePattern,
-                    omimId,
-                    prevalence,
-                    description
+                        diseaseId,
+                        diseaseName,
+                        category,
+                        inheritancePattern,
+                        omimId,
+                        prevalence,
+                        description
                 ));
             }
         }
@@ -71,18 +71,18 @@ public class DiseaseSeeder implements CommandLineRunner {
 
     // Maps CSV string values to your DiseaseCategory enum
     private DiseaseCategory mapCategory(String value) {
-        return switch (value.toLowerCase()) {
-            case "metabolic"        -> DiseaseCategory.METABOLIC;
-            case "neurological"     -> DiseaseCategory.NEUROLOGICAL;
-            case "neuromuscular"    -> DiseaseCategory.NEUROMUSCULAR;
-            case "cancer"           -> DiseaseCategory.CANCER;
-            case "hematologic"      -> DiseaseCategory.HEMATOLOGIC;
-            case "cardiovascular"   -> DiseaseCategory.CARDIOVASCULAR;
-            case "renal"            -> DiseaseCategory.RENAL;
-            case "dermatologic"     -> DiseaseCategory.DERMATOLOGICAL;
-            case "syndromic"        -> DiseaseCategory.SYNDROMIC;
-            default                 -> DiseaseCategory.ETC;
-        };
+        switch (value.toLowerCase()) {
+            case "metabolic":      return DiseaseCategory.METABOLIC;
+            case "neurological":   return DiseaseCategory.NEUROLOGICAL;
+            case "neuromuscular":  return DiseaseCategory.NEUROMUSCULAR;
+            case "cancer":         return DiseaseCategory.CANCER;
+            case "hematologic":    return DiseaseCategory.HEMATOLOGIC;
+            case "cardiovascular": return DiseaseCategory.CARDIOVASCULAR;
+            case "renal":          return DiseaseCategory.RENAL;
+            case "dermatologic":   return DiseaseCategory.DERMATOLOGICAL;
+            case "syndromic":      return DiseaseCategory.SYNDROMIC;
+            default:               return DiseaseCategory.ETC;
+        }
     }
 
     // Since ph_prevalence is absent from the CSV, derive it or default to NONE
@@ -90,14 +90,14 @@ public class DiseaseSeeder implements CommandLineRunner {
     private Prevalence derivePrevalence(String diseaseName) {
         String name = diseaseName.toLowerCase();
         if (name.contains("thalassemia") || name.contains("g6pd") ||
-            name.contains("diabetes")    || name.contains("breast cancer") ||
-            name.contains("nasopharyngeal") || name.contains("lupus") ||
-            name.contains("hypothyroidism")) {
+                name.contains("diabetes")    || name.contains("breast cancer") ||
+                name.contains("nasopharyngeal") || name.contains("lupus") ||
+                name.contains("hypothyroidism")) {
             return Prevalence.HIGH;
         } else if (name.contains("hemophilia") || name.contains("duchenne") ||
-                   name.contains("hypercholesterolemia") || name.contains("down") ||
-                   name.contains("neurofibromatosis") || name.contains("polycystic") ||
-                   name.contains("colorectal") || name.contains("dystonia")) {
+                name.contains("hypercholesterolemia") || name.contains("down") ||
+                name.contains("neurofibromatosis") || name.contains("polycystic") ||
+                name.contains("colorectal") || name.contains("dystonia")) {
             return Prevalence.MEDIUM;
         } else {
             return Prevalence.LOW;

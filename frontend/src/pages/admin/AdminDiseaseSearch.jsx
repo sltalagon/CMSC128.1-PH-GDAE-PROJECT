@@ -7,6 +7,7 @@ import DiseaseModal from "../../components/DiseaseModal";
 const AdminDiseaseSearch = () => {
   const [diseases, setDiseases] = useState([]);
   const [geneDiseases, setGeneDiseases] = useState([]);
+  const [geneCategories, setGeneCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
@@ -19,12 +20,14 @@ const AdminDiseaseSearch = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [diseasesData, geneDiseaseData] = await Promise.all([
+        const [diseasesData, geneDiseaseData, geneCategoryData] = await Promise.all([
           apiGet("/diseases"),
           apiGet("/genedisease"),
+          apiGet("/gene-categories"),
         ]);
         setDiseases(diseasesData);
         setGeneDiseases(geneDiseaseData);
+        setGeneCategories(geneCategoryData);
       } catch (err) {
         setError(err.message);
       } finally {
@@ -48,31 +51,62 @@ const AdminDiseaseSearch = () => {
     return map;
   }, [geneDiseases]);
 
+  const getCategoriesForGene = (geneId) => {
+    return geneCategories
+      .filter((gc) => gc.gene?.geneId === geneId)
+      .map((gc) => ({
+        name: gc.functionalCategory?.categoryName,
+        description: gc.functionalCategory?.description,
+      }))
+      .filter((cat) => cat.name);
+  };
+
   // Helper to format detailed gene data specifically for the modal
   const getDetailedGenesForModal = (diseaseId) => {
     return geneDiseases
       .filter((gd) => gd.disease?.diseaseId === diseaseId)
       .map((gd) => ({
+        geneDiseaseId: gd.geneDiseaseId || gd.id,
         symbol: gd.gene?.geneSymbol || "Unknown",
         name: gd.gene?.fullGeneName || "Unknown Gene",
+        geneType: gd.gene?.geneType || "Unknown Type",
         chromosome: gd.gene?.chromosome || "N/A",
         associationType: gd.associationType || "Associated",
         confidence: gd.confidenceScore || "High",
         description: gd.gene?.description || "No description available.",
         function: gd.gene?.function || "No function data available.",
-        references: gd.references || []
+        functionalCategories: getCategoriesForGene(gd.gene?.geneId),
+        references: [],
       }));
   };
 
-  // Click handler to structure the data identically
-  const handleDiseaseClick = (disease) => {
+  const handleDiseaseClick = async (disease) => {
+    const baseAssociatedGenes = getDetailedGenesForModal(disease.diseaseId);
+
+    // Fetch references for each gene linked to this disease
+    const associatedGenesWithRefs = await Promise.all(
+      baseAssociatedGenes.map(async (geneItem) => {
+        if (!geneItem.geneDiseaseId) return geneItem;
+        
+        try {
+          const refs = await apiGet(`/references/genedisease/${geneItem.geneDiseaseId}`);
+          return { ...geneItem, references: refs.map(r => r.reference) };
+        } catch (e) {
+          console.error("Failed to load references for", geneItem.symbol, e);
+          return geneItem;
+        }
+      })
+    );
+
     setSelectedDisease({
       ...disease,
       name: disease.diseaseName,
-      // Checking both description fields just in case your API uses either
-      description: disease.description || disease.diseaseDescription || "No detailed description provided for this disease.",
+      description:
+        disease.description ||
+        disease.diseaseDescription ||
+        "No detailed description provided for this disease.",
       symptoms: disease.symptoms || ["Data on symptoms currently unavailable."],
-      associatedGenes: getDetailedGenesForModal(disease.diseaseId)
+      associatedGenes: associatedGenesWithRefs, // Use the array with fetched references!
     });
   };
 
