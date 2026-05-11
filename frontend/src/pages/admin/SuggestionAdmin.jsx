@@ -96,14 +96,50 @@ const SuggestionAdmin = () => {
     try {
       const parsed = JSON.parse(content);
       return (
-        <div className="bg-gray-50 rounded-lg p-4 space-y-2 text-sm">
+        <div className="bg-gray-50 rounded-lg p-4 space-y-3 text-sm">
           {Object.entries(parsed).map(([key, value]) => {
-            if (!value) return null;
+            // Skip completely empty values or empty arrays
+            if (value === null || value === undefined || value === "") return null;
+            if (Array.isArray(value) && value.length === 0) return null;
+
             const label = key.replace(/([A-Z])/g, " $1").replace(/^./, (s) => s.toUpperCase());
+
+            // FIX: Safely handle objects and arrays so React doesn't crash
+            let displayValue;
+            if (typeof value === "object") {
+              // If it's our references array, format it nicely into a list
+              if (Array.isArray(value) && value[0]?.title) {
+                displayValue = (
+                  <ul className="list-disc pl-5 mt-1 space-y-2 text-gray-700">
+                    {value.map((item, idx) => (
+                      <li key={idx}>
+                        <span className="font-semibold">{item.title}</span>
+                        {item.description && <p className="text-xs text-gray-500">{item.description}</p>}
+                        <a href={item.url} target="_blank" rel="noreferrer" className="text-blue-600 hover:underline text-xs break-all">
+                          {item.url}
+                        </a>
+                      </li>
+                    ))}
+                  </ul>
+                );
+              } else {
+                // Fallback for any other objects (just prints them clearly)
+                displayValue = (
+                  <pre className="text-xs bg-gray-200 p-2 rounded mt-1 overflow-x-auto">
+                    {JSON.stringify(value, null, 2)}
+                  </pre>
+                );
+              }
+            } else {
+              // Standard strings or numbers
+              displayValue = <span className="text-gray-800">{String(value)}</span>;
+            }
+
+            // If it's an object, stack it vertically. If it's text, keep it side-by-side.
             return (
-              <div key={key} className="flex gap-2">
+              <div key={key} className={`flex ${typeof value === "object" ? "flex-col" : "gap-2"}`}>
                 <span className="font-semibold text-gray-600 min-w-[160px]">{label}:</span>
-                <span className="text-gray-800">{value}</span>
+                {displayValue}
               </div>
             );
           })}
