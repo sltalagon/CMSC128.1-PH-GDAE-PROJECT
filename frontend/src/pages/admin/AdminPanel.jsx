@@ -14,6 +14,7 @@ import { AddDiseaseForm } from "./AddDiseaseForm";
 import { AddAssociationForm } from "./AddAssociationForm";
 import { AddFunctionalCategoryForm } from "./AddFunctionalCategoryForm";
 import { AddGeneCategoryForm } from "./AddGeneCategoryForm";
+import { AddReferenceForm } from "./AddReferenceForm";
 
 // ---------------------------------------------------------------------------
 // Shared UI primitives
@@ -131,117 +132,6 @@ const SaveCancelBar = ({ onSave, saving, onClose, saveColor = "bg-blue-600 hover
     </button>
   </div>
 );
-
-// ---------------------------------------------------------------------------
-// ADD: Reference
-// ---------------------------------------------------------------------------
-const AddReferenceForm = ({ onClose }) => {
-  const [saving, setSaving] = useState(false);
-  const [error, setError] = useState(null);
-  
-  // Added geneDiseaseId to the state
-  const [data, setData] = useState({ title: "", url: "", description: "", geneDiseaseId: "" });
-  
-  // State for fetching the dropdown list
-  const [associations, setAssociations] = useState([]);
-  const [loadingLists, setLoadingLists] = useState(true);
-
-  // Fetch associations when the modal opens
-  useEffect(() => {
-    apiGet("/genedisease")
-      .then(data => setAssociations(data))
-      .catch(err => console.error("Failed to fetch associations", err))
-      .finally(() => setLoadingLists(false));
-  }, []);
-
-  const set = (field) => (e) => setData((d) => ({ ...d, [field]: e.target.value }));
-
-  const handleSave = async () => {
-    setSaving(true); setError(null);
-    try {
-      let referenceIdToLink = null;
-
-      // 1. Create or find the reference
-      try {
-        const savedRef = await apiPost("/references", {
-          title: data.title,
-          url: data.url,
-          description: data.description,
-        });
-        referenceIdToLink = savedRef.referenceId;
-      } catch (refErr) {
-        // If the URL already exists, gracefully grab its ID instead of crashing
-        if (refErr.message?.includes("exists") || refErr.message?.includes("409")) {
-          const allRefs = await apiGet("/references");
-          const existingRef = allRefs.find((r) => r.url === data.url);
-          if (existingRef) {
-            referenceIdToLink = existingRef.referenceId;
-          } else {
-            throw new Error("Reference URL exists, but couldn't retrieve it.");
-          }
-        } else {
-          throw refErr;
-        }
-      }
-
-      // 2. Link it to the selected Gene-Disease Association (if one was picked)
-      if (data.geneDiseaseId && referenceIdToLink) {
-        try {
-          await apiPost(`/references/genedisease/${data.geneDiseaseId}/${referenceIdToLink}`);
-        } catch (linkErr) {
-          // If they try to link it but it's already linked, that's fine, ignore the error
-          if (!linkErr.message?.includes("already linked")) {
-            throw new Error("Reference saved, but failed to link to the association.");
-          }
-        }
-      }
-
-      onClose();
-    } catch (err) {
-      setError(err.message || "Failed to create reference. Please try again.");
-    } finally { setSaving(false); }
-  };
-
-  return (
-    <div className="bg-white border-2 border-teal-200 rounded-xl p-6">
-      <FormHeader title="Add Reference" icon={BookOpen} colorClass={{ iconBg: "bg-teal-100", iconText: "text-teal-600" }} onClose={onClose} />
-      <ErrorBanner message={error} />
-      <div className="space-y-4">
-        <Field label="Reference Title" required>
-          <input type="text" value={data.title} onChange={set("title")} placeholder="e.g., Study on BRCA1 Mutations" className={inputCls("focus:border-teal-500")} />
-        </Field>
-        <Field label="URL" required>
-          <input type="url" value={data.url} onChange={set("url")} placeholder="https://pubmed.ncbi.nlm.nih.gov/..." className={inputCls("focus:border-teal-500")} />
-        </Field>
-        <Field label="Description">
-          <textarea rows={3} value={data.description} onChange={set("description")} placeholder="Briefly describe the findings of this paper..." className={`${inputCls("focus:border-teal-500")} resize-none`} />
-        </Field>
-
-        {/* --- NEW DROPDOWN SECTION --- */}
-        <div className="border-t border-teal-100 pt-4 mt-4">
-          <Field label="Link to Association (Optional)">
-            <select
-              value={data.geneDiseaseId}
-              onChange={set("geneDiseaseId")}
-              disabled={loadingLists}
-              className={inputCls("focus:border-teal-500 disabled:bg-gray-50")}
-            >
-              <option value="">-- No Association (Save as Standalone) --</option>
-              {associations.map((a) => (
-                <option key={a.geneDiseaseId} value={a.geneDiseaseId}>
-                  {a.gene?.geneSymbol} - {a.disease?.diseaseName}
-                </option>
-              ))}
-            </select>
-            <p className="text-xs text-slate-500 mt-1">Select an association to instantly attach this reference to it.</p>
-          </Field>
-        </div>
-
-        <SaveCancelBar onSave={handleSave} saving={saving} onClose={onClose} saveColor="bg-teal-600 hover:bg-teal-700" />
-      </div>
-    </div>
-  );
-};
 
 // ---------------------------------------------------------------------------
 // EDIT: Gene

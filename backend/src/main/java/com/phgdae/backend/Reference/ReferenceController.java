@@ -70,15 +70,13 @@ public class ReferenceController {
         return ResponseEntity.notFound().build();
     }
 
-    // --- GeneDisease <-> Reference ---
-
     @GetMapping("/genedisease/{geneDiseaseId}")
-    public List<GeneDiseaseReference> getReferencesForGeneDisease(@PathVariable String geneDiseaseId) {
+    public List<GeneDiseaseReference> getReferencesForGeneDisease(@PathVariable("geneDiseaseId") String geneDiseaseId) {
         return referenceService.getReferencesForGeneDisease(geneDiseaseId);
     }
 
     @PostMapping("/genedisease/{geneDiseaseId}/{referenceId}")
-    public ResponseEntity<?> linkGeneDiseaseToReference(@PathVariable String geneDiseaseId, @PathVariable String referenceId) {
+    public ResponseEntity<?> linkGeneDiseaseToReference(@PathVariable("geneDiseaseId") String geneDiseaseId, @PathVariable("referenceId") String referenceId) {
         try {
             GeneDiseaseReference link = referenceService.linkGeneDiseaseToReference(geneDiseaseId, referenceId);
             return ResponseEntity.ok(link);
@@ -89,7 +87,7 @@ public class ReferenceController {
 
     @DeleteMapping("/genedisease/{geneDiseaseId}/{referenceId}")
     @Transactional
-    public ResponseEntity<Void> unlinkGeneDiseaseFromReference(@PathVariable String geneDiseaseId, @PathVariable String referenceId) {
+    public ResponseEntity<Void> unlinkGeneDiseaseFromReference(@PathVariable("geneDiseaseId") String geneDiseaseId, @PathVariable("referenceId") String referenceId) {
         referenceService.unlinkGeneDiseaseFromReference(geneDiseaseId, referenceId);
         return ResponseEntity.ok().build();
     }

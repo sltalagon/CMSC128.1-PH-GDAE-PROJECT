@@ -7,5 +7,6 @@ import java.util.Optional;
 @Repository
 public interface ReferenceRepository extends JpaRepository<Reference, String> {
     boolean existsByUrl(String url);
+    Optional<Reference> findByUrl(String url);
     Optional<Reference> findTopByOrderByReferenceIdDesc();
 }

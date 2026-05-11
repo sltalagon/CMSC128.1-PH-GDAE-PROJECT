@@ -5,5 +5,6 @@ public enum SuggestionType {
     DISEASE,
     ASSOCIATION,
     FUNCTIONAL_CATEGORY,
-    GENE_CATEGORY
+    GENE_CATEGORY,
+    REFERENCE
 }

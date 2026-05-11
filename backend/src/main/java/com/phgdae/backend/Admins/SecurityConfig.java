@@ -72,6 +72,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/suggestions").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/references/").permitAll()
                         .requestMatchers("/login/**", "/oauth2/**").permitAll()
                         .requestMatchers("/api/admin/add", "/api/admin/remove/**", "/api/admin/all").hasRole("SUPER_ADMIN")
 

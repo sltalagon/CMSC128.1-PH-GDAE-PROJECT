@@ -182,19 +182,16 @@ const GeneSearch = () => {
           </p>
         </div>
 
-        <div className="bg-blue-50 border-l-4 border-blue-500 p-4 rounded-r-lg mb-6 flex gap-4">
-          <Info className="text-blue-600 flex-shrink-0 mt-0.5" size={20} />
-          <div>
-            <h4 className="font-semibold text-blue-900 text-sm">
-              About Gene Search
-            </h4>
-            <p className="text-sm text-blue-800 mt-1">
-              Click on any gene card to view detailed information including gene
-              type, function, and associated diseases with prevalence data for
-              the Philippines.
-            </p>
-          </div>
+        <div className="bg-blue-50 border-l-4 border-blue-500 p-4 rounded-r-lg mb-8 flex gap-4">
+        <Info className="text-blue-600 flex-shrink-0" size={24} />
+        <div>
+          <h4 className="font-semibold text-blue-900">About Gene Search</h4>
+          <p className="text-sm text-blue-800 mt-1">
+            Click on any gene card to view detailed information including gene
+            name, function and associated diseases.
+          </p>
         </div>
+      </div>
 
         <div className="relative mb-6">
           <Search

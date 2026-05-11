@@ -5,6 +5,7 @@ import { AddDiseaseForm } from "../admin/AddDiseaseForm";
 import { AddAssociationForm } from "../admin/AddAssociationForm";
 import { AddFunctionalCategoryForm } from "../admin/AddFunctionalCategoryForm";
 import { AddGeneCategoryForm } from "../admin/AddGeneCategoryForm";
+import { AddReferenceForm } from "../admin/AddReferenceForm";
 
 function SuggestionTab() {
   const [step, setStep] = useState("info");
@@ -41,6 +42,11 @@ function SuggestionTab() {
       value: "GENE_CATEGORY",
       label: "Gene–Category Association",
       desc: "Suggest linking a gene to a functional category",
+    },
+    {
+      value: "REFERENCE",
+      label: "Research Reference",
+      desc: "Suggest a published reference of an association",
     },
   ];
 
@@ -136,6 +142,7 @@ function SuggestionTab() {
         {suggestionType === "GENE_CATEGORY" && (
           <AddGeneCategoryForm {...formProps} />
         )}
+        {suggestionType === "REFERENCE" && <AddReferenceForm {...formProps} />}
       </div>
     );
   }

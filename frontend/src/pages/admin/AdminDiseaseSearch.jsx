@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { apiGet } from "../../api/api";
-import { Search, Filter, Activity, ChevronRight } from "lucide-react";
+import { Search, Info, Filter, Activity, ChevronRight } from "lucide-react";
 import DiseaseModal from "../../components/DiseaseModal";
 
 const AdminDiseaseSearch = () => {
@@ -209,6 +209,17 @@ const handleEdit = (disease) => {
           <h2 className="text-2xl font-bold text-slate-900">Disease Search</h2>
           <p className="text-slate-600">Browse diseases monitored in the Philippines.</p>
         </div>
+        
+        <div className="bg-blue-50 border-l-4 border-blue-500 p-4 rounded-r-lg mb-8 flex gap-4">
+          <Info className="text-blue-600 flex-shrink-0" size={24} />
+          <div>
+            <h4 className="font-semibold text-blue-900">About Disease Search</h4>
+            <p className="text-sm text-blue-800 mt-1">
+              Click on any disease card to view detailed information including disease
+              name, PH prevelance and associated genes.
+            </p>
+          </div>
+        </div>
 
         <div className="relative mb-6">
           <Search className="absolute left-4 top-3.5 text-slate-400" size={20} />
@@ -220,6 +231,7 @@ const handleEdit = (disease) => {
             className="w-full pl-12 pr-4 py-3 bg-white border border-slate-200 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
         </div>
+      
 
         {error && (
           <div className="p-4 bg-red-50 border border-red-200 text-red-700 rounded-lg mb-4">
@@ -260,8 +272,8 @@ const handleEdit = (disease) => {
                       {associatedGenes.length > 0 && (
                         <div className="flex items-center gap-2 flex-wrap">
                           <span className="text-xs font-semibold text-slate-500 uppercase">Associated Genes:</span>
-                          {associatedGenes.map((gene) => (
-                            <span key={gene} className="bg-blue-50 text-blue-700 px-2 py-1 rounded text-xs font-medium border border-blue-100">
+                          {associatedGenes.map((gene, idx) => (
+                            <span key={idx} className="bg-blue-50 text-blue-700 px-2 py-1 rounded text-xs font-medium border border-blue-100">
                               {gene}
                             </span>
                           ))}

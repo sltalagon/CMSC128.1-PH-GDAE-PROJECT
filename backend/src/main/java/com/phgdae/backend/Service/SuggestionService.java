@@ -5,6 +5,7 @@ import com.phgdae.backend.Functional.FunctionalCategory;
 import com.phgdae.backend.GeneCategory.GeneCategory;
 import com.phgdae.backend.GeneDisease.GeneDisease;
 import com.phgdae.backend.Genes.Gene;
+import com.phgdae.backend.Reference.Reference;
 import com.phgdae.backend.Suggestion.*;
 import com.phgdae.backend.enums.*;
 import org.springframework.stereotype.Service;
@@ -26,14 +27,16 @@ public class SuggestionService {
     private final GeneDiseaseService geneDiseaseService;
     private final FunctionalCategoryService functionalCategoryService;
     private final GeneCategoryService geneCategoryService;
+    private final ReferenceService referenceService;
 
-    public SuggestionService(SuggestionRepository suggestionRepository, GeneService geneService, DiseaseService diseaseService, GeneDiseaseService geneDiseaseService, FunctionalCategoryService functionalCategoryService, GeneCategoryService geneCategoryService) {
+    public SuggestionService(SuggestionRepository suggestionRepository, GeneService geneService, DiseaseService diseaseService, GeneDiseaseService geneDiseaseService, FunctionalCategoryService functionalCategoryService, GeneCategoryService geneCategoryService, ReferenceService referenceService) {
         this.suggestionRepository = suggestionRepository;
         this.geneService = geneService;
         this.diseaseService = diseaseService;
         this.geneDiseaseService = geneDiseaseService;
         this.functionalCategoryService = functionalCategoryService;
         this.geneCategoryService = geneCategoryService;
+        this.referenceService = referenceService;
     }
 
     @Transactional
@@ -98,18 +101,58 @@ public class SuggestionService {
                 }
                 case ASSOCIATION -> {
                     GeneDisease geneDisease = new GeneDisease();
-                    
-                    // Fetch existing entities to prevent Transient Object crashes
+
+                    // Fetch existing entities
                     Gene gene = geneService.getGeneById((String) data.get("geneId"));
                     Disease disease = diseaseService.getDiseaseById((String) data.get("diseaseId"));
-                    
+
                     geneDisease.setGene(gene);
                     geneDisease.setDisease(disease);
                     geneDisease.setAssociationType(parseEnum(AssociationType.class, data.get("associationType")));
-                    geneDisease.setCitationUrl((String) data.get("citationUrl"));
-                    geneDisease.setCitationDescription((String) data.get("citationDescription"));
-                    
-                    geneDiseaseService.saveGeneDisease(geneDisease);
+
+                    // Safely extract the new references array
+                    List<Map<String, String>> references = null;
+                    if (data.containsKey("references")) {
+                        references = (List<Map<String, String>>) data.get("references");
+                    }
+
+                    // Keep fallbacks populated just in case your backend entity still requires them
+                    if (references != null && !references.isEmpty()) {
+                        geneDisease.setCitationUrl(references.get(0).get("url"));
+                        geneDisease.setCitationDescription(references.get(0).get("description"));
+                    }
+
+                    // 1. Save the base association first so we have its ID
+                    GeneDisease savedGd = geneDiseaseService.saveGeneDisease(geneDisease);
+
+                    // 2. Process and link the references!
+                    if (references != null) {
+                        for (Map<String, String> refMap : references) {
+                            String url = refMap.get("url");
+                            if (url == null || url.trim().isEmpty()) continue;
+
+                            // FIX: Check if it exists FIRST to avoid poisoning the transaction!
+                            Reference refToLink = referenceService.getReferenceByUrl(url);
+
+                            if (refToLink == null) {
+                                // If it doesn't exist, create and save it
+                                Reference newRef = new Reference();
+                                newRef.setTitle(refMap.get("title"));
+                                newRef.setUrl(url);
+                                newRef.setDescription(refMap.get("description"));
+                                refToLink = referenceService.saveReference(newRef);
+                            }
+
+                            // 3. Link the reference to the GeneDisease Association
+                            if (refToLink != null) {
+                                try {
+                                    referenceService.linkGeneDiseaseToReference(savedGd.getGeneDiseaseId(), refToLink.getReferenceId());
+                                } catch (Exception ignored) {
+                                    // It's safe to ignore if it's already linked
+                                }
+                            }
+                        }
+                    }
                 }
                 case FUNCTIONAL_CATEGORY -> {
                     FunctionalCategory category = new FunctionalCategory();
@@ -129,6 +172,31 @@ public class SuggestionService {
                     geneCategory.setFunctionalCategory(category);
                     
                     geneCategoryService.saveGeneCategory(geneCategory);
+                }
+                case REFERENCE -> {
+                    String url = (String) data.get("url");
+                    if (url != null && !url.trim().isEmpty()) {
+                        // Check if it already exists to prevent duplicates
+                        Reference refToLink = referenceService.getReferenceByUrl(url);
+
+                        if (refToLink == null) {
+                            Reference newRef = new Reference();
+                            newRef.setTitle((String) data.get("title"));
+                            newRef.setUrl(url);
+                            newRef.setDescription((String) data.get("description"));
+                            refToLink = referenceService.saveReference(newRef);
+                        }
+
+                        // Link it to an association if the user selected one!
+                        String geneDiseaseId = (String) data.get("geneDiseaseId");
+                        if (geneDiseaseId != null && !geneDiseaseId.trim().isEmpty()) {
+                            try {
+                                referenceService.linkGeneDiseaseToReference(geneDiseaseId, refToLink.getReferenceId());
+                            } catch (Exception ignored) {
+                                // Ignore if already linked
+                            }
+                        }
+                    }
                 }
             }
         } catch (Exception e) {

@@ -68,4 +68,8 @@ public class ReferenceService {
     public List<GeneDiseaseReference> getGeneDiseasesForReference(String referenceId) {
         return geneDiseaseReferenceRepository.findByReference_ReferenceId(referenceId);
     }
+
+    public Reference getReferenceByUrl(String url) {
+        return referenceRepository.findByUrl(url).orElse(null);
+    }
 }
