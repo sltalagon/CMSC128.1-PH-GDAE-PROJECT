@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from "react";
-// IMPORT your central api helpers
 import { apiGet, apiPatch } from "../../api/api"; 
 import {
   CheckCircle,
@@ -24,7 +23,8 @@ const SuggestionAdmin = () => {
   // For the review modal
   const [reviewing, setReviewing] = useState(null);
   const [adminNotes, setAdminNotes] = useState("");
-  const [submittingAction, setSubmittingAction] = useState(null); // "APPROVED" | "REJECTED" | null
+  const [submittingAction, setSubmittingAction] = useState(null); 
+  const [reviewError, setReviewError] = useState(null); 
 
   useEffect(() => {
     fetchSuggestions();
@@ -43,7 +43,9 @@ const SuggestionAdmin = () => {
 
   const handleReview = async (status) => {
     setSubmittingAction(status);
+    setReviewError(null);
     try {
+      // The backend now safely handles find-or-create logic
       await apiPatch(`/suggestions/${reviewing.suggestionId}/review`, { 
         status, 
         adminNotes 
@@ -53,12 +55,12 @@ const SuggestionAdmin = () => {
       setAdminNotes("");
       fetchSuggestions();
     } catch (err) {
-      setError(err.message || "Failed to update suggestion.");
+      // api.js extracts the clean backend exception string, so we just display it!
+      setReviewError(err.message || "Failed to update suggestion.");
     } finally {
       setSubmittingAction(null);
     }
   };
-
   const Spinner = () => (
     <svg className="animate-spin w-4 h-4" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
       <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
@@ -98,16 +100,13 @@ const SuggestionAdmin = () => {
       return (
         <div className="bg-gray-50 rounded-lg p-4 space-y-3 text-sm">
           {Object.entries(parsed).map(([key, value]) => {
-            // Skip completely empty values or empty arrays
             if (value === null || value === undefined || value === "") return null;
             if (Array.isArray(value) && value.length === 0) return null;
 
             const label = key.replace(/([A-Z])/g, " $1").replace(/^./, (s) => s.toUpperCase());
 
-            // FIX: Safely handle objects and arrays so React doesn't crash
             let displayValue;
             if (typeof value === "object") {
-              // If it's our references array, format it nicely into a list
               if (Array.isArray(value) && value[0]?.title) {
                 displayValue = (
                   <ul className="list-disc pl-5 mt-1 space-y-2 text-gray-700">
@@ -123,7 +122,6 @@ const SuggestionAdmin = () => {
                   </ul>
                 );
               } else {
-                // Fallback for any other objects (just prints them clearly)
                 displayValue = (
                   <pre className="text-xs bg-gray-200 p-2 rounded mt-1 overflow-x-auto">
                     {JSON.stringify(value, null, 2)}
@@ -131,11 +129,9 @@ const SuggestionAdmin = () => {
                 );
               }
             } else {
-              // Standard strings or numbers
               displayValue = <span className="text-gray-800">{String(value)}</span>;
             }
 
-            // If it's an object, stack it vertically. If it's text, keep it side-by-side.
             return (
               <div key={key} className={`flex ${typeof value === "object" ? "flex-col" : "gap-2"}`}>
                 <span className="font-semibold text-gray-600 min-w-[160px]">{label}:</span>
@@ -275,7 +271,11 @@ const SuggestionAdmin = () => {
               {suggestion.status === "PENDING" && (
                 <div className="flex items-center gap-3 mt-6 pt-6 border-t border-gray-200">
                   <button
-                    onClick={() => { setReviewing(suggestion); setAdminNotes(""); }}
+                    onClick={() => { 
+                      setReviewing(suggestion); 
+                      setAdminNotes(""); 
+                      setReviewError(null); 
+                    }}
                     className="flex items-center gap-2 px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-semibold"
                   >
                     <Eye className="w-5 h-5" />
@@ -296,6 +296,13 @@ const SuggestionAdmin = () => {
             <p className="text-sm text-slate-500 mb-4">From {reviewing.submitterName} — {reviewing.suggestionType?.replace("_", " ")}</p>
 
             <div className="mb-4">{renderContent(reviewing.content)}</div>
+
+            {reviewError && (
+              <div className="mb-4 p-3 bg-red-50 text-red-700 border border-red-200 rounded-lg text-sm font-medium flex items-start gap-2">
+                <AlertCircle className="w-5 h-5 shrink-0 mt-0.5" />
+                <p>{reviewError}</p>
+              </div>
+            )}
 
             <div className="mb-4">
               <label className="block text-sm font-semibold text-gray-700 mb-2">
@@ -330,7 +337,10 @@ const SuggestionAdmin = () => {
               </button>
 
               <button
-                onClick={() => setReviewing(null)}
+                onClick={() => {
+                  setReviewing(null);
+                  setReviewError(null);
+                }}
                 disabled={submittingAction !== null}
                 className="px-4 py-2.5 border-2 border-gray-200 text-gray-700 rounded-lg hover:bg-gray-50 font-semibold disabled:opacity-50 transition-colors"
               >

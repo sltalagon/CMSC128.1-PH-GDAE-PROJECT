@@ -7,4 +7,5 @@ import java.util.Optional;
 @Repository
 public interface GeneCategoryRepository extends JpaRepository<GeneCategory, String> {
     Optional<GeneCategory> findTopByOrderByGeneCategoryIdDesc();
+    boolean existsByGene_GeneIdAndFunctionalCategory_CategoryId(String geneId, String categoryId);
 }

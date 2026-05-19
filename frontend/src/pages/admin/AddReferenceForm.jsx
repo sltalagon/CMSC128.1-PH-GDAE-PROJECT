@@ -19,7 +19,8 @@ export const AddReferenceForm = ({ onClose, onCancel, onSuccess, mode = "admin",
   const set = (field) => (e) => setData((d) => ({ ...d, [field]: e.target.value }));
 
   const handleSave = async () => {
-    setSaving(true); setError(null);
+    setSaving(true); 
+    setError(null);
     try {
       if (mode === "suggestion") {
         await apiPost("/suggestions", {
@@ -37,12 +38,20 @@ export const AddReferenceForm = ({ onClose, onCancel, onSuccess, mode = "admin",
           const savedRef = await apiPost("/references", { title: data.title, url: data.url, description: data.description });
           referenceIdToLink = savedRef.referenceId;
         } catch (refErr) {
-          if (refErr.message?.includes("exists") || refErr.message?.includes("409")) {
-            const allRefs = await apiGet("/references");
-            const existingRef = allRefs.find((r) => r.url === data.url);
-            if (existingRef) referenceIdToLink = existingRef.referenceId;
-            else throw new Error("Reference URL exists, but couldn't retrieve it.");
-          } else throw refErr;
+          // Extract error messaging from any common API response layout or status strings
+          const errorString = (
+            refErr.response?.data?.message || 
+            refErr.data?.message || 
+            refErr.message || 
+            ""
+          ).toLowerCase();
+
+          // FIX: Added '400' detection to catch the IllegalArgumentException response status
+          if (errorString.includes("exists") || errorString.includes("409") || errorString.includes("400")) {
+            throw new Error("This URL already exists in the database. Please search for the existing reference to link it.");
+          } else {
+            throw refErr;
+          }
         }
 
         if (data.geneDiseaseId && referenceIdToLink) {
@@ -56,7 +65,9 @@ export const AddReferenceForm = ({ onClose, onCancel, onSuccess, mode = "admin",
       }
     } catch (err) {
       setError(err.message || "Failed to process reference. Please try again.");
-    } finally { setSaving(false); }
+    } finally { 
+      setSaving(false); 
+    }
   };
 
   return (
@@ -73,7 +84,7 @@ export const AddReferenceForm = ({ onClose, onCancel, onSuccess, mode = "admin",
         )}
       </div>
 
-      {error && <div className="mb-4 p-3 bg-red-50 text-red-700 rounded-lg text-sm">{error}</div>}
+      {error && <div className="mb-4 p-3 bg-red-50 text-red-700 rounded-lg text-sm font-medium">{error}</div>}
 
       <div className="space-y-4">
         <div>
@@ -102,11 +113,11 @@ export const AddReferenceForm = ({ onClose, onCancel, onSuccess, mode = "admin",
         </div>
 
         <div className="flex gap-3 pt-4">
-          <button onClick={handleSave} disabled={saving} className="flex-1 bg-teal-600 hover:bg-teal-700 text-white py-3 rounded-lg flex items-center justify-center gap-2 font-semibold disabled:opacity-50">
+          <button onClick={handleSave} disabled={saving} className="flex-1 bg-teal-600 hover:bg-teal-700 text-white py-3 rounded-lg flex items-center justify-center gap-2 font-semibold disabled:opacity-50 transition-colors">
             {saving && <Loader2 size={16} className="animate-spin" />}
             {mode === "suggestion" ? "Submit Suggestion" : "Save Changes"}
           </button>
-          <button onClick={onCancel || onClose} className="px-6 py-3 border-2 border-gray-200 text-gray-700 rounded-lg hover:bg-gray-50 font-semibold">Cancel</button>
+          <button onClick={onCancel || onClose} disabled={saving} className="px-6 py-3 border-2 border-gray-200 text-gray-700 rounded-lg hover:bg-gray-50 font-semibold transition-colors disabled:opacity-50">Cancel</button>
         </div>
       </div>
     </div>

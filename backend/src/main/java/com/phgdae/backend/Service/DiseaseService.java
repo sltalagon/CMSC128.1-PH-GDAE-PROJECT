@@ -16,6 +16,9 @@ public class DiseaseService {
 
     @Transactional
     public Disease saveDisease(Disease disease) {
+        if (diseaseRepository.existsByDiseaseName(disease.getDiseaseName())) {
+            throw new IllegalArgumentException("A disease named '" + disease.getDiseaseName() + "' already exists.");
+        }
         String maxId = diseaseRepository.findTopByOrderByDiseaseIdDesc()
                 .map(Disease::getDiseaseId)
                 .orElse("D000");

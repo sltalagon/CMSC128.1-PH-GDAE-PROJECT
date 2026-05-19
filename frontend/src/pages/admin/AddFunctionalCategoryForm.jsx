@@ -44,7 +44,12 @@ export function AddFunctionalCategoryForm({
         onClose();
       }
     } catch (err) {
-      setError(err.message || "An error occurred while saving.");
+      const msg = (err.response?.data?.message || err.message || "").toLowerCase();
+      if (msg.includes("exists") || msg.includes("400")) {
+        setError("This Functional Category name already exists inside the database.");
+      } else {
+        setError(err.message || "An error occurred while saving.");
+      }
     } finally {
       setSubmitting(false);
     }

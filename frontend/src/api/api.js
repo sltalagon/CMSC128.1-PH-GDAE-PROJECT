@@ -6,7 +6,7 @@ const API_BASE = `${import.meta.env.VITE_API_URL || "http://localhost:8080"}/api
 // Token storage
 export const getToken = () => localStorage.getItem("jwt");
 export const setToken = (token) => {
-  removeToken(); 
+  removeToken();
   localStorage.setItem("jwt", token);
 };
 export const removeToken = () => localStorage.removeItem("jwt");
@@ -27,6 +27,32 @@ const parseResponse = async (response) => {
   return response.text();
 };
 
+// MODIFIED: Shared error extractor to grab backend exception messages cleanly
+const handleErrorResponse = async (response, method, endpoint) => {
+  try {
+    const contentType = response.headers.get("content-type");
+    if (contentType && contentType.includes("application/json")) {
+      const errorBody = await response.json();
+      // Look for custom Spring Boot validation fields or standard error payloads
+      const serverMessage = errorBody.message || errorBody.error;
+      if (serverMessage) {
+        const error = new Error(serverMessage);
+        error.status = response.status;
+        error.data = errorBody;
+        throw error;
+      }
+    }
+  } catch (parseDetailsErr) {
+    // If it's a structural custom validation error from our app, pass it straight through
+    if (parseDetailsErr.status) throw parseDetailsErr;
+  }
+
+  // Fallback if the server didn't provide a readable JSON exception message
+  const fallbackError = new Error(`${method} ${endpoint} failed: ${response.status}`);
+  fallbackError.status = response.status;
+  throw fallbackError;
+};
+
 // GET request
 export const apiGet = async (endpoint) => {
   const response = await fetch(`${API_BASE}${endpoint}`, {
@@ -34,7 +60,7 @@ export const apiGet = async (endpoint) => {
     headers: authHeaders(),
   });
   if (!response.ok) {
-    throw new Error(`GET ${endpoint} failed: ${response.status}`);
+    await handleErrorResponse(response, "GET", endpoint);
   }
   return parseResponse(response);
 };
@@ -47,7 +73,7 @@ export const apiPost = async (endpoint, body) => {
     body: JSON.stringify(body),
   });
   if (!response.ok) {
-    throw new Error(`POST ${endpoint} failed: ${response.status}`);
+    await handleErrorResponse(response, "POST", endpoint);
   }
   return parseResponse(response);
 };
@@ -60,7 +86,7 @@ export const apiPut = async (endpoint, body) => {
     body: JSON.stringify(body),
   });
   if (!response.ok) {
-    throw new Error(`PUT ${endpoint} failed: ${response.status}`);
+    await handleErrorResponse(response, "PUT", endpoint);
   }
   return parseResponse(response);
 };
@@ -73,7 +99,7 @@ export const apiPatch = async (endpoint, body) => {
     body: JSON.stringify(body),
   });
   if (!response.ok) {
-    throw new Error(`PATCH ${endpoint} failed: ${response.status}`);
+    await handleErrorResponse(response, "PATCH", endpoint);
   }
   return parseResponse(response);
 };
@@ -85,14 +111,14 @@ export const apiDelete = async (endpoint) => {
     headers: authHeaders(),
   });
   if (!response.ok) {
-    throw new Error(`DELETE ${endpoint} failed: ${response.status}`);
+    await handleErrorResponse(response, "DELETE", endpoint);
   }
   return parseResponse(response);
 };
 
 // Helper to trigger Google login — clears old session first
 export const loginWithGoogle = () => {
-  removeToken(); 
+  removeToken();
   const baseUrl = API_BASE.replace(/\/api$/, "");
   window.location.href = `${baseUrl}/oauth2/authorization/google?prompt=select_account`;
 };

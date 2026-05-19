@@ -26,7 +26,8 @@ public class ReferenceService {
         this.geneDiseaseReferenceRepository = geneDiseaseReferenceRepository;
     }
 
-    @Transactional
+    // ADDED: noRollbackFor prevents the UnexpectedRollbackException
+    @Transactional(noRollbackFor = IllegalArgumentException.class)
     public Reference saveReference(Reference reference) {
         if (referenceRepository.existsByUrl(reference.getUrl())) {
             throw new IllegalArgumentException("A reference with this URL already exists.");
@@ -44,7 +45,8 @@ public class ReferenceService {
 
     // --- GeneDisease <-> Reference ---
 
-    @Transactional
+    // ADDED: noRollbackFor prevents the UnexpectedRollbackException
+    @Transactional(noRollbackFor = IllegalArgumentException.class)
     public GeneDiseaseReference linkGeneDiseaseToReference(String geneDiseaseId, String referenceId) {
         if (geneDiseaseReferenceRepository.existsByGeneDisease_GeneDiseaseIdAndReference_ReferenceId(geneDiseaseId, referenceId)) {
             throw new IllegalArgumentException("This association is already linked to that reference.");

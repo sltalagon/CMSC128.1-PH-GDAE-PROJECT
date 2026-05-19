@@ -59,9 +59,13 @@ export function AddGeneCategoryForm({ onClose, onCancel, onSuccess, mode = "admi
       } else {
         onClose();
       }
-    } 
-    catch (err) {
-      setError(err.message || "An unexpected error occurred.");
+    } catch (err) {
+      const msg = (err.response?.data?.message || err.message || "").toLowerCase();
+      if (msg.includes("already linked") || msg.includes("exists") || msg.includes("400")) {
+        setError("This association mapping already exists in the database system.");
+      } else {
+        setError(err.message || "An unexpected error occurred.");
+      }
     } finally {
       setSubmitting(false);
     }

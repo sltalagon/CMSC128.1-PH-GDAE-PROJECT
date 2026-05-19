@@ -16,6 +16,11 @@ public class GeneCategoryService {
 
     @Transactional
     public GeneCategory saveGeneCategory(GeneCategory geneCategory) {
+        if (geneCategoryRepository.existsByGene_GeneIdAndFunctionalCategory_CategoryId(
+                geneCategory.getGene().getGeneId(),
+                geneCategory.getFunctionalCategory().getCategoryId())) {
+            throw new IllegalArgumentException("This Gene is already linked to this Functional Category.");
+        }
         String maxId = geneCategoryRepository.findTopByOrderByGeneCategoryIdDesc()
                 .map(GeneCategory::getGeneCategoryId)
                 .orElse("GC000");

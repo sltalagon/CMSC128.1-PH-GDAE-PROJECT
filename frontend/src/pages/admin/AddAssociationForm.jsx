@@ -80,13 +80,23 @@ export function AddAssociationForm({ onClose, onCancel, onSuccess, mode = "admin
         });
       } else {
         // 1. Create the Gene-Disease Association
-        const savedAssociation = await apiPost("/genedisease", {
-          gene: { geneId: formData.geneId },
-          disease: { diseaseId: formData.diseaseId },
-          associationType: formData.associationType,
-          citationUrl: validReferences[0].url, 
-          citationDescription: validReferences[0].description,
-        });
+        let savedAssociation;
+        try {
+          savedAssociation = await apiPost("/genedisease", {
+            gene: { geneId: formData.geneId },
+            disease: { diseaseId: formData.diseaseId },
+            associationType: formData.associationType,
+            citationUrl: validReferences[0].url, 
+            citationDescription: validReferences[0].description,
+          });
+        } catch (assocErr) {
+          // MODIFIED: Read backend error layout to capture duplication constraints
+          const msg = (assocErr.response?.data?.message || assocErr.message || "").toLowerCase();
+          if (msg.includes("exists") || msg.includes("400") || msg.includes("409")) {
+            throw new Error("This exact Gene-Disease association pairing and type already exists in the database.");
+          }
+          throw assocErr;
+        }
 
         // FIX: Check multiple possible ID field names based on your backend entity
         const newGdId = savedAssociation?.id || savedAssociation?.geneDiseaseId; 
@@ -105,10 +115,10 @@ export function AddAssociationForm({ onClose, onCancel, onSuccess, mode = "admin
             referenceIdToLink = savedRef.referenceId;
             
           } catch (refErr) {
-            // If URL already exists (usually a 409 Conflict), fetch it to get its ID
+            // If URL already exists, fetch it to get its ID
             const errorMessage = (refErr.message || "").toLowerCase();
             
-            if (errorMessage.includes("exists") || errorMessage.includes("409")) {
+            if (errorMessage.includes("exists") || errorMessage.includes("409") || errorMessage.includes("400")) {
               const allRefs = await apiGet("/references");
               const existingRef = allRefs.find((r) => r.url === ref.url);
               

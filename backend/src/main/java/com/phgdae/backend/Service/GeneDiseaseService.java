@@ -16,6 +16,12 @@ public class GeneDiseaseService {
 
     @Transactional
     public GeneDisease saveGeneDisease(GeneDisease geneDisease) {
+        if (geneDiseaseRepository.existsByGene_GeneIdAndDisease_DiseaseIdAndAssociationType(
+                geneDisease.getGene().getGeneId(),
+                geneDisease.getDisease().getDiseaseId(),
+                geneDisease.getAssociationType())) {
+            throw new IllegalArgumentException("An association between this gene and disease with this type already exists.");
+        }
         String maxId = geneDiseaseRepository.findTopByOrderByGeneDiseaseIdDesc()
                 .map(GeneDisease::getGeneDiseaseId)
                 .orElse("GDA000");

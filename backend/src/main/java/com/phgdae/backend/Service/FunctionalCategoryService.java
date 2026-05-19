@@ -16,6 +16,9 @@ public class FunctionalCategoryService {
 
     @Transactional
     public FunctionalCategory saveFunctionalCategory(FunctionalCategory functionalCategory) {
+        if (functionalCategoryRepository.existsByCategoryName(functionalCategory.getCategoryName())) {
+            throw new IllegalArgumentException("Functional Category '" + functionalCategory.getCategoryName() + "' already exists.");
+        }
         String maxId = functionalCategoryRepository.findTopByOrderByCategoryIdDesc()
                 .map(FunctionalCategory::getCategoryId)
                 .orElse("FC000");

@@ -7,7 +7,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class GeneService {
-
     private final GeneRepository geneRepository;
 
     public GeneService(GeneRepository geneRepository) {
@@ -16,6 +15,9 @@ public class GeneService {
 
     @Transactional
     public Gene saveGene(Gene gene) {
+        if (geneRepository.existsByGeneSymbol(gene.getGeneSymbol())) {
+            throw new IllegalArgumentException("A gene with the symbol '" + gene.getGeneSymbol() + "' already exists.");
+        }
         String maxId = geneRepository.findTopByOrderByGeneIdDesc()
                 .map(Gene::getGeneId)
                 .orElse("G000");

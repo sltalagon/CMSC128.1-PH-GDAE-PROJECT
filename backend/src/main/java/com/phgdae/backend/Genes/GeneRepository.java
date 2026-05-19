@@ -7,4 +7,5 @@ import java.util.Optional;
 @Repository
 public interface GeneRepository extends JpaRepository<Gene, String> {
     Optional<Gene> findTopByOrderByGeneIdDesc();
+    boolean existsByGeneSymbol(String geneSymbol);
 }

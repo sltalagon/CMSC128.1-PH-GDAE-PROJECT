@@ -53,7 +53,8 @@ const GeneSearch = () => {
           name: disease.diseaseName,
           type: disease.diseaseCategory || "Unknown Category",
           prevalence: disease.phPrevalence || "NONE",
-          description: disease.diseaseDescription || "No description available.",
+          // FIX: Changed disease.diseaseDescription to disease.description to match backend schema layout
+          description: disease.description || "No description available.",
           associationType: gd.associationType || "Associated",
           confidence: "Verified",
           references: [],
@@ -183,15 +184,15 @@ const GeneSearch = () => {
         </div>
 
         <div className="bg-blue-50 border-l-4 border-blue-500 p-4 rounded-r-lg mb-8 flex gap-4">
-        <Info className="text-blue-600 flex-shrink-0" size={24} />
-        <div>
-          <h4 className="font-semibold text-blue-900">About Gene Search</h4>
-          <p className="text-sm text-blue-800 mt-1">
-            Click on any gene card to view detailed information including gene
-            name, function and associated diseases.
-          </p>
+          <Info className="text-blue-600 flex-shrink-0" size={24} />
+          <div>
+            <h4 className="font-semibold text-blue-900">About Gene Search</h4>
+            <p className="text-sm text-blue-800 mt-1">
+              Click on any gene card to view detailed information including gene
+              name, function and associated diseases.
+            </p>
+          </div>
         </div>
-      </div>
 
         <div className="relative mb-6">
           <Search

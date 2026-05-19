@@ -35,15 +35,23 @@ public class SuggestionController {
     }
 
     @PatchMapping("/{id}/review")
-    public ResponseEntity<Suggestion> reviewSuggestion(
+    public ResponseEntity<?> reviewSuggestion(
             @PathVariable("id") String id,
             @RequestBody Map<String, String> payload) {
         try {
             SuggestionStatus status = SuggestionStatus.valueOf(payload.get("status").toUpperCase());
             String adminNotes = payload.getOrDefault("adminNotes", "");
+
+            // Returns the approved/rejected Suggestion object
             return ResponseEntity.ok(suggestionService.reviewSuggestion(id, status, adminNotes));
+
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().build();
+            // FIX: Returns the exact duplicate error message inside a JSON payload so api.js can read it
+            return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
+
+        } catch (Exception e) {
+            // Failsafe: Catches any other random crashes and sends a readable message
+            return ResponseEntity.internalServerError().body(Map.of("message", "An unexpected server error occurred."));
         }
     }
 }

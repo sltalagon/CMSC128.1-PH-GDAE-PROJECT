@@ -49,7 +49,8 @@ export function AddGeneForm({ onClose, onCancel, onSuccess, mode = "admin", sugg
       }
       
     } catch (err) {
-      if (err.message.includes("409")) {
+      const msg = (err.response?.data?.message || err.message || "").toLowerCase();
+      if (msg.includes("exists") || msg.includes("409") || msg.includes("400")) {
         setDuplicate(true);
       } else {
         setError(err.message || "An unexpected error occurred.");
