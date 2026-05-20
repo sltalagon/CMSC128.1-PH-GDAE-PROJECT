@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { BookOpen, Loader2, Check, X } from "lucide-react";
-import { apiGet, apiPost } from "../../api/api";
+import { apiGet, apiPost, apiPostPublic } from "../../api/api";
 
 export const AddReferenceForm = ({ onClose, onCancel, onSuccess, mode = "admin", suggestionMeta = {} }) => {
   const [saving, setSaving] = useState(false);
@@ -23,7 +23,8 @@ export const AddReferenceForm = ({ onClose, onCancel, onSuccess, mode = "admin",
     setError(null);
     try {
       if (mode === "suggestion") {
-        await apiPost("/suggestions", {
+        // Use the public post so Spring Security ignores it!
+        await apiPostPublic("/suggestions", {
           suggestionType: "REFERENCE",
           submitterName: suggestionMeta.submitterName,
           submitterEmail: suggestionMeta.submitterEmail,

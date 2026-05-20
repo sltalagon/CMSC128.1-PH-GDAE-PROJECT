@@ -78,6 +78,22 @@ export const apiPost = async (endpoint, body) => {
   return parseResponse(response);
 };
 
+// Add this right below your normal apiPost function
+export const apiPostPublic = async (endpoint, body) => {
+  const response = await fetch(`${API_BASE}${endpoint}`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    }, // Notice: We purposefully leave out authHeaders() here!
+    body: JSON.stringify(body),
+  });
+  
+  if (!response.ok) {
+    await handleErrorResponse(response, "POST", endpoint);
+  }
+  return parseResponse(response);
+};
+
 // PUT request
 export const apiPut = async (endpoint, body) => {
   const response = await fetch(`${API_BASE}${endpoint}`, {
