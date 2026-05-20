@@ -115,10 +115,10 @@ const Navbar = () => {
         />
       </div>
 
-     {/* ===== NAVBAR ===== */}
+      {/* ===== NAVBAR ===== */}
       <nav className="bg-white/80 backdrop-blur-md border-b border-gray-100 shadow-sm sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-6 py-3">
-          {/* 🔥 Mobile Header */}
+          {/* Mobile Header */}
           <div className="flex justify-between items-center md:hidden">
             <span className="text-lg font-semibold text-slate-700">
               Admin Menu
@@ -132,7 +132,7 @@ const Navbar = () => {
             </button>
           </div>
 
-          {/* 🔥 Animated Menu */}
+          {/* Animated Menu */}
           <div
             className={`transform transition-all duration-300 ease-in-out origin-top
             ${
@@ -144,8 +144,8 @@ const Navbar = () => {
           >
             <div
               className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 
-                            bg-white/70 backdrop-blur-xl md:bg-transparent 
-                            rounded-2xl md:rounded-none p-4 md:p-0 shadow-lg md:shadow-none"
+                          bg-white/70 backdrop-blur-xl md:bg-transparent 
+                          rounded-2xl md:rounded-none p-4 md:p-0 shadow-lg md:shadow-none"
             >
               {/* Left Links */}
               <div className="flex flex-col md:flex-row gap-3">
@@ -154,24 +154,13 @@ const Navbar = () => {
                     key={item.name}
                     to={item.path}
                     end={item.path === "/admin"}
-                    className={({ isActive }) => getLinkClass(isActive)}
+                    className={({ isActive }) => getLinkClass(isActive, item.danger)}
                     onClick={() => setIsOpen(false)}
                   >
                     {item.icon}
                     {item.name}
                   </NavLink>
                 ))}
-
-                {isSuperAdmin && (
-                  <NavLink
-                    to="/superadmin"
-                    className={({ isActive }) => getLinkClass(isActive, true)}
-                    onClick={() => setIsOpen(false)}
-                  >
-                    <Users size={18} />
-                    Manage Accounts
-                  </NavLink>
-                )}
               </div>
 
               {/* Right */}
